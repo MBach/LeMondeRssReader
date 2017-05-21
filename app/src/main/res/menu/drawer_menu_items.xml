@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/cat_favorites"
+            android:title="@string/category_fav" />
+        <item
+            android:id="@+id/cat_news"
+            android:title="@string/category_news" />
+        <item
+            android:id="@+id/cat_international"
+            android:title="@string/category_international" />
+        <item
+            android:id="@+id/cat_politics"
+            android:title="@string/category_politics" />
+        <item
+            android:id="@+id/cat_society"
+            android:title="@string/category_society" />
+        <item
+            android:id="@+id/cat_economy"
+            android:title="@string/category_economy" />
+        <item
+            android:id="@+id/cat_culture"
+            android:title="@string/category_culture" />
+        <item
+            android:id="@+id/cat_ideas"
+            android:title="@string/category_ideas" />
+        <item
+            android:id="@+id/cat_planet"
+            android:title="@string/category_planet" />
+        <item
+            android:id="@+id/cat_sports"
+            android:title="@string/category_sports" />
+        <item
+            android:id="@+id/cat_sciences"
+            android:title="@string/category_sciences" />
+        <item
+            android:id="@+id/cat_pixels"
+            android:title="@string/category_pixels" />
+        <item
+            android:id="@+id/cat_campus"
+            android:title="@string/category_campus" />
+    </group>
+
+</menu>

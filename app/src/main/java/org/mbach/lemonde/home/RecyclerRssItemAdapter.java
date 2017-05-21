@@ -15,6 +15,12 @@ import org.mbach.lemonde.R;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * RecyclerRssItemAdapter class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
 public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItemAdapter.ViewHolder> implements View.OnClickListener {
 
     @NonNull

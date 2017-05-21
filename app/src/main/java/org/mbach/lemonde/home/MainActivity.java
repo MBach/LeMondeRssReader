@@ -6,9 +6,9 @@ import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,7 +24,6 @@ import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.settings.SettingsActivity;
 import org.mbach.lemonde.article.ArticleActivity;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,17 +31,23 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 
+/**
+ * MainActivity class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
 
     private final LeMondeRssParser parser = new LeMondeRssParser();
     private DrawerLayout drawerLayout;
-    private View content;
     private RecyclerView mainActivityRecyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private final RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter();
-
     private final SparseArray<String> rssCats = new SparseArray<>();
+    private MenuItem selectedMenuItem;
 
     private void initCategories() {
         rssCats.append(R.id.cat_news, Constants.CAT_NEWS);
@@ -71,11 +76,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mainActivityRecyclerView = (RecyclerView) findViewById(R.id.mainActivityRecyclerView);
         mainActivityRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        initFab();
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                String category = selectedMenuItem == null ? Constants.CAT_NEWS : rssCats.get(selectedMenuItem.getItemId());
+                getFeedFromCategory(category);
+            }
+        });
+
         initToolbar();
         setupDrawerLayout();
 
-        content = findViewById(R.id.content);
         mainActivityRecyclerView.setAdapter(adapter);
 
         getFeedFromCategory(Constants.CAT_NEWS);
@@ -91,14 +103,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
         mainActivityRecyclerView.scheduleLayoutAnimation();
-    }
-
-    private void initFab() {
-        findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                Snackbar.make(content, "FAB Clicked", Snackbar.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void initToolbar() {
@@ -119,27 +123,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void getFeedFromCategory(String category) {
-        try {
-            List<RssItem> rssItems = parser.parse(getInputStream(category));
-            RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter(rssItems);
-            adapter.setOnItemClickListener(new RecyclerRssItemAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, @NonNull RssItem rssItem) {
-                    Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
-                    intent.putExtra(Constants.EXTRA_RSS_LINK, rssItem.getLink());
-                    intent.putExtra(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
-                    intent.putExtra(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
-                    startActivityForResult(intent, 1001);
-                }
-            });
-            mainActivityRecyclerView.setAdapter(adapter);
-        } catch (@NonNull XmlPullParserException | IOException e) {
-            Log.w(e.getMessage(), e);
-        }
+        List<RssItem> rssItems = parser.parse(getInputStream(category));
+        RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter(rssItems);
+        adapter.setOnItemClickListener(new RecyclerRssItemAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, @NonNull RssItem rssItem) {
+                Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
+                intent.putExtra(Constants.EXTRA_RSS_LINK, rssItem.getLink());
+                intent.putExtra(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
+                intent.putExtra(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
+                startActivityForResult(intent, 1001);
+            }
+        });
+        mainActivityRecyclerView.setAdapter(adapter);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        selectedMenuItem = menuItem;
         setTitle(menuItem.getTitle());
         String category = rssCats.get(menuItem.getItemId());
         getFeedFromCategory(category);

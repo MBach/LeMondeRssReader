@@ -14,6 +14,12 @@ import org.mbach.lemonde.R;
 
 import java.util.List;
 
+/**
+ * ArticleAdapter class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
 public class ArticleAdapter extends RecyclerView.Adapter {
 
     private static final String TAG = "ArticleAdapter";
@@ -65,7 +71,8 @@ public class ArticleAdapter extends RecyclerView.Adapter {
         if (model == null) {
             return;
         }
-        holder.getItemViewType();
+        RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
         switch (model.getType()) {
             case Model.TEXT_TYPE:
                 TextView textView = (TextView) model.getTheContent();
@@ -74,11 +81,15 @@ public class ArticleAdapter extends RecyclerView.Adapter {
                 ((ViewHolder1) holder).text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
                 ((ViewHolder1) holder).text.setTypeface(textView.getTypeface());
                 ((ViewHolder1) holder).text.setTextColor(textView.getCurrentTextColor());
+                ((ViewHolder1) holder).text.setBackground(textView.getBackground());
+                if (textView.getBackground() != null) {
+                    ((ViewHolder1) holder).text.setAllCaps(true);
+                }
+                ((ViewHolder1) holder).text.setLayoutParams(lp);
                 ((ViewHolder1) holder).text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize());
                 break;
             case Model.IMAGE_TYPE:
                 String imageURI = (String) model.getTheContent();
-                RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 ((ViewHolder2) holder).image.setLayoutParams(lp);
                 Picasso.with(((ViewHolder2) holder).image.getContext()).load(imageURI).into(((ViewHolder2) holder).image);
                 break;

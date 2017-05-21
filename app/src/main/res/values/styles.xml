@@ -28,4 +28,11 @@
     <color name="accent_translucent">#FFFFC43B</color>
     <color name="accent_bright">#FFF493</color>
 
+    <color name="tag_green">#00c853</color>
+    <color name="tag_red">#f44336</color>
+    <color name="tag_yellow">#ff9800</color>
+    <color name="tag_grey">#212121</color>
+
+
+
 </resources>

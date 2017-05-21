@@ -2,6 +2,12 @@ package org.mbach.lemonde.article;
 
 import android.widget.TextView;
 
+/**
+ * Model class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
 public class Model {
 
     public static final int TEXT_TYPE = 0;

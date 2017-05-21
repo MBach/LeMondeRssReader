@@ -7,6 +7,12 @@ import android.support.v7.app.AppCompatActivity;
 
 import org.mbach.lemonde.R;
 
+/**
+ * SettingsActivity class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
 public class SettingsActivity extends AppCompatActivity {
 
     @NonNull

@@ -26,6 +26,8 @@
 
     <string name="error_no_items_in_feed">Une erreur s\'est produite : rien à lire dans le flux !</string>
 
+    <string name="paid_article">Article Abonnés</string>
+
     <!-- Strings related to Settings -->
     <string name="preference_article">Contenu des articles</string>
     <string name="display_tweets">Afficher les tweets</string>

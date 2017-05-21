@@ -26,17 +26,24 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ArticleActivity class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
 public class ArticleActivity extends AppCompatActivity implements ScrollFeedbackRecyclerView.Callbacks {
 
     private static final String TAG = "ArticleActivity";
 
-    private AppBarLayout mAppBarLayout;
-    private Toolbar mToolbar;
+    private AppBarLayout appBarLayout;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +55,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         ScrollFeedbackRecyclerView articleActivityRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
         articleActivityRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -68,7 +75,8 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
             try {
                 Document doc = Jsoup.connect(extras.getString(Constants.EXTRA_RSS_LINK)).get();
                 if (doc.getElementById("teaser_article") != null) {
-
+                    TextView paidArticle = (TextView) findViewById(R.id.paidArticle);
+                    paidArticle.setVisibility(View.VISIBLE);
                 }
                 Elements articles = doc.getElementsByTag("article");
 
@@ -94,50 +102,59 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     @NonNull
     private List<Model> loadAndExtractCommentPreview(@NonNull Element rootComments) {
         List<Model> list = new ArrayList<>();
+
         Elements dataAjURI = rootComments.select("[^data-aj-uri]");
-        Log.d(TAG, "dataAjURI ? " + dataAjURI);
-        if (dataAjURI != null && !dataAjURI.isEmpty()) {
-            try {
-                String commentURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
+        if (dataAjURI == null || dataAjURI.isEmpty()) {
+            return list;
+        }
+        try {
+            String commentURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
+            Document docComments = Jsoup.connect(commentURI).get();
 
-                Document docComments = Jsoup.connect(commentURI).get();
-                Elements comments = docComments.select("[itemprop='commentText']");
+            // Extract header
+            Elements header = docComments.select("[itemprop='InteractionCount']");
+            if (header != null && !header.isEmpty()) {
+                TextView commentHeader = new TextView(getBaseContext());
+                commentHeader.setText(String.format("Commentaires %s", header.text()));
+                commentHeader.setTypeface(null, Typeface.BOLD);
+                commentHeader.setTextColor(Color.WHITE);
+                commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
+                list.add(new Model(commentHeader));
+            }
 
-                for (Element comment : comments) {
-                    Elements refs = comment.select("p.references");
+            // Extract comments
+            Elements comments = docComments.select("[itemprop='commentText']");
+            for (Element comment : comments) {
+                Elements refs = comment.select("p.references");
 
-                    if (refs != null && !refs.isEmpty()) {
-                        // Clear date
-                        refs.select("span").remove();
-                        TextView author = new TextView(getBaseContext());
-                        author.setTypeface(null, Typeface.BOLD);
-                        author.setText(refs.text());
-                        author.setTextColor(Color.WHITE);
+                if (refs != null && !refs.isEmpty()) {
+                    // Clear date
+                    refs.select("span").remove();
+                    TextView author = new TextView(getBaseContext());
+                    author.setTypeface(null, Typeface.BOLD);
+                    author.setText(refs.text());
+                    author.setTextColor(Color.WHITE);
 
-                        Elements commentComment = refs.next();
-                        if (commentComment != null && !commentComment.isEmpty()) {
-                            TextView content = new TextView(getBaseContext());
-                            content.setText(commentComment.first().text());
-                            content.setTextColor(Color.WHITE);
-                            if (comment.hasClass("reponse")) {
-                                author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
-                                content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
-                            } else {
-                                author.setPadding(0, 0, 0, 12);
-                                content.setPadding(0, 0, 0, 16);
-                            }
-                            list.add(new Model(author));
-                            list.add(new Model(content));
+                    Elements commentComment = refs.next();
+                    if (commentComment != null && !commentComment.isEmpty()) {
+                        TextView content = new TextView(getBaseContext());
+                        content.setText(commentComment.first().text());
+                        content.setTextColor(Color.WHITE);
+                        if (comment.hasClass("reponse")) {
+                            author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
+                            content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
+                        } else {
+                            author.setPadding(0, 0, 0, 12);
+                            content.setPadding(0, 0, 0, 16);
                         }
+                        list.add(new Model(author));
+                        list.add(new Model(content));
                     }
                 }
-            } catch (IOException e) {
-                Log.d(TAG, "no comments?" + e.getMessage());
             }
+        } catch (IOException e) {
+            Log.d(TAG, "no comments?" + e.getMessage());
         }
-
-
-        Log.d(TAG, "Comments ? " + list.size());
         return list;
     }
 
@@ -271,16 +288,16 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         Elements elements = body.children();
         for (int i = 0; i < elements.size(); i++) {
             Element element = elements.get(i);
-            // On ignore les encarts "À lire" qui n'apportent pas grand chose
+            // Ignore "À lire" ("Read also") parts which don't add much information on mobile phones
             if (element.hasClass("lire")) {
                 continue;
             }
 
             Elements figures = element.getElementsByTag("figure");
-            // Texte ou images ?
+            // Text or figure ?
             if (figures.isEmpty()) {
 
-                // Nettoyage des liens
+                // Cleanup hyperlink and keep only the value
                 Elements links = element.select("a[href]");
                 for (Element link : links) {
                     element.select("a").unwrap();
@@ -303,10 +320,33 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                     t.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
                     t.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
                 }
+
+                if (element.is("h2.tag") && element.children().size() > 0) {
+                    String cssClass = element.child(0).attr("class");
+                    Log.d(TAG, cssClass);
+                    t.setAllCaps(true);
+                    t.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM);
+                    switch (cssClass) {
+                        case "faux":
+                            t.setBackgroundColor(getResources().getColor(R.color.tag_red, null));
+                            break;
+                        case "vrai":
+                            t.setBackgroundColor(getResources().getColor(R.color.tag_green, null));
+                            break;
+                        case "plutot_vrai":
+                            t.setBackgroundColor(getResources().getColor(R.color.tag_yellow, null));
+                            break;
+                        case "oubli":
+                            t.setBackgroundColor(getResources().getColor(R.color.tag_grey, null));
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 p.add(new Model(t));
 
             } else {
-                // Si l'image se trouve en première position dans le DOM il est inutile de la réafficher car elle se trouve déjà dans la Toolbar
+                // If image is on first position in the DOM, it's useless to display once more: it's already displayed in the toolbar
                 if (i > 0) {
                     Element figure = figures.first();
                     Elements images = figure.getElementsByTag("img");
@@ -324,7 +364,6 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home:
-                //NavUtils.navigateUpFromSameTask(this);
                 onBackPressed();
                 return true;
             case R.id.action_settings:
@@ -343,13 +382,13 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
 
     @Override
     public boolean isAppBarCollapsed() {
-        final int appBarVisibleHeight = (int) (mAppBarLayout.getY() + mAppBarLayout.getHeight());
-        final int toolbarHeight = mToolbar.getHeight();
+        final int appBarVisibleHeight = (int) (appBarLayout.getY() + appBarLayout.getHeight());
+        final int toolbarHeight = toolbar.getHeight();
         return (appBarVisibleHeight == toolbarHeight);
     }
 
     @Override
     public void setExpanded(boolean expanded) {
-        mAppBarLayout.setExpanded(expanded, true);
+        appBarLayout.setExpanded(expanded, true);
     }
 }

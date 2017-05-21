@@ -1,5 +1,11 @@
 package org.mbach.lemonde.home;
 
+/**
+ * RssItem class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
 public class RssItem {
 
     private String link = null;

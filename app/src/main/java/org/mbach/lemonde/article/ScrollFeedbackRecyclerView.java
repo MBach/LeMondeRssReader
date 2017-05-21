@@ -8,6 +8,12 @@ import android.util.AttributeSet;
 
 import java.lang.ref.WeakReference;
 
+/**
+ * ScrollFeedbackRecyclerView class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
 public class ScrollFeedbackRecyclerView extends RecyclerView {
     private WeakReference<Callbacks> mCallbacks;
 

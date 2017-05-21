@@ -1,12 +1,16 @@
 package org.mbach.lemonde;
 
-public class Constants {
+/**
+ * Constants class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2017-05
+ */
+public final class Constants {
 
     public static final String TAG = "LeMondeRSSReader";
 
     private static final String RSS_FULL = "/rss_full.xml";
-
-    public static final int OPEN_ARTICLE_ACTIVITY = 42;
 
     public static final String BASE_URL = "http://www.lemonde.fr/";
     public static final String BASE_URL2 = "http://www.lemonde.fr";
@@ -23,8 +27,6 @@ public class Constants {
     public static final String CAT_PIXELS = "pixels" + RSS_FULL;
     public static final String CAT_CAMPUS = "campus" + RSS_FULL;
 
-    public static final String PREF_SELECTED_CATEGORY = "selected_category";
-
     public static final String EXTRA_RSS_LINK = "RSS_LINK";
     public static final String EXTRA_NEWS_CATEGORY = "NEWS_CATEGORY";
 
@@ -34,6 +36,7 @@ public class Constants {
     public static final int PADDING_BOTTOM = 16;
     public static final int PADDING_TOP_SUBTITLE = 30;
     public static final int PADDING_BOTTOM_SUBTITLE = 20;
+    public static final int PADDING_LEFT_RIGHT_TAG = 20;
 
     public static final int PADDING_COMMENT_ANSWER = 30;
 }

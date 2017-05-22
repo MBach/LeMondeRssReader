@@ -22,6 +22,7 @@ You can get the app directly on GitHub, here is the [v1.0](https://github.com/MB
 
 ![Article](https://raw.githubusercontent.com/MBach/LeMondeRssReader/gh-pages/screenshots/article_1.jpg)
 
+![Article](https://raw.githubusercontent.com/MBach/LeMondeRssReader/gh-pages/screenshots/article_2.jpg)
 
 ![Drawer](https://raw.githubusercontent.com/MBach/LeMondeRssReader/gh-pages/screenshots/drawer.jpg)
 

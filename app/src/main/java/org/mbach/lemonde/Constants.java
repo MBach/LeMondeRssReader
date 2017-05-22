@@ -26,6 +26,7 @@ public final class Constants {
     public static final String CAT_SCIENCES = "sciences" + RSS_FULL;
     public static final String CAT_PIXELS = "pixels" + RSS_FULL;
     public static final String CAT_CAMPUS = "campus" + RSS_FULL;
+    public static final String CAT_DECODERS = "les-decodeurs" + RSS_FULL;
 
     public static final String EXTRA_RSS_LINK = "RSS_LINK";
     public static final String EXTRA_NEWS_CATEGORY = "NEWS_CATEGORY";

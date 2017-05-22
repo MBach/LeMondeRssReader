@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rssCats.append(R.id.cat_sciences, Constants.CAT_SCIENCES);
         rssCats.append(R.id.cat_pixels, Constants.CAT_PIXELS);
         rssCats.append(R.id.cat_campus, Constants.CAT_CAMPUS);
+        rssCats.append(R.id.cat_decoders, Constants.CAT_DECODERS);
     }
 
     @Override

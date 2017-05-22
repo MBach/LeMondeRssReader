@@ -26,7 +26,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -82,6 +81,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
 
                 List<Model> list = null;
                 if (!articles.isEmpty()) {
+                    Elements category = doc.select("div.tt_rubrique_ombrelle");
+                    if (category != null && !category.isEmpty()) {
+                        getSupportActionBar().setTitle(category.text());
+                    }
                     list = extractStandardArticle(articles);
                     list.addAll(loadAndExtractCommentPreview(doc.getElementById("liste_reactions")));
                 } else if (doc.getElementById("content") != null) {
@@ -302,6 +305,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 for (Element link : links) {
                     element.select("a").unwrap();
                 }
+
+                // Cleanup style markup and script which should be placed on top
+                element.select("style").remove();
+                element.select("script").remove();
 
                 TextView t = new TextView(getBaseContext());
                 t.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));

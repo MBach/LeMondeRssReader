@@ -41,6 +41,9 @@
         <item
             android:id="@+id/cat_campus"
             android:title="@string/category_campus" />
+        <item
+            android:id="@+id/cat_decoders"
+            android:title="@string/category_decoders" />
     </group>
 
 </menu>

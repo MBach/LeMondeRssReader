@@ -16,6 +16,7 @@
     <string name="category_sciences">Sciences</string>
     <string name="category_pixels">Pixels</string>
     <string name="category_campus">Campus</string>
+    <string name="category_decoders">Les décodeurs</string>
 
     <string name="image_from_article">Image de l\'article</string>
     <string name="title_activity_settings">Settings</string>

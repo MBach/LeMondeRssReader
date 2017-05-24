@@ -1,11 +1,15 @@
 package org.mbach.lemonde.home;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -112,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final ActionBar actionBar = getSupportActionBar();
 
         if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
@@ -123,20 +127,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    public void getFeedFromCategory(String category) {
-        List<RssItem> rssItems = parser.parse(getInputStream(category));
-        RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter(rssItems);
-        adapter.setOnItemClickListener(new RecyclerRssItemAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, @NonNull RssItem rssItem) {
-                Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
-                intent.putExtra(Constants.EXTRA_RSS_LINK, rssItem.getLink());
-                intent.putExtra(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
-                intent.putExtra(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
-                startActivityForResult(intent, 1001);
-            }
-        });
-        mainActivityRecyclerView.setAdapter(adapter);
+    public void getFeedFromCategory(final String category) {
+        ConnectivityManager cm = (ConnectivityManager)getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        if (isConnected) {
+            List<RssItem> rssItems = parser.parse(getInputStream(category));
+            RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter(rssItems);
+            adapter.setOnItemClickListener(new RecyclerRssItemAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, @NonNull RssItem rssItem) {
+                    Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
+                    intent.putExtra(Constants.EXTRA_RSS_LINK, rssItem.getLink());
+                    intent.putExtra(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
+                    intent.putExtra(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
+                    startActivityForResult(intent, 1001);
+                }
+            });
+            mainActivityRecyclerView.setAdapter(adapter);
+        } else {
+            Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
+                    .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            getFeedFromCategory(category);
+                        }
+                    }).show();
+        }
         swipeRefreshLayout.setRefreshing(false);
     }
 

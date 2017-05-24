@@ -306,6 +306,14 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                     element.select("a").unwrap();
                 }
 
+                if (element.is("div.snippet.multimedia-embed")) {
+                    Log.d(TAG, "find multimedia-embed and extract it");
+                    boolean hasGraph = !element.select("graphe, script").isEmpty();
+                    if (hasGraph) {
+                        Log.d(TAG, "i'm pretty sure i need to extract some graphs!");
+                    }
+                }
+
                 // Cleanup style markup and script which should be placed on top
                 element.select("style").remove();
                 element.select("script").remove();

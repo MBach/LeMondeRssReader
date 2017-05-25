@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <!--app:layout_behaviorg.mbach.lemondeonde.article.FlingBehavior"-->
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"

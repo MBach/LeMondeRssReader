@@ -1,5 +1,6 @@
 package org.mbach.lemonde.article;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -17,8 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -47,20 +46,21 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         initActivityTransitions();
         setContentView(R.layout.activity_article);
+        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         ScrollFeedbackRecyclerView articleActivityRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
         articleActivityRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        //ViewCompat.setTransitionName(appBarLayout, Constants.EXTRA_RSS_IMAGE);
+        //supportPostponeEnterTransition();
 
         Bundle extras = getIntent().getExtras();
 
@@ -69,7 +69,8 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
             collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
 
             final ImageView imageView = (ImageView) findViewById(R.id.imageArticle);
-            Picasso.with(this).load(extras.getString(Constants.EXTRA_RSS_IMAGE)).into(imageView);
+            Bitmap bmp = extras.getParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP);
+            imageView.setImageBitmap(bmp);
 
             try {
                 Document doc = Jsoup.connect(extras.getString(Constants.EXTRA_RSS_LINK)).get();
@@ -301,10 +302,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
             if (figures.isEmpty()) {
 
                 // Cleanup hyperlink and keep only the value
-                Elements links = element.select("a[href]");
-                for (Element link : links) {
+                /*Elements links =*/ element.select("a[href]").unwrap();
+                /*for (Element link : links) {
                     element.select("a").unwrap();
-                }
+                }*/
 
                 if (element.is("div.snippet.multimedia-embed")) {
                     Log.d(TAG, "find multimedia-embed and extract it");

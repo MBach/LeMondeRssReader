@@ -16,7 +16,8 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/accent_translucent" android:state_pressed="true"/>
-    <item android:drawable="@android:color/transparent"/>
-</selector>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+    <item android:id="@android:id/mask"
+        android:drawable="@color/accent" />
+</ripple>

@@ -23,6 +23,7 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
@@ -138,10 +139,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onItemClick(View view, @NonNull RssItem rssItem) {
                     Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
-                    intent.putExtra(Constants.EXTRA_RSS_LINK, rssItem.getLink());
-                    intent.putExtra(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
-                    intent.putExtra(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
-                    startActivityForResult(intent, 1001);
+                    Bundle extras = new Bundle();
+
+                    extras.putString(Constants.EXTRA_RSS_LINK, rssItem.getLink());
+                    extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
+                    extras.putString(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
+
+                    ImageView rssImage = (ImageView) view.findViewById(R.id.rss_image);
+                    rssImage.buildDrawingCache();
+                    extras.putParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP, rssImage.getDrawingCache());
+                    intent.putExtras(extras);
+                    startActivity(intent);
                 }
             });
             mainActivityRecyclerView.setAdapter(adapter);

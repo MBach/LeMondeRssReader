@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="AppTheme" parent="BaseTheme"/>
+    <style name="AppTheme" parent="BaseTheme" />
 
     <style name="BaseTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/primary</item> 
@@ -26,7 +26,5 @@
     <color name="tag_red">#f44336</color>
     <color name="tag_yellow">#ff9800</color>
     <color name="tag_grey">#212121</color>
-
-
 
 </resources>

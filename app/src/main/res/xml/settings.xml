@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Preference category">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="main_theme"
+            android:title="@string/preference_app"
+            android:summary="@string/preference_app_dark_theme" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Preference category">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="display_tweets"
+            android:title="@string/preference_article"
+            android:summary="@string/preference_article_display_tweets" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

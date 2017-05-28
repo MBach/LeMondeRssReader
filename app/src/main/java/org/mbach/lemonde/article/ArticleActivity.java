@@ -302,16 +302,14 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
             if (figures.isEmpty()) {
 
                 // Cleanup hyperlink and keep only the value
-                /*Elements links =*/ element.select("a[href]").unwrap();
-                /*for (Element link : links) {
-                    element.select("a").unwrap();
-                }*/
+                element.select("a[href]").unwrap();
 
                 if (element.is("div.snippet.multimedia-embed")) {
-                    Log.d(TAG, "find multimedia-embed and extract it");
-                    boolean hasGraph = !element.select("graphe, script").isEmpty();
-                    if (hasGraph) {
-                        Log.d(TAG, "i'm pretty sure i need to extract some graphs!");
+                    boolean hasGraph = !element.select("graphe").isEmpty();
+                    boolean hasScript = !element.select("script").isEmpty();
+                    if (hasGraph && hasScript) {
+                        GraphExtractor graphExtractor = new GraphExtractor(getBaseContext(), element.select("script").first());
+                        p.add(new Model(Model.GRAPH_TYPE, graphExtractor.generate()));
                     }
                 }
 

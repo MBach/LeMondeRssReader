@@ -26,8 +26,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import org.mbach.lemonde.Constants;
-import org.mbach.lemonde.R;
 import org.mbach.lemonde.settings.SettingsActivity;
+import org.mbach.lemonde.R;
 import org.mbach.lemonde.article.ArticleActivity;
 
 import java.io.IOException;
@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initCategories();
+        // TODO
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
@@ -186,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
+                //Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(intent);
                 return true;

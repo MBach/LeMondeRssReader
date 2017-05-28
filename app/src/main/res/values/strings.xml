@@ -19,9 +19,9 @@
     <string name="category_decoders">Les décodeurs</string>
 
     <string name="image_from_article">Image de l\'article</string>
-    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_settings">Paramètres</string>
 
-    <string name="drawer_header_img_content_desc">Default image</string>
+    <string name="drawer_header_img_content_desc">Image par défaut</string>
     <string name="drawer_header_username">Matthieu BACHELIER</string>
     <string name="drawer_header_email">bachelier.matthieu@gmail.com</string>
 
@@ -31,8 +31,12 @@
     <string name="error_no_connection">Aucune connexion Internet</string>
     <string name="error_no_connection_retry">Réessayer</string>
 
-    <!-- Strings related to Settings -->
-    <string name="preference_article">Contenu des articles</string>
-    <string name="display_tweets">Afficher les tweets</string>
+    <!-- Work in Progress! -->
+    <string name="work_in_progress">Cette action n\'a pas encore été implémentée !</string>
 
+    <!-- Strings related to Settings -->
+    <string name="preference_app">Style de l\'App</string>
+    <string name="preference_app_dark_theme">Thème sombre</string>
+    <string name="preference_article">Contenu des articles</string>
+    <string name="preference_article_display_tweets">Inclure les tweets dans le corps d\'un article</string>
 </resources>

@@ -1,50 +1,44 @@
 package org.mbach.lemonde.settings;
 
-
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
+import android.view.View;
 
 import org.mbach.lemonde.R;
+import org.mbach.lemonde.home.MainActivity;
 
-/**
- * SettingsActivity class.
- *
- * @author Matthieu BACHELIER
- * @since 2017-05
- */
-public class SettingsActivity extends AppCompatActivity {
-
-    @NonNull
-    private static String TAG = "SettingsActivity";
+public class SettingsActivity extends PreferenceActivity {
+    private static final String TAG = "SettingsActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getFragmentManager().beginTransaction().replace(android.R.id.content, new GeneralPreferenceFragment()).commit();
 
-        setContentView(R.layout.activity_settings);
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                View root = SettingsActivity.this.getListView();
+                Snackbar.make(root, getString(R.string.work_in_progress), Snackbar.LENGTH_LONG)
+                        .show();
+            }
+        });
 
-        /*getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment())
-                .commit();
-
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
-
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }*/
     }
 
-    /*public static class SettingsFragment extends PreferenceFragment
-    {
+    protected boolean isValidFragment(String fragmentName) {
+        return GeneralPreferenceFragment.class.getName().equals(fragmentName);
+    }
+
+    public static class GeneralPreferenceFragment extends PreferenceFragment {
         @Override
-        public void onCreate(final Bundle savedInstanceState)
-        {
+        public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.preferences);
+            addPreferencesFromResource(R.xml.settings);
         }
-    }*/
+    }
 }

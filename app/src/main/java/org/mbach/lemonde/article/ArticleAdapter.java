@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.squareup.picasso.Picasso;
 
 import org.mbach.lemonde.R;
@@ -42,6 +45,10 @@ public class ArticleAdapter extends RecyclerView.Adapter {
                 return Model.TEXT_TYPE;
             case 1:
                 return Model.IMAGE_TYPE;
+            case 2:
+                return Model.BLANK_TYPE;
+            case 3:
+                return Model.GRAPH_TYPE;
             default:
                 return -1;
         }
@@ -52,15 +59,18 @@ public class ArticleAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
             case Model.TEXT_TYPE:
-                return new ViewHolder1(new TextView(parent.getContext()));
+                return new ViewHolderText(new TextView(parent.getContext()));
             case Model.IMAGE_TYPE:
                 ImageView imageView = new ImageView(parent.getContext());
                 imageView.setImageResource(R.drawable.avatar);
-                return new ViewHolder2(imageView);
+                return new ViewHolderImage(imageView);
             case Model.BLANK_TYPE:
-                return new ViewHolder3(new View(parent.getContext()));
+                return new ViewHolderBlank(new View(parent.getContext()));
+            case Model.GRAPH_TYPE:
+                BarChart barChart = new BarChart(parent.getContext());
+                return new ViewHolderBarChart(barChart);
             default:
-                return new ViewHolder3(new View(parent.getContext()));
+                return new ViewHolderBlank(new View(parent.getContext()));
         }
     }
 
@@ -72,61 +82,85 @@ public class ArticleAdapter extends RecyclerView.Adapter {
             return;
         }
         RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        RecyclerView.LayoutParams lp2 = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         switch (model.getType()) {
             case Model.TEXT_TYPE:
                 TextView textView = (TextView) model.getTheContent();
 
-                ((ViewHolder1) holder).text.setText(textView.getText());
-                ((ViewHolder1) holder).text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
-                ((ViewHolder1) holder).text.setTypeface(textView.getTypeface());
-                ((ViewHolder1) holder).text.setTextColor(textView.getCurrentTextColor());
-                ((ViewHolder1) holder).text.setBackground(textView.getBackground());
+                ((ViewHolderText) holder).text.setText(textView.getText());
+                ((ViewHolderText) holder).text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
+                ((ViewHolderText) holder).text.setTypeface(textView.getTypeface());
+                ((ViewHolderText) holder).text.setTextColor(textView.getCurrentTextColor());
+                ((ViewHolderText) holder).text.setBackground(textView.getBackground());
                 if (textView.getBackground() != null) {
-                    ((ViewHolder1) holder).text.setAllCaps(true);
+                    ((ViewHolderText) holder).text.setAllCaps(true);
                 }
-                ((ViewHolder1) holder).text.setLayoutParams(lp);
-                ((ViewHolder1) holder).text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize());
+                ((ViewHolderText) holder).text.setLayoutParams(lp);
+                ((ViewHolderText) holder).text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize());
                 break;
             case Model.IMAGE_TYPE:
                 String imageURI = (String) model.getTheContent();
-                ((ViewHolder2) holder).image.setLayoutParams(lp);
-                Picasso.with(((ViewHolder2) holder).image.getContext()).load(imageURI).into(((ViewHolder2) holder).image);
+                ((ViewHolderImage) holder).image.setLayoutParams(lp);
+                Picasso.with(((ViewHolderImage) holder).image.getContext()).load(imageURI).into(((ViewHolderImage) holder).image);
+                break;
+            case Model.GRAPH_TYPE:
+                BarChart barChart = (BarChart) model.getTheContent();
+                ((ViewHolderBarChart) holder).barChart.setLayoutParams(lp2);
+                ((ViewHolderBarChart) holder).barChart.setData(barChart.getData());
+
                 break;
             case Model.BLANK_TYPE:
                 View view = (View) model.getTheContent();
-                ((ViewHolder3) holder).view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
+                ((ViewHolderBlank) holder).view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
                 break;
         }
     }
 
-    public static class ViewHolder1 extends RecyclerView.ViewHolder {
+    public static class ViewHolderText extends RecyclerView.ViewHolder {
         @NonNull
         public final TextView text;
 
-        ViewHolder1(@NonNull View view) {
+        ViewHolderText(@NonNull View view) {
             super(view);
             this.text = (TextView) view;
         }
     }
 
-    public static class ViewHolder2 extends RecyclerView.ViewHolder {
+    public static class ViewHolderImage extends RecyclerView.ViewHolder {
         @NonNull
         public final ImageView image;
 
-        ViewHolder2(@NonNull View view) {
+        ViewHolderImage(@NonNull View view) {
             super(view);
             this.image = (ImageView) view;
         }
     }
 
-    public static class ViewHolder3 extends RecyclerView.ViewHolder {
+    public static class ViewHolderBlank extends RecyclerView.ViewHolder {
         @NonNull
         public final View view;
 
-        ViewHolder3(@NonNull View view) {
+        ViewHolderBlank(@NonNull View view) {
             super(view);
             this.view = view;
+        }
+    }
+
+    public static class ViewHolderBarChart extends RecyclerView.ViewHolder {
+        @NonNull
+        public final BarChart barChart;
+
+        ViewHolderBarChart(@NonNull BarChart view) {
+            super(view);
+            barChart = view;
+            barChart.setPinchZoom(false);
+            barChart.setMaxVisibleValueCount(10);
+            barChart.setDrawGridBackground(false);
+            XAxis xAxis = barChart.getXAxis();
+            xAxis.setEnabled(false);
+            YAxis rightAxis = barChart.getAxisRight();
+            rightAxis.setEnabled(false);
         }
     }
 }

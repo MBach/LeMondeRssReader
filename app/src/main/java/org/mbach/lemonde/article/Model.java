@@ -13,7 +13,8 @@ public class Model {
     public static final int TEXT_TYPE = 0;
     public static final int IMAGE_TYPE = 1;
     public static final int BLANK_TYPE = 2;
-    public static final int GRAPH_TYPE = 3;
+    public static final int TWEET_TYPE = 3;
+    public static final int GRAPH_TYPE = 4;
 
     private final int type;
     private final Object theContent;

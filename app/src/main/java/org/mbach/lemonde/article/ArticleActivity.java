@@ -1,13 +1,16 @@
 package org.mbach.lemonde.article;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -313,9 +316,32 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                     }
                 }
 
+                if (element.is("blockquote.twitter-tweet")) {
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                    boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
+
+                    element.remove();
+                    if (displayTweets) {
+                        TextView t = new TextView(getBaseContext());
+                        t.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
+                        t.setTextColor(Color.WHITE);
+
+                        CardView cardView = new CardView(getBaseContext());
+                        cardView.addView(t);
+                        p.add(new Model(Model.TWEET_TYPE, cardView));
+                    }
+                    continue;
+                }
+
                 // Cleanup style markup and script which should be placed on top
-                element.select("style").remove();
-                element.select("script").remove();
+                if (element.is("style")) {
+                    element.remove();
+                    continue;
+                }
+                if (element.is("script")) {
+                    element.remove();
+                    continue;
+                }
 
                 TextView t = new TextView(getBaseContext());
                 t.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));

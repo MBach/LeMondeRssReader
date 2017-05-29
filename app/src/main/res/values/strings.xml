@@ -35,8 +35,10 @@
     <string name="work_in_progress">Cette action n\'a pas encore été implémentée !</string>
 
     <!-- Strings related to Settings -->
-    <string name="preference_app">Style de l\'App</string>
+    <string name="preference_general_display">Affichage</string>
+    <string name="preference_app_style">Style de l\'App</string>
     <string name="preference_app_dark_theme">Thème sombre</string>
-    <string name="preference_article">Contenu des articles</string>
+    <string name="preference_article_layout">Mise en page</string>
+    <string name="preference_article_content">Contenu des articles</string>
     <string name="preference_article_display_tweets">Inclure les tweets dans le corps d\'un article</string>
 </resources>

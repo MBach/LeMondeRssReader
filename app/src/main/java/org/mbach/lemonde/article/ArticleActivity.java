@@ -308,11 +308,12 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 element.select("a[href]").unwrap();
 
                 if (element.is("div.snippet.multimedia-embed")) {
-                    boolean hasGraph = !element.select("graphe").isEmpty();
+                    boolean hasGraph = !element.select("div.graphe").isEmpty();
                     boolean hasScript = !element.select("script").isEmpty();
                     if (hasGraph && hasScript) {
                         GraphExtractor graphExtractor = new GraphExtractor(getBaseContext(), element.select("script").first());
                         p.add(new Model(Model.GRAPH_TYPE, graphExtractor.generate()));
+                        continue;
                     }
                 }
 
@@ -359,6 +360,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 } else {
                     t.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
                     t.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
+                }
+
+                if (element.is("p.question")) {
+                    t.setTypeface(null, Typeface.BOLD);
                 }
 
                 if (element.is("h2.tag") && element.children().size() > 0) {

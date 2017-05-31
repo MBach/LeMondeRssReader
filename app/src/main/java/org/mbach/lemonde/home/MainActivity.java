@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    public void getFeedFromCategory(final String category) {
+    private void getFeedFromCategory(final String category) {
         ConnectivityManager cm = (ConnectivityManager)getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Nullable
-    public InputStream getInputStream(String category) {
+    private InputStream getInputStream(String category) {
         try {
             URL url = new URL(Constants.BASE_URL + category);
             URLConnection urlConnection = url.openConnection();

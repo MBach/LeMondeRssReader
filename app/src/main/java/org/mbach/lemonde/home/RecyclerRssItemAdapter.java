@@ -23,21 +23,20 @@ import java.util.List;
  */
 public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItemAdapter.ViewHolder> implements View.OnClickListener {
 
-    @NonNull
-    private static String TAG = "RecyclerRssItemAdapter";
+    // private static String TAG = "RecyclerRssItemAdapter";
 
     private final List<RssItem> items;
     private OnItemClickListener onItemClickListener;
 
-    public RecyclerRssItemAdapter(List<RssItem> items) {
+    RecyclerRssItemAdapter(List<RssItem> items) {
         this.items = items;
     }
 
-    public RecyclerRssItemAdapter() {
+    RecyclerRssItemAdapter() {
         this.items = new ArrayList<>();
     }
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+    void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -74,9 +73,10 @@ public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItem
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         @NonNull
-        public final ImageView image;
+        final ImageView image;
+
         @NonNull
-        public final TextView title;
+        final TextView title;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);

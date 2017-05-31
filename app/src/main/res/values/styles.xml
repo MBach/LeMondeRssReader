@@ -17,6 +17,15 @@
         <item name="color">@android:color/white</item>
     </style>
 
+    <style name="fabStyle">
+        <item name="android:layout_margin">@dimen/fab_margin</item>
+        <item name="android:src">@drawable/ic_comment_black_24px</item>
+        <item name="borderWidth">0dp</item>
+        <item name="elevation">6dp</item>
+        <item name="pressedTranslationZ">12dp</item>
+        <item name="rippleColor">@android:color/white</item>
+    </style>
+
     <color name="primary">#616161</color>
     <color name="primary_dark">#212121</color>
     <color name="accent">#ffc400</color>

@@ -23,12 +23,12 @@ import java.util.List;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-public class GraphExtractor {
-    public static final String TAG = "GraphExtractor";
+class GraphExtractor {
+    private static final String TAG = "GraphExtractor";
 
     private final Context context;
 
-    public GraphExtractor(Context context, Element graph) {
+    GraphExtractor(Context context, Element graph) {
         this.context = context;
         Log.d(TAG, "todo graph");
 
@@ -57,7 +57,7 @@ public class GraphExtractor {
         }
     }
 
-    public Object generate() {
+    Object generate() {
         BarChart barChart = new BarChart(context);
 
         List<BarEntry> yVals1 = new ArrayList<>();

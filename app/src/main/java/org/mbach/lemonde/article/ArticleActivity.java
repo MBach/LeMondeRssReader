@@ -95,9 +95,6 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                     list = extractBlogArticle(doc);
                 }
                 if (list != null && !list.isEmpty()) {
-                    View lastEmptyView = new View(getBaseContext());
-                    lastEmptyView.setPadding(0, 500, 0, 0);
-                    list.add(new Model(Model.BLANK_TYPE, lastEmptyView));
                     articleActivityRecyclerView.setAdapter(new ArticleAdapter(list));
                 }
             } catch (IOException e) {

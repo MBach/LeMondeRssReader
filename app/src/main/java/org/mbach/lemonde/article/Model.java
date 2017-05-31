@@ -8,32 +8,31 @@ import android.widget.TextView;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-public class Model {
+class Model {
 
-    public static final int TEXT_TYPE = 0;
-    public static final int IMAGE_TYPE = 1;
-    public static final int BLANK_TYPE = 2;
-    public static final int TWEET_TYPE = 3;
-    public static final int GRAPH_TYPE = 4;
+    static final int TEXT_TYPE = 0;
+    static final int IMAGE_TYPE = 1;
+    static final int TWEET_TYPE = 2;
+    static final int GRAPH_TYPE = 3;
 
     private final int type;
     private final Object theContent;
 
-    public Model(TextView textView) {
+    Model(TextView textView) {
         this.type = TEXT_TYPE;
         theContent = textView;
     }
 
-    public Model(int type, Object view) {
+    Model(int type, Object view) {
         this.type = type;
         theContent = view;
     }
 
-    public int getType() {
+    int getType() {
         return type;
     }
 
-    public Object getTheContent() {
+    Object getTheContent() {
         return theContent;
     }
 }

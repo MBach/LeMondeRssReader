@@ -19,21 +19,21 @@ import java.util.List;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-public class LeMondeRssParser {
+class LeMondeRssParser {
 
     private static final String TAG = "LeMondeRssParser";
 
     private static final String TAG_TITLE = "title";
     private static final String TAG_LINK = "link";
     private static final String TAG_DESCRIPTION = "description";
-    private static final String TAG_GUID = "guid";
+    // private static final String TAG_GUID = "guid";
     private static final String TAG_ENCLOSURE = "enclosure";
-    private static final String TAG_PUBDATE = "pubDate";
+    // private static final String TAG_PUBDATE = "pubDate";
     private static final String TAG_RSS = "rss";
     private static final String TAG_ITEM = "item";
 
     @NonNull
-    public List<RssItem> parse(@Nullable InputStream inputStream) {
+    List<RssItem> parse(@Nullable InputStream inputStream) {
         List<RssItem> items = null;
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -93,11 +93,11 @@ public class LeMondeRssParser {
                             item.setTitle(text);
                         } else if (tagName.equalsIgnoreCase(TAG_DESCRIPTION)) {
                             item.setDescription(text);
-                        } else if (tagName.equalsIgnoreCase(TAG_PUBDATE)) {
+                        } /*else if (tagName.equalsIgnoreCase(TAG_PUBDATE)) {
                             item.setPubDate(text);
                         } else if (tagName.equalsIgnoreCase(TAG_GUID)) {
                             item.setGuid(text);
-                        } else if (tagName.equalsIgnoreCase(TAG_ENCLOSURE)) {
+                        }*/ else if (tagName.equalsIgnoreCase(TAG_ENCLOSURE)) {
                             text = parser.getAttributeValue(null, "url");
                             item.setEnclosure(text);
                         }

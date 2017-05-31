@@ -9,10 +9,8 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 
 import org.mbach.lemonde.R;
-import org.mbach.lemonde.home.MainActivity;
 
 public class SettingsActivity extends PreferenceActivity {
-    private static final String TAG = "SettingsActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

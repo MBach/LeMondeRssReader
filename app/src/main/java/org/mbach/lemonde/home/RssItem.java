@@ -6,24 +6,24 @@ package org.mbach.lemonde.home;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-public class RssItem {
+class RssItem {
 
     private String link = null;
     private String title = null;
     private String description = null;
-    private String pubDate = null;
-    private String guid = null;
+    //private String pubDate = null;
+    //private String guid = null;
     private String enclosure = null;
 
-    public RssItem() {
+    RssItem() {
 
     }
 
-    public String getLink() {
+    String getLink() {
         return link;
     }
 
-    public void setLink(String link) {
+    void setLink(String link) {
         this.link = link;
     }
 
@@ -35,29 +35,29 @@ public class RssItem {
         this.title = title;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    void setDescription(String description) {
         this.description = description;
     }
 
-    public String getPubDate() {
+    /*public String getPubDate() {
         return pubDate;
-    }
+    }*/
 
-    public void setPubDate(String pubDate) {
+    /*public void setPubDate(String pubDate) {
         this.pubDate = pubDate;
-    }
+    }*/
 
-    public String getGuid() {
+    /*public String getGuid() {
         return guid;
-    }
+    }*/
 
-    public void setGuid(String guid) {
+    /*public void setGuid(String guid) {
         this.guid = guid;
-    }
+    }*/
 
     public String getEnclosure() {
         return enclosure;

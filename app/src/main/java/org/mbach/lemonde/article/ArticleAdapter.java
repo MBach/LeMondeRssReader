@@ -24,13 +24,13 @@ import java.util.List;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-public class ArticleAdapter extends RecyclerView.Adapter {
+class ArticleAdapter extends RecyclerView.Adapter {
 
     private static final String TAG = "ArticleAdapter";
 
     private final List<Model> items;
 
-    public ArticleAdapter(List<Model> items) {
+    ArticleAdapter(List<Model> items) {
         this.items = items;
     }
 
@@ -48,10 +48,8 @@ public class ArticleAdapter extends RecyclerView.Adapter {
             case 1:
                 return Model.IMAGE_TYPE;
             case 2:
-                return Model.BLANK_TYPE;
-            case 3:
                 return Model.TWEET_TYPE;
-            case 4:
+            case 3:
                 return Model.GRAPH_TYPE;
             default:
                 return -1;
@@ -62,6 +60,7 @@ public class ArticleAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
+            default:
             case Model.TEXT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.IMAGE_TYPE:
@@ -70,13 +69,9 @@ public class ArticleAdapter extends RecyclerView.Adapter {
                 return new ViewHolderImage(imageView);
             case Model.TWEET_TYPE:
                 return new ViewHolderCardView(new CardView(parent.getContext()));
-            case Model.BLANK_TYPE:
-                return new ViewHolderBlank(new View(parent.getContext()));
             case Model.GRAPH_TYPE:
                 BarChart barChart = new BarChart(parent.getContext());
                 return new ViewHolderBarChart(barChart);
-            default:
-                return new ViewHolderBlank(new View(parent.getContext()));
         }
     }
 
@@ -119,10 +114,6 @@ public class ArticleAdapter extends RecyclerView.Adapter {
                 ((ViewHolderBarChart) holder).barChart.setLayoutParams(lp2);
                 ((ViewHolderBarChart) holder).barChart.setData(barChart.getData());
                 break;
-            case Model.BLANK_TYPE:
-                View view = (View) model.getTheContent();
-                ((ViewHolderBlank) holder).view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
-                break;
         }
     }
 
@@ -131,7 +122,7 @@ public class ArticleAdapter extends RecyclerView.Adapter {
      */
     public static class ViewHolderText extends RecyclerView.ViewHolder {
         @NonNull
-        public final TextView text;
+        private final TextView text;
 
         ViewHolderText(@NonNull View view) {
             super(view);
@@ -144,7 +135,7 @@ public class ArticleAdapter extends RecyclerView.Adapter {
      */
     public static class ViewHolderImage extends RecyclerView.ViewHolder {
         @NonNull
-        public final ImageView image;
+        private final ImageView image;
 
         ViewHolderImage(@NonNull View view) {
             super(view);
@@ -155,22 +146,9 @@ public class ArticleAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    public static class ViewHolderBlank extends RecyclerView.ViewHolder {
-        @NonNull
-        public final View view;
-
-        ViewHolderBlank(@NonNull View view) {
-            super(view);
-            this.view = view;
-        }
-    }
-
-    /**
-     *
-     */
     public static class ViewHolderCardView extends RecyclerView.ViewHolder {
         @NonNull
-        public final CardView cardView;
+        private final CardView cardView;
 
         ViewHolderCardView(@NonNull CardView view) {
             super(view);
@@ -182,7 +160,7 @@ public class ArticleAdapter extends RecyclerView.Adapter {
      */
     public static class ViewHolderBarChart extends RecyclerView.ViewHolder {
         @NonNull
-        public final BarChart barChart;
+        private final BarChart barChart;
 
         ViewHolderBarChart(@NonNull BarChart view) {
             super(view);

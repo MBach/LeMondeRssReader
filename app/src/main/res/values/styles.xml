@@ -29,7 +29,9 @@
     <color name="primary">#616161</color>
     <color name="primary_dark">#212121</color>
     <color name="accent">#ffc400</color>
-    <color name="accent_translucent">#FFFFC43B</color>
+    <color name="accent_bright">#ffecb3</color>
+    <color name="accent_translucent">#42ffc400</color>
+    <color name="accent_complementary">#304ffe</color>
 
     <color name="tag_green">#00c853</color>
     <color name="tag_red">#f44336</color>

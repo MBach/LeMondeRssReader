@@ -8,10 +8,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewParent;
 
 import org.mbach.lemonde.R;
-
+import com.github.jorgecastilloprz.FABProgressCircle;
 import java.lang.ref.WeakReference;
 
 /**
@@ -24,8 +25,7 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
     private static final String TAG = "ScrollFeedbackRV";
 
     private FloatingActionButton fab;
-
-
+    private FABProgressCircle fabProgressCircle;
     private WeakReference<Callbacks> callbacks;
 
     public ScrollFeedbackRecyclerView(@NonNull Context context) {
@@ -38,8 +38,8 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
     private void initFab() {
         ViewParent viewParent = getParent();
         if (viewParent instanceof CoordinatorLayout) {
-            Log.d(TAG, "ICI ?");
             fab = (FloatingActionButton) ((CoordinatorLayout) viewParent).findViewById(R.id.fab);
+            fabProgressCircle = (FABProgressCircle) ((CoordinatorLayout) viewParent).findViewById(R.id.fabProgressCircle);
         }
     }
 
@@ -59,9 +59,22 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
             }
         }
         if (layout.findLastCompletelyVisibleItemPosition() == getLayoutManager().getItemCount() - 1) {
-            fab.show();
+            fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
+                @Override
+                public void onShown(FloatingActionButton fab) {
+                    super.onShown(fab);
+                    fabProgressCircle.setVisibility(VISIBLE);
+                }
+            });
+
         } else {
-            fab.hide();
+            fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
+                @Override
+                public void onHidden(FloatingActionButton fab) {
+                    super.onShown(fab);
+                    fabProgressCircle.setVisibility(INVISIBLE);
+                }
+            });
         }
         super.onScrolled(dx, dy);
     }

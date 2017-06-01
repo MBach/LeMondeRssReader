@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +22,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.github.jorgecastilloprz.FABProgressCircle;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,6 +48,11 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
 
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
+    private FABProgressCircle fabProgressCircle;
+    private String commentsURI;
+    private ScrollFeedbackRecyclerView articleActivityRecyclerView;
+
+    private List<Model> items = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +62,22 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        ScrollFeedbackRecyclerView articleActivityRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
+        articleActivityRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
         articleActivityRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fabProgressCircle = (FABProgressCircle) findViewById(R.id.fabProgressCircle);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                fabProgressCircle.show();
+                loadMoreComments();
+            }
+        });
 
         //ViewCompat.setTransitionName(appBarLayout, Constants.EXTRA_RSS_IMAGE);
         //supportPostponeEnterTransition();
@@ -83,19 +100,18 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 }
                 Elements articles = doc.getElementsByTag("article");
 
-                List<Model> list = null;
                 if (!articles.isEmpty()) {
                     Elements category = doc.select("div.tt_rubrique_ombrelle");
-                    if (category != null && !category.isEmpty()) {
+                    if (atLeastOneChild(category)) {
                         getSupportActionBar().setTitle(category.text());
                     }
-                    list = extractStandardArticle(articles);
-                    list.addAll(loadAndExtractCommentPreview(doc.getElementById("liste_reactions")));
+                    items = extractStandardArticle(articles);
+                    loadAndExtractCommentPreview(doc.getElementById("liste_reactions"));
                 } else if (doc.getElementById("content") != null) {
-                    list = extractBlogArticle(doc);
+                    items = extractBlogArticle(doc);
                 }
-                if (list != null && !list.isEmpty()) {
-                    articleActivityRecyclerView.setAdapter(new ArticleAdapter(list));
+                if (!items.isEmpty()) {
+                    articleActivityRecyclerView.setAdapter(new ArticleAdapter(items));
                 }
             } catch (IOException e) {
                 Log.d(TAG, e.getMessage());
@@ -103,63 +119,93 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         }
     }
 
-    @NonNull
-    private List<Model> loadAndExtractCommentPreview(@NonNull Element rootComments) {
-        List<Model> list = new ArrayList<>();
-
+    private void loadAndExtractCommentPreview(@NonNull Element rootComments) {
         Elements dataAjURI = rootComments.select("[^data-aj-uri]");
         if (dataAjURI == null || dataAjURI.isEmpty()) {
-            return list;
+            return;
         }
         try {
-            String commentURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
-            Document docComments = Jsoup.connect(commentURI).get();
-
-            // Extract header
-            Elements header = docComments.select("[itemprop='InteractionCount']");
-            if (header != null && !header.isEmpty()) {
-                TextView commentHeader = new TextView(getBaseContext());
-                commentHeader.setText(String.format("Commentaires %s", header.text()));
-                commentHeader.setTypeface(null, Typeface.BOLD);
-                commentHeader.setTextColor(Color.WHITE);
-                commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
-                list.add(new Model(commentHeader));
-            }
-
-            // Extract comments
-            Elements comments = docComments.select("[itemprop='commentText']");
-            for (Element comment : comments) {
-                Elements refs = comment.select("p.references");
-
-                if (refs != null && !refs.isEmpty()) {
-                    // Clear date
-                    refs.select("span").remove();
-                    TextView author = new TextView(getBaseContext());
-                    author.setTypeface(null, Typeface.BOLD);
-                    author.setText(refs.text());
-                    author.setTextColor(Color.WHITE);
-
-                    Elements commentComment = refs.next();
-                    if (commentComment != null && !commentComment.isEmpty()) {
-                        TextView content = new TextView(getBaseContext());
-                        content.setText(commentComment.first().text());
-                        content.setTextColor(Color.WHITE);
-                        if (comment.hasClass("reponse")) {
-                            author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
-                            content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
-                        } else {
-                            author.setPadding(0, 0, 0, 12);
-                            content.setPadding(0, 0, 0, 16);
-                        }
-                        list.add(new Model(author));
-                        list.add(new Model(content));
-                    }
-                }
-            }
+            String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
+            Document docComments = Jsoup.connect(commentPreviewURI).get();
+            extractComments(docComments);
         } catch (IOException e) {
             Log.d(TAG, "no comments?" + e.getMessage());
         }
-        return list;
+    }
+
+    private boolean atLeastOneChild(Elements elements) {
+        return elements != null && !elements.isEmpty();
+    }
+
+    private void extractComments(Element doc) {
+
+        // Extract header
+        Elements header = doc.select("[itemprop='InteractionCount']");
+        if (atLeastOneChild(header)) {
+            TextView commentHeader = new TextView(getBaseContext());
+            commentHeader.setText(String.format("Commentaires %s", header.text()));
+            commentHeader.setTypeface(null, Typeface.BOLD);
+            commentHeader.setTextColor(Color.WHITE);
+            commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
+            items.add(new Model(commentHeader));
+        }
+
+        // Extract comments
+        Elements comments = doc.select("[itemprop='commentText']");
+        for (Element comment : comments) {
+            Elements refs = comment.select("p.references");
+
+            if (atLeastOneChild(refs)) {
+                // Clear date
+                refs.select("span").remove();
+                TextView author = new TextView(getBaseContext());
+                author.setTypeface(null, Typeface.BOLD);
+                author.setText(refs.text());
+                author.setTextColor(Color.WHITE);
+
+                Elements commentComment = refs.next();
+                if (atLeastOneChild(commentComment)) {
+                    TextView content = new TextView(getBaseContext());
+                    content.setText(commentComment.first().text());
+                    content.setTextColor(Color.WHITE);
+                    if (comment.hasClass("reponse")) {
+                        author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
+                        content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
+                    } else {
+                        author.setPadding(0, 0, 0, 12);
+                        content.setPadding(0, 0, 0, 16);
+                    }
+                    items.add(new Model(author));
+                    items.add(new Model(content));
+                }
+            }
+        }
+        // Extract full comments page URI
+        Elements div = doc.select("div.reactions");
+
+        if (atLeastOneChild(div)) {
+            Element fullComments = div.first().nextElementSibling();
+            Elements next = fullComments.select("a");
+            if (atLeastOneChild(next)) {
+                commentsURI = next.first().attr("href");
+            }
+        }
+    }
+
+    private void loadMoreComments() {
+        if (commentsURI != null && !commentsURI.isEmpty()) {
+            Log.d(TAG, "loading more comments from " + Constants.BASE_URL2 + commentsURI);
+            try {
+                Document doc = Jsoup.connect(Constants.BASE_URL2 + commentsURI).get();
+                extractComments(doc.getElementById("liste_reactions"));
+
+                if (!items.isEmpty()) {
+                    articleActivityRecyclerView.setAdapter(new ArticleAdapter(items));
+                }
+            } catch (IOException e) {
+                Log.d(TAG, "not being able to retrieve comments?" + e.getMessage());
+            }
+        }
     }
 
     @NonNull

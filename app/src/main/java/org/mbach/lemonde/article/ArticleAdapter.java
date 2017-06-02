@@ -16,6 +16,7 @@ import com.squareup.picasso.Picasso;
 
 import org.mbach.lemonde.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,10 +29,34 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
     private static final String TAG = "ArticleAdapter";
 
-    private final List<Model> items;
+    private List<Model> items;
 
     ArticleAdapter(List<Model> items) {
         this.items = items;
+    }
+
+    void insertItems(List<Model> items) {
+        if (this.items == null) {
+            this.items = items;
+        } else {
+            List<Model> previousComments = new ArrayList<>();
+            for (Model model : this.items) {
+                if (model.getType() == Model.COMMENT_TYPE) {
+                    previousComments.add(model);
+                }
+            }
+
+            List<Model> nextComments = new ArrayList<>();
+            for (Model model : items) {
+                if (model.getType() == Model.COMMENT_TYPE) {
+                    nextComments.add(model);
+                }
+            }
+
+            nextComments.removeAll(previousComments);
+            this.items.addAll(nextComments);
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -51,6 +76,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 return Model.TWEET_TYPE;
             case 3:
                 return Model.GRAPH_TYPE;
+            case 4:
+                return Model.COMMENT_TYPE;
             default:
                 return -1;
         }
@@ -72,6 +99,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
             case Model.GRAPH_TYPE:
                 BarChart barChart = new BarChart(parent.getContext());
                 return new ViewHolderBarChart(barChart);
+            case Model.COMMENT_TYPE:
+                return new ViewHolderText(new TextView(parent.getContext()));
         }
     }
 
@@ -87,8 +116,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
         switch (model.getType()) {
             case Model.TEXT_TYPE:
+            case Model.COMMENT_TYPE:
                 TextView textView = (TextView) model.getTheContent();
-
                 ((ViewHolderText) holder).text.setText(textView.getText());
                 ((ViewHolderText) holder).text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
                 ((ViewHolderText) holder).text.setTypeface(textView.getTypeface());

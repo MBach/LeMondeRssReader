@@ -52,8 +52,6 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     private String commentsURI;
     private ScrollFeedbackRecyclerView articleActivityRecyclerView;
 
-    private List<Model> items = new ArrayList<>();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +73,11 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         fab.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
                 fabProgressCircle.show();
-                loadMoreComments();
+                List<Model> comments = loadMoreComments();
+                if (!comments.isEmpty()) {
+                    ArticleAdapter adapter = (ArticleAdapter) articleActivityRecyclerView.getAdapter();
+                    adapter.insertItems(comments);
+                }
             }
         });
 
@@ -99,18 +101,18 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                     paidArticle.setVisibility(View.VISIBLE);
                 }
                 Elements articles = doc.getElementsByTag("article");
-
+                List<Model> items = null;
                 if (!articles.isEmpty()) {
                     Elements category = doc.select("div.tt_rubrique_ombrelle");
                     if (atLeastOneChild(category)) {
                         getSupportActionBar().setTitle(category.text());
                     }
                     items = extractStandardArticle(articles);
-                    loadAndExtractCommentPreview(doc.getElementById("liste_reactions"));
+                    items.addAll(loadAndExtractCommentPreview(doc.getElementById("liste_reactions")));
                 } else if (doc.getElementById("content") != null) {
                     items = extractBlogArticle(doc);
                 }
-                if (!items.isEmpty()) {
+                if (items != null && !items.isEmpty()) {
                     articleActivityRecyclerView.setAdapter(new ArticleAdapter(items));
                 }
             } catch (IOException e) {
@@ -119,42 +121,45 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         }
     }
 
-    private void loadAndExtractCommentPreview(@NonNull Element rootComments) {
+    private List<Model> loadAndExtractCommentPreview(@NonNull Element rootComments) {
         Elements dataAjURI = rootComments.select("[^data-aj-uri]");
-        if (dataAjURI == null || dataAjURI.isEmpty()) {
-            return;
+        if (atLeastOneChild(dataAjURI)) {
+            try {
+                String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
+                Document docComments = Jsoup.connect(commentPreviewURI).get();
+                return extractComments(docComments, false);
+            } catch (IOException e) {
+                Log.d(TAG, "no comments?" + e.getMessage());
+            }
         }
-        try {
-            String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
-            Document docComments = Jsoup.connect(commentPreviewURI).get();
-            extractComments(docComments);
-        } catch (IOException e) {
-            Log.d(TAG, "no comments?" + e.getMessage());
-        }
+        return new ArrayList<>();
     }
 
     private boolean atLeastOneChild(Elements elements) {
         return elements != null && !elements.isEmpty();
     }
 
-    private void extractComments(Element doc) {
+    private List<Model> extractComments(Element doc, boolean loadMoreComments) {
+
+        List<Model> commentList = new ArrayList<>();
 
         // Extract header
-        Elements header = doc.select("[itemprop='InteractionCount']");
-        if (atLeastOneChild(header)) {
-            TextView commentHeader = new TextView(getBaseContext());
-            commentHeader.setText(String.format("Commentaires %s", header.text()));
-            commentHeader.setTypeface(null, Typeface.BOLD);
-            commentHeader.setTextColor(Color.WHITE);
-            commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
-            items.add(new Model(commentHeader));
+        if (!loadMoreComments) {
+            Elements header = doc.select("[itemprop='InteractionCount']");
+            if (atLeastOneChild(header)) {
+                TextView commentHeader = new TextView(getBaseContext());
+                commentHeader.setText(String.format("Commentaires %s", header.text()));
+                commentHeader.setTypeface(null, Typeface.BOLD);
+                commentHeader.setTextColor(Color.WHITE);
+                commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
+                commentList.add(new Model(commentHeader, 0));
+            }
         }
 
         // Extract comments
         Elements comments = doc.select("[itemprop='commentText']");
         for (Element comment : comments) {
             Elements refs = comment.select("p.references");
-
             if (atLeastOneChild(refs)) {
                 // Clear date
                 refs.select("span").remove();
@@ -175,8 +180,9 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                         author.setPadding(0, 0, 0, 12);
                         content.setPadding(0, 0, 0, 16);
                     }
-                    items.add(new Model(author));
-                    items.add(new Model(content));
+                    Integer commentId = Integer.valueOf(comment.attr("data-reaction_id"));
+                    commentList.add(new Model(author, commentId));
+                    commentList.add(new Model(content, commentId));
                 }
             }
         }
@@ -190,22 +196,22 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 commentsURI = next.first().attr("href");
             }
         }
+        return commentList;
     }
 
-    private void loadMoreComments() {
+    private List<Model> loadMoreComments() {
         if (commentsURI != null && !commentsURI.isEmpty()) {
             Log.d(TAG, "loading more comments from " + Constants.BASE_URL2 + commentsURI);
             try {
                 Document doc = Jsoup.connect(Constants.BASE_URL2 + commentsURI).get();
-                extractComments(doc.getElementById("liste_reactions"));
-
-                if (!items.isEmpty()) {
-                    articleActivityRecyclerView.setAdapter(new ArticleAdapter(items));
-                }
+                List<Model> newComments = extractComments(doc.getElementById("liste_reactions"), true);
+                fabProgressCircle.hide();
+                return newComments;
             } catch (IOException e) {
                 Log.d(TAG, "not being able to retrieve comments?" + e.getMessage());
             }
         }
+        return new ArrayList<>();
     }
 
     @NonNull

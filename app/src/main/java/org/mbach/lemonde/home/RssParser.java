@@ -14,14 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * LeMondeRssParser class.
+ * RssParser class.
  *
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-class LeMondeRssParser {
+class RssParser {
 
-    private static final String TAG = "LeMondeRssParser";
+    private static final String TAG = "RssParser";
 
     private static final String TAG_TITLE = "title";
     private static final String TAG_LINK = "link";

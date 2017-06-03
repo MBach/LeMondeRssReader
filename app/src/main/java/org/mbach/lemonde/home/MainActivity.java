@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final String TAG = "MainActivity";
 
-    private final LeMondeRssParser parser = new LeMondeRssParser();
+    private final RssParser parser = new RssParser();
     private DrawerLayout drawerLayout;
     private RecyclerView mainActivityRecyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -187,7 +187,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
-                //Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(intent);
                 return true;

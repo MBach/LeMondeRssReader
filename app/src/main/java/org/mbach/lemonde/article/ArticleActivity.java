@@ -10,11 +10,13 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.text.Layout;
 import android.transition.Slide;
 import android.util.Log;
 import android.util.TypedValue;
@@ -24,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.jorgecastilloprz.FABProgressCircle;
+import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,6 +34,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
+import org.mbach.lemonde.home.MainActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,7 +78,11 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
             @Override public void onClick(View view) {
                 fabProgressCircle.show();
                 List<Model> comments = loadMoreComments();
-                if (!comments.isEmpty()) {
+                fabProgressCircle.hide();
+
+                if (comments.isEmpty()) {
+                    Snackbar.make(findViewById(R.id.coordinatorArticle), "Pas de nouveau commentaire", Snackbar.LENGTH_LONG).show();
+                } else {
                     ArticleAdapter adapter = (ArticleAdapter) articleActivityRecyclerView.getAdapter();
                     adapter.insertItems(comments);
                 }
@@ -91,8 +99,9 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
             collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
 
             final ImageView imageView = (ImageView) findViewById(R.id.imageArticle);
-            Bitmap bmp = extras.getParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP);
-            imageView.setImageBitmap(bmp);
+            Picasso.with(getBaseContext()).load(extras.getString(Constants.EXTRA_RSS_IMAGE)).into(imageView);
+            //Bitmap bmp = extras.getParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP);
+            //imageView.setImageBitmap(bmp);
 
             try {
                 Document doc = Jsoup.connect(extras.getString(Constants.EXTRA_RSS_LINK)).get();
@@ -201,12 +210,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
 
     private List<Model> loadMoreComments() {
         if (commentsURI != null && !commentsURI.isEmpty()) {
-            Log.d(TAG, "loading more comments from " + Constants.BASE_URL2 + commentsURI);
             try {
+                Log.d(TAG, "loading more comments from " + Constants.BASE_URL2 + commentsURI);
                 Document doc = Jsoup.connect(Constants.BASE_URL2 + commentsURI).get();
-                List<Model> newComments = extractComments(doc.getElementById("liste_reactions"), true);
-                fabProgressCircle.hide();
-                return newComments;
+                return extractComments(doc.getElementById("liste_reactions"), true);
             } catch (IOException e) {
                 Log.d(TAG, "not being able to retrieve comments?" + e.getMessage());
             }

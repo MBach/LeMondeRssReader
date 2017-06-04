@@ -6,6 +6,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
         android:allowBackup="false"
         android:fullBackupContent="false"
@@ -19,9 +24,7 @@
         tools:replace="android:allowBackup">
 
         <!-- Main page: RSS feed, drawer -->
-        <activity
-            android:name=".home.MainActivity"
-            android:label="@string/app_name">
+        <activity android:name=".home.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,8 +40,13 @@
         <!-- Settings page -->
         <activity
             android:name=".settings.SettingsActivity"
-            android:label="@string/title_activity_settings"
+            android:label="@string/action_settings"
             android:parentActivityName=".home.MainActivity" />
+
+        <!-- Account page -->
+        <activity
+            android:name=".account.LoginActivity"
+            android:label="@string/title_activity_login" />
     </application>
 
 </manifest>

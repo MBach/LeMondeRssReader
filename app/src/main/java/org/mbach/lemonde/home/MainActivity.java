@@ -2,6 +2,8 @@ package org.mbach.lemonde.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -20,12 +22,14 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
 import org.mbach.lemonde.Constants;
+import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.settings.SettingsActivity;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.article.ArticleActivity;
@@ -52,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private SwipeRefreshLayout swipeRefreshLayout;
     private final RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter();
     private final SparseArray<String> rssCats = new SparseArray<>();
+    private final SparseIntArray colorCats = new SparseIntArray();
     private MenuItem selectedMenuItem;
 
     private void initCategories() {
@@ -68,6 +73,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rssCats.append(R.id.cat_pixels, Constants.CAT_PIXELS);
         rssCats.append(R.id.cat_campus, Constants.CAT_CAMPUS);
         rssCats.append(R.id.cat_decoders, Constants.CAT_DECODERS);
+
+        colorCats.append(R.id.cat_news, R.color.cat_color_news);
+        colorCats.append(R.id.cat_international, R.color.cat_color_international);
+        colorCats.append(R.id.cat_politics, R.color.cat_color_politics);
+        colorCats.append(R.id.cat_society, R.color.cat_color_society);
+        colorCats.append(R.id.cat_economy, R.color.cat_color_economy);
+        colorCats.append(R.id.cat_culture, R.color.cat_color_culture);
+        colorCats.append(R.id.cat_ideas, R.color.cat_color_ideas);
+        colorCats.append(R.id.cat_planet, R.color.cat_color_planet);
+        colorCats.append(R.id.cat_sports, R.color.cat_color_sports);
+        colorCats.append(R.id.cat_sciences, R.color.cat_color_sciences);
+        colorCats.append(R.id.cat_pixels, R.color.cat_color_pixels);
+        colorCats.append(R.id.cat_campus, R.color.cat_color_campus);
+        colorCats.append(R.id.cat_decoders, R.color.cat_color_decoders);
     }
 
     @Override
@@ -97,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mainActivityRecyclerView.setAdapter(adapter);
 
+        setTitle(getString(R.string.category_news));
         getFeedFromCategory(Constants.CAT_NEWS);
     }
 
@@ -179,16 +199,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setupDrawerLayout() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(1).setChecked(true);
+        View header = navigationView.getHeaderView(0);
+        header.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                drawerLayout.closeDrawers();
+            }
+        });
+        Menu menu = navigationView.getMenu();
+        Drawable icon = getDrawable(R.drawable.circle);
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            int colorId = colorCats.get(item.getItemId());
+            if (colorId > 0 && icon != null) {
+                Drawable.ConstantState constantState = icon.getConstantState();
+                if (constantState != null) {
+                    Drawable clone = constantState.newDrawable();
+                    clone.setColorFilter(getColor(colorId), PorterDuff.Mode.SRC);
+                    item.setIcon(clone);
+                }
+            }
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_account:
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                return true;
             case R.id.action_settings:
-                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
                 return true;
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);

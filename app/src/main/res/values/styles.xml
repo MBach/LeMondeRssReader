@@ -33,4 +33,17 @@
     <color name="tag_yellow">#ff9800</color>
     <color name="tag_grey">#212121</color>
 
+    <color name="cat_color_news">#FFC600</color>
+    <color name="cat_color_international">#0386C3</color>
+    <color name="cat_color_politics">#1F0D67</color>
+    <color name="cat_color_society">#D50303</color>
+    <color name="cat_color_economy">#FE2F2F</color>
+    <color name="cat_color_culture">#F20559</color>
+    <color name="cat_color_ideas">#464F57</color>
+    <color name="cat_color_planet">#30932E</color>
+    <color name="cat_color_sports">#30932E</color>
+    <color name="cat_color_sciences">#0CB4AE</color>
+    <color name="cat_color_pixels">#06B586</color>
+    <color name="cat_color_campus">#FF6E17</color>
+    <color name="cat_color_decoders">#1F0D67</color>
 </resources>

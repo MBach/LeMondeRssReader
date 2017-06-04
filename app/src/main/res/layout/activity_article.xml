@@ -43,17 +43,15 @@
                     android:layout_height="24dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginTop="16dp"
-                    android:background="@color/accent"
                     android:gravity="center"
                     android:paddingEnd="@dimen/article_authors"
                     android:paddingStart="@dimen/article_authors"
-                    android:text="@string/paid_article"
                     android:textAllCaps="true"
-                    android:textColor="@android:color/black"
                     android:visibility="gone"
                     app:layout_constraintDimensionRatio="w,"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
             </android.support.constraint.ConstraintLayout>
 
             <android.support.v7.widget.Toolbar
@@ -89,8 +87,7 @@
         app:arcColor="@color/accent_complementary"
         app:arcWidth="4dp"
         android:clipChildren="false"
-        android:visibility="invisible"
-        >
+        android:visibility="invisible">
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"

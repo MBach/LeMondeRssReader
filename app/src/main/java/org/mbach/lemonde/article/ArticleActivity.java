@@ -1,7 +1,6 @@
 package org.mbach.lemonde.article;
 
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.text.Layout;
 import android.transition.Slide;
 import android.util.Log;
 import android.util.TypedValue;
@@ -34,7 +32,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
-import org.mbach.lemonde.home.MainActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,6 +52,14 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     private FABProgressCircle fabProgressCircle;
     private String commentsURI;
     private ScrollFeedbackRecyclerView articleActivityRecyclerView;
+
+    private static final String ATTR_HEADLINE = "Headline";
+    private static final String ATTR_DESCRIPTION = "description";
+    private static final String ATTR_AUTHOR = "author";
+    private static final String TAG_TRUE = "vrai";
+    private static final String TAG_FAKE = "faux";
+    private static final String TAG_MOSTLY_TRUE = "plutot_vrai";
+    private static final String TAG_FORGOTTEN = "oubli";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,39 +99,54 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
 
         Bundle extras = getIntent().getExtras();
 
-        if (extras != null) {
-            CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-            collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
+        if (extras == null) {
+            return;
+        }
+        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
 
-            final ImageView imageView = (ImageView) findViewById(R.id.imageArticle);
-            Picasso.with(getBaseContext()).load(extras.getString(Constants.EXTRA_RSS_IMAGE)).into(imageView);
-            //Bitmap bmp = extras.getParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP);
-            //imageView.setImageBitmap(bmp);
+        final ImageView imageView = (ImageView) findViewById(R.id.imageArticle);
+        Picasso.with(getBaseContext()).load(extras.getString(Constants.EXTRA_RSS_IMAGE)).into(imageView);
+        //Bitmap bmp = extras.getParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP);
+        //imageView.setImageBitmap(bmp);
 
-            try {
-                Document doc = Jsoup.connect(extras.getString(Constants.EXTRA_RSS_LINK)).get();
-                if (doc.getElementById("teaser_article") != null) {
-                    TextView paidArticle = (TextView) findViewById(R.id.paidArticle);
-                    paidArticle.setVisibility(View.VISIBLE);
+        try {
+            List<Model> items;
+            Document doc = Jsoup.connect(extras.getString(Constants.EXTRA_RSS_LINK)).get();
+
+            // Blog
+            if (doc.getElementById("content") != null) {
+                items = extractBlogArticle(doc);
+            } else {
+                Elements category = doc.select("div.tt_rubrique_ombrelle");
+                if (atLeastOneChild(category)) {
+                    getSupportActionBar().setTitle(category.text());
                 }
                 Elements articles = doc.getElementsByTag("article");
-                List<Model> items = null;
-                if (!articles.isEmpty()) {
-                    Elements category = doc.select("div.tt_rubrique_ombrelle");
-                    if (atLeastOneChild(category)) {
-                        getSupportActionBar().setTitle(category.text());
-                    }
+                if (articles.isEmpty()) {
+                    // Video
+                    items = extractVideo(doc);
+                    TextView paidArticle = (TextView) findViewById(R.id.paidArticle);
+                    paidArticle.setText(getString(R.string.video_article));
+                    paidArticle.setBackgroundColor(getColor(R.color.accent_complementary));
+                    paidArticle.setTextColor(Color.WHITE);
+                    paidArticle.setVisibility(View.VISIBLE);
+                } else {
+                    // Standard article
                     items = extractStandardArticle(articles);
                     items.addAll(loadAndExtractCommentPreview(doc.getElementById("liste_reactions")));
-                } else if (doc.getElementById("content") != null) {
-                    items = extractBlogArticle(doc);
+                    if (doc.getElementById("teaser_article") != null) {
+                        TextView paidArticle = (TextView) findViewById(R.id.paidArticle);
+                        paidArticle.setText(getString(R.string.paid_article));
+                        paidArticle.setBackgroundColor(getColor(R.color.accent));
+                        paidArticle.setTextColor(Color.BLACK);
+                        paidArticle.setVisibility(View.VISIBLE);
+                    }
                 }
-                if (items != null && !items.isEmpty()) {
-                    articleActivityRecyclerView.setAdapter(new ArticleAdapter(items));
-                }
-            } catch (IOException e) {
-                Log.d(TAG, e.getMessage());
             }
+            articleActivityRecyclerView.setAdapter(new ArticleAdapter(items));
+        } catch (IOException e) {
+            Log.d(TAG, e.getMessage());
         }
     }
 
@@ -208,6 +228,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         return commentList;
     }
 
+    /**
+     *
+     * @return List<Model>
+     */
     private List<Model> loadMoreComments() {
         if (commentsURI != null && !commentsURI.isEmpty()) {
             try {
@@ -239,10 +263,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
         description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
 
-        headLine.setText(extractHeadline(article));
-        authors.setText(extractAuthors(article));
+        headLine.setText(extractAttr(article, ATTR_HEADLINE));
+        authors.setText(extractAttr(article, ATTR_AUTHOR));
         dates.setText(extractDates(article));
-        description.setText(extractDescription(article));
+        description.setText(extractAttr(article, ATTR_DESCRIPTION));
 
         List<Model> views = new ArrayList<>();
         views.add(new Model(headLine));
@@ -250,6 +274,50 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         views.add(new Model(dates));
         views.add(new Model(description));
         views.addAll(extractParagraphs(article));
+        return views;
+    }
+
+    @NonNull
+    private List<Model> extractVideo(@NonNull Document doc) {
+        Elements elements = doc.select("section.video");
+        if (elements.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        TextView headLine = new TextView(getBaseContext());
+        TextView authors = new TextView(getBaseContext());
+        TextView dates = new TextView(getBaseContext());
+        TextView content = new TextView(getBaseContext());
+
+        headLine.setTextColor(Color.WHITE);
+        authors.setTextColor(Color.GRAY);
+        dates.setTextColor(Color.GRAY);
+        content.setTextColor(Color.WHITE);
+
+        headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
+        authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
+        dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
+        content.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
+
+        Element video = elements.first();
+        headLine.setText(extractAttr(video, ATTR_HEADLINE));
+        authors.setText(extractAttr(video, ATTR_AUTHOR));
+        dates.setText(extractDates(video));
+        Elements els = video.select("div.grid_12.alpha");
+        if (atLeastOneChild(els)) {
+            for (Element e : els) {
+                Log.d(TAG, e.html());
+            }
+            els.select("h2").remove();
+            els.select("span.txt_gris_soutenu").remove();
+            els.select("#recos_videos_outbrain").remove();
+            content.setText(Html.fromHtml(els.html(), Html.FROM_HTML_MODE_COMPACT));
+        }
+        List<Model> views = new ArrayList<>();
+        views.add(new Model(headLine));
+        views.add(new Model(authors));
+        views.add(new Model(dates));
+        views.add(new Model(content));
         return views;
     }
 
@@ -295,32 +363,12 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     }
 
     @NonNull
-    private String extractHeadline(@NonNull Element article) {
-        Elements elements = article.select("[itemprop='Headline']");
+    private String extractAttr(@NonNull Element article, String attribute) {
+        Elements elements = article.select("[itemprop='" + attribute + "']");
         if (elements.isEmpty()) {
             return "";
         } else {
             return elements.first().text();
-        }
-    }
-
-    @NonNull
-    private String extractDescription(@NonNull Element article) {
-        Elements elements = article.select("[itemprop='description']");
-        if (elements.isEmpty()) {
-            return "";
-        } else {
-            return elements.first().text();
-        }
-    }
-
-    @NonNull
-    private String extractAuthors(@NonNull Element article) {
-        Elements elements = article.select("[itemprop='author']");
-        if (elements.isEmpty()) {
-            return "";
-        } else {
-            return "Par " + elements.first().text();
         }
     }
 
@@ -428,16 +476,16 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                     t.setAllCaps(true);
                     t.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM);
                     switch (cssClass) {
-                        case "faux":
+                        case TAG_FAKE:
                             t.setBackgroundColor(getResources().getColor(R.color.tag_red, null));
                             break;
-                        case "vrai":
+                        case TAG_TRUE:
                             t.setBackgroundColor(getResources().getColor(R.color.tag_green, null));
                             break;
-                        case "plutot_vrai":
+                        case TAG_MOSTLY_TRUE:
                             t.setBackgroundColor(getResources().getColor(R.color.tag_yellow, null));
                             break;
-                        case "oubli":
+                        case TAG_FORGOTTEN:
                             t.setBackgroundColor(getResources().getColor(R.color.tag_grey, null));
                             break;
                         default:
@@ -489,7 +537,7 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     }
 
     @Override
-    public void setExpanded(boolean expanded) {
-        appBarLayout.setExpanded(expanded, true);
+    public void expand() {
+        appBarLayout.setExpanded(true, true);
     }
 }

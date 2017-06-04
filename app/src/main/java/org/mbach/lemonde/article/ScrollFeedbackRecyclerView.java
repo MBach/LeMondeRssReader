@@ -10,7 +10,9 @@ import android.util.AttributeSet;
 import android.view.ViewParent;
 
 import org.mbach.lemonde.R;
+
 import com.github.jorgecastilloprz.FABProgressCircle;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -50,29 +52,31 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
 
     @Override
     public void onScrolled(int dx, int dy) {
-        LinearLayoutManager layout = (LinearLayoutManager) getLayoutManager() ;
+        LinearLayoutManager layout = (LinearLayoutManager) getLayoutManager();
         if (layout.findFirstCompletelyVisibleItemPosition() == 0) {
             if (callbacks != null && callbacks.get().isAppBarCollapsed()) {
-                callbacks.get().setExpanded(true);
+                callbacks.get().expand();
             }
         }
-        if (layout.findLastCompletelyVisibleItemPosition() == getLayoutManager().getItemCount() - 1) {
-            fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
-                @Override
-                public void onShown(FloatingActionButton fab) {
-                    super.onShown(fab);
-                    fabProgressCircle.setVisibility(VISIBLE);
-                }
-            });
+        if (fab != null) {
+            if (layout.findLastCompletelyVisibleItemPosition() == getLayoutManager().getItemCount() - 1) {
+                fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
+                    @Override
+                    public void onShown(FloatingActionButton fab) {
+                        super.onShown(fab);
+                        fabProgressCircle.setVisibility(VISIBLE);
+                    }
+                });
 
-        } else {
-            fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
-                @Override
-                public void onHidden(FloatingActionButton fab) {
-                    super.onShown(fab);
-                    fabProgressCircle.setVisibility(INVISIBLE);
-                }
-            });
+            } else {
+                fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
+                    @Override
+                    public void onHidden(FloatingActionButton fab) {
+                        super.onShown(fab);
+                        fabProgressCircle.setVisibility(INVISIBLE);
+                    }
+                });
+            }
         }
         super.onScrolled(dx, dy);
     }
@@ -88,7 +92,7 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
 
     private void attachCallbacks(@NonNull Context context) {
         try {
-            callbacks = new WeakReference<>((Callbacks)context);
+            callbacks = new WeakReference<>((Callbacks) context);
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement ScrollFeedbackRecyclerView.Callbacks");
         }
@@ -96,6 +100,7 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
 
     interface Callbacks {
         boolean isAppBarCollapsed();
-        void setExpanded(boolean expanded);
+
+        void expand();
     }
 }

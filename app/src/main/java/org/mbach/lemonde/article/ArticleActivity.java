@@ -425,14 +425,15 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
                     boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
 
-                    element.remove();
+                    //element.remove();
                     if (displayTweets) {
-                        TextView t = new TextView(getBaseContext());
-                        t.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
-                        t.setTextColor(Color.WHITE);
-
+                        TextView content = new TextView(getBaseContext());
+                        content.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
+                        TextView link = new TextView(getBaseContext());
+                        link.setText(element.select("a").attr("href"));
                         CardView cardView = new CardView(getBaseContext());
-                        cardView.addView(t);
+                        cardView.addView(content);
+                        cardView.addView(link);
                         p.add(new Model(Model.TWEET_TYPE, cardView));
                     }
                     continue;

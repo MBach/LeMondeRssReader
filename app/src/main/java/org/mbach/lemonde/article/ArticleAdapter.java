@@ -1,12 +1,16 @@
 package org.mbach.lemonde.article;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -95,7 +99,19 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 imageView.setImageResource(R.drawable.avatar);
                 return new ViewHolderImage(imageView);
             case Model.TWEET_TYPE:
-                return new ViewHolderCardView(new CardView(parent.getContext()));
+                LinearLayout layout = new LinearLayout(parent.getContext());
+                layout.setOrientation(LinearLayout.VERTICAL);
+                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+
+                layout.addView(new TextView(parent.getContext()));
+                layout.addView(new Button(parent.getContext()));
+                CardView cardView = new CardView(parent.getContext());
+                cardView.setLayoutParams(params);
+                cardView.addView(layout);
+                return new ViewHolderCardView(cardView);
             case Model.GRAPH_TYPE:
                 BarChart barChart = new BarChart(parent.getContext());
                 return new ViewHolderBarChart(barChart);
@@ -135,8 +151,11 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 Picasso.with(((ViewHolderImage) holder).image.getContext()).load(imageURI).into(((ViewHolderImage) holder).image);
                 break;
             case Model.TWEET_TYPE:
-                //CardView cardView = (CardView) model.getTheContent();
-                //((ViewHolderCardView) holder).content.setText();
+                CardView cardView = (CardView) model.getTheContent();
+                TextView tweet = (TextView) cardView.getChildAt(0);
+                TextView link = (TextView) cardView.getChildAt(1);
+                ((ViewHolderCardView) holder).getTweet().setText(tweet.getText());
+                ((ViewHolderCardView) holder).getLink().setText(link.getText());
                 break;
             case Model.GRAPH_TYPE:
                 BarChart barChart = (BarChart) model.getTheContent();
@@ -182,6 +201,15 @@ class ArticleAdapter extends RecyclerView.Adapter {
         ViewHolderCardView(@NonNull CardView view) {
             super(view);
             cardView = view;
+        }
+
+        TextView getTweet() {
+            LinearLayout layout = (LinearLayout) cardView.getChildAt(0);
+            return (TextView) layout.getChildAt(0);
+        }
+        Button getLink() {
+            LinearLayout layout = (LinearLayout) cardView.getChildAt(0);
+            return (Button) layout.getChildAt(1);
         }
     }
     /**

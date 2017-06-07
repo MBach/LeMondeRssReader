@@ -23,6 +23,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.github.jorgecastilloprz.FABProgressCircle;
 import com.squareup.picasso.Picasso;
 
@@ -33,7 +39,6 @@ import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,13 +51,6 @@ import java.util.List;
 public class ArticleActivity extends AppCompatActivity implements ScrollFeedbackRecyclerView.Callbacks {
 
     private static final String TAG = "ArticleActivity";
-
-    private AppBarLayout appBarLayout;
-    private Toolbar toolbar;
-    private FABProgressCircle fabProgressCircle;
-    private String commentsURI;
-    private ScrollFeedbackRecyclerView articleActivityRecyclerView;
-
     private static final String ATTR_HEADLINE = "Headline";
     private static final String ATTR_DESCRIPTION = "description";
     private static final String ATTR_AUTHOR = "author";
@@ -60,6 +58,13 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     private static final String TAG_FAKE = "faux";
     private static final String TAG_MOSTLY_TRUE = "plutot_vrai";
     private static final String TAG_FORGOTTEN = "oubli";
+    private static RequestQueue REQUEST_QUEUE = null;
+
+    private AppBarLayout appBarLayout;
+    private Toolbar toolbar;
+    private FABProgressCircle fabProgressCircle;
+    private String commentsURI;
+    private final ArticleAdapter articleAdapter = new ArticleAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +74,9 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        articleActivityRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
+        ScrollFeedbackRecyclerView articleActivityRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
         articleActivityRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        articleActivityRecyclerView.setAdapter(articleAdapter);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -81,15 +87,11 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         fabProgressCircle = (FABProgressCircle) findViewById(R.id.fabProgressCircle);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
-                fabProgressCircle.show();
-                List<Model> comments = loadMoreComments();
-                fabProgressCircle.hide();
-
-                if (comments.isEmpty()) {
+                if (Constants.BASE_URL2.equals(commentsURI)) {
                     Snackbar.make(findViewById(R.id.coordinatorArticle), "Pas de nouveau commentaire", Snackbar.LENGTH_LONG).show();
                 } else {
-                    ArticleAdapter adapter = (ArticleAdapter) articleActivityRecyclerView.getAdapter();
-                    adapter.insertItems(comments);
+                    fabProgressCircle.show();
+                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
                 }
             }
         });
@@ -107,20 +109,68 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
 
         final ImageView imageView = (ImageView) findViewById(R.id.imageArticle);
         Picasso.with(getBaseContext()).load(extras.getString(Constants.EXTRA_RSS_IMAGE)).into(imageView);
-        //Bitmap bmp = extras.getParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP);
-        //imageView.setImageBitmap(bmp);
 
-        try {
-            List<Model> items;
-            Document doc = Jsoup.connect(extras.getString(Constants.EXTRA_RSS_LINK)).get();
 
-            // Blog
+
+        // Start async job
+        if (REQUEST_QUEUE == null) {
+            REQUEST_QUEUE = Volley.newRequestQueue(this);
+        }
+        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, extras.getString(Constants.EXTRA_RSS_LINK), articleReceived, errorResponse));
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.action_settings:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void initActivityTransitions() {
+        Slide transition = new Slide();
+        transition.excludeTarget(android.R.id.statusBarBackground, true);
+        getWindow().setEnterTransition(transition);
+        getWindow().setReturnTransition(transition);
+    }
+
+    @Override
+    public boolean isAppBarCollapsed() {
+        final int appBarVisibleHeight = (int) (appBarLayout.getY() + appBarLayout.getHeight());
+        final int toolbarHeight = toolbar.getHeight();
+        return (appBarVisibleHeight == toolbarHeight);
+    }
+
+    @Override
+    public void expand() {
+        appBarLayout.setExpanded(true, true);
+    }
+
+    /**
+     *
+     */
+    private Response.Listener<String> articleReceived = new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            Log.d(TAG, "onResponse");
+            Document doc = Jsoup.parse(response);
+
+            // Article is from a hosted blog
+            List<Model> items = new ArrayList<>();
             if (doc.getElementById("content") != null) {
                 items = extractBlogArticle(doc);
             } else {
                 Elements category = doc.select("div.tt_rubrique_ombrelle");
                 if (atLeastOneChild(category)) {
-                    getSupportActionBar().setTitle(category.text());
+                    Log.d(TAG, "Cat: " + category.text());
+                    setTitle(category.text());
                 }
                 Elements articles = doc.getElementsByTag("article");
                 if (articles.isEmpty()) {
@@ -134,7 +184,7 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 } else {
                     // Standard article
                     items = extractStandardArticle(articles);
-                    items.addAll(loadAndExtractCommentPreview(doc.getElementById("liste_reactions")));
+                    Element react = doc.getElementById("liste_reactions");
                     if (doc.getElementById("teaser_article") != null) {
                         TextView paidArticle = (TextView) findViewById(R.id.paidArticle);
                         paidArticle.setText(getString(R.string.paid_article));
@@ -142,107 +192,103 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                         paidArticle.setTextColor(Color.BLACK);
                         paidArticle.setVisibility(View.VISIBLE);
                     }
+                    // After parsing the article, start a new request for comments
+                    Elements dataAjURI = react.select("[^data-aj-uri]");
+                    if (atLeastOneChild(dataAjURI)) {
+                        String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
+                        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
+                    }
                 }
             }
-            articleActivityRecyclerView.setAdapter(new ArticleAdapter(items));
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
+            articleAdapter.insertItems(items);
         }
-    }
+    };
 
-    private List<Model> loadAndExtractCommentPreview(@NonNull Element rootComments) {
-        Elements dataAjURI = rootComments.select("[^data-aj-uri]");
-        if (atLeastOneChild(dataAjURI)) {
-            try {
-                String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
-                Document docComments = Jsoup.connect(commentPreviewURI).get();
-                return extractComments(docComments, false);
-            } catch (IOException e) {
-                Log.d(TAG, "no comments?" + e.getMessage());
-            }
-        }
-        return new ArrayList<>();
-    }
+    /**
+     *
+     */
+    private Response.Listener<String> commentsReceived = new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            Document commentDoc = Jsoup.parse(response);
 
-    private boolean atLeastOneChild(Elements elements) {
-        return elements != null && !elements.isEmpty();
-    }
-
-    private List<Model> extractComments(Element doc, boolean loadMoreComments) {
-
-        List<Model> commentList = new ArrayList<>();
-
-        // Extract header
-        if (!loadMoreComments) {
-            Elements header = doc.select("[itemprop='InteractionCount']");
+            List<Model> items = new ArrayList<>();
+            // Extract header
+            Elements header = commentDoc.select("[itemprop='InteractionCount']");
             if (atLeastOneChild(header)) {
                 TextView commentHeader = new TextView(getBaseContext());
                 commentHeader.setText(String.format("Commentaires %s", header.text()));
                 commentHeader.setTypeface(null, Typeface.BOLD);
                 commentHeader.setTextColor(Color.WHITE);
                 commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
-                commentList.add(new Model(commentHeader, 0));
+                items.add(new Model(commentHeader, 0));
             }
-        }
 
-        // Extract comments
-        Elements comments = doc.select("[itemprop='commentText']");
-        for (Element comment : comments) {
-            Elements refs = comment.select("p.references");
-            if (atLeastOneChild(refs)) {
-                // Clear date
-                refs.select("span").remove();
-                TextView author = new TextView(getBaseContext());
-                author.setTypeface(null, Typeface.BOLD);
-                author.setText(refs.text());
-                author.setTextColor(Color.WHITE);
+            // Extract comments
+            Log.d(TAG, "Extract comments ICI");
+            Elements comments = commentDoc.select("[itemprop='commentText']");
+            for (Element comment : comments) {
+                Elements refs = comment.select("p.references");
+                if (atLeastOneChild(refs)) {
+                    Log.d(TAG, "Extract comments LA");
+                    // Clear date
+                    refs.select("span").remove();
+                    TextView author = new TextView(getBaseContext());
+                    author.setTypeface(null, Typeface.BOLD);
+                    author.setText(refs.text());
+                    author.setTextColor(Color.WHITE);
 
-                Elements commentComment = refs.next();
-                if (atLeastOneChild(commentComment)) {
-                    TextView content = new TextView(getBaseContext());
-                    content.setText(commentComment.first().text());
-                    content.setTextColor(Color.WHITE);
-                    if (comment.hasClass("reponse")) {
-                        author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
-                        content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
-                    } else {
-                        author.setPadding(0, 0, 0, 12);
-                        content.setPadding(0, 0, 0, 16);
+                    Elements commentComment = refs.next();
+                    if (atLeastOneChild(commentComment)) {
+                        TextView content = new TextView(getBaseContext());
+                        content.setText(commentComment.first().text());
+                        content.setTextColor(Color.WHITE);
+                        if (comment.hasClass("reponse")) {
+                            author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
+                            content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
+                        } else {
+                            author.setPadding(0, 0, 0, 12);
+                            content.setPadding(0, 0, 0, 16);
+                        }
+                        Integer commentId = Integer.valueOf(comment.attr("data-reaction_id"));
+                        items.add(new Model(author, commentId));
+                        items.add(new Model(content, commentId));
                     }
-                    Integer commentId = Integer.valueOf(comment.attr("data-reaction_id"));
-                    commentList.add(new Model(author, commentId));
-                    commentList.add(new Model(content, commentId));
                 }
             }
-        }
-        // Extract full comments page URI
-        Elements div = doc.select("div.reactions");
+            // Extract full comments page URI
+            Elements div = commentDoc.select("div.reactions");
 
-        if (atLeastOneChild(div)) {
-            Element fullComments = div.first().nextElementSibling();
-            Elements next = fullComments.select("a");
-            if (atLeastOneChild(next)) {
-                commentsURI = next.first().attr("href");
+            if (atLeastOneChild(div)) {
+                Element fullComments = div.first().nextElementSibling();
+                Elements next = fullComments.select("a");
+                if (atLeastOneChild(next)) {
+                    commentsURI = Constants.BASE_URL2 + next.first().attr("href");
+                    Log.d(TAG, "Next URI for comments: " + commentsURI);
+                }
             }
+            articleAdapter.insertItems(items);
+            fabProgressCircle.hide();
         }
-        return commentList;
-    }
+    };
 
     /**
      *
-     * @return List<Model>
      */
-    private List<Model> loadMoreComments() {
-        if (commentsURI != null && !commentsURI.isEmpty()) {
-            try {
-                Log.d(TAG, "loading more comments from " + Constants.BASE_URL2 + commentsURI);
-                Document doc = Jsoup.connect(Constants.BASE_URL2 + commentsURI).get();
-                return extractComments(doc.getElementById("liste_reactions"), true);
-            } catch (IOException e) {
-                Log.d(TAG, "not being able to retrieve comments?" + e.getMessage());
-            }
+    private Response.ErrorListener errorResponse = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.e(TAG, "onErrorResponse", error);
         }
-        return new ArrayList<>();
+    };
+
+    /**
+     *
+     * @param elements
+     * @return
+     */
+    private boolean atLeastOneChild(Elements elements) {
+        return elements != null && !elements.isEmpty();
     }
 
     @NonNull
@@ -507,38 +553,5 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
             }
         }
         return p;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            case R.id.action_settings:
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void initActivityTransitions() {
-        Slide transition = new Slide();
-        transition.excludeTarget(android.R.id.statusBarBackground, true);
-        getWindow().setEnterTransition(transition);
-        getWindow().setReturnTransition(transition);
-    }
-
-    @Override
-    public boolean isAppBarCollapsed() {
-        final int appBarVisibleHeight = (int) (appBarLayout.getY() + appBarLayout.getHeight());
-        final int toolbarHeight = toolbar.getHeight();
-        return (appBarVisibleHeight == toolbarHeight);
-    }
-
-    @Override
-    public void expand() {
-        appBarLayout.setExpanded(true, true);
     }
 }

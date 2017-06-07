@@ -11,7 +11,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * RssParser class.
@@ -33,8 +32,8 @@ class RssParser {
     private static final String TAG_ITEM = "item";
 
     @NonNull
-    List<RssItem> parse(@Nullable InputStream inputStream) {
-        List<RssItem> items = null;
+    ArrayList<RssItem> parse(@Nullable InputStream inputStream) {
+        ArrayList<RssItem> items = null;
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -66,8 +65,8 @@ class RssParser {
      * @return a list of well formed news that can be clicked later inside {@link org.mbach.lemonde.article.ArticleActivity}
      */
     @NonNull
-    private List<RssItem> readFeed(@NonNull XmlPullParser parser) {
-        List<RssItem> items = new ArrayList<>();
+    private ArrayList<RssItem> readFeed(@NonNull XmlPullParser parser) {
+        ArrayList<RssItem> items = new ArrayList<>();
         RssItem item = new RssItem();
         String text = null;
         /// TODO: store cache calls maybe here!

@@ -1,7 +1,5 @@
 package org.mbach.lemonde.article;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -35,10 +33,6 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
     private List<Model> items;
 
-    ArticleAdapter(List<Model> items) {
-        this.items = items;
-    }
-
     void insertItems(List<Model> items) {
         if (this.items == null) {
             this.items = items;
@@ -65,25 +59,28 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return items == null ? 0 : items.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        // FIXME ?
-        switch (items.get(position).getType()) {
-            case 0:
-                return Model.TEXT_TYPE;
-            case 1:
-                return Model.IMAGE_TYPE;
-            case 2:
-                return Model.TWEET_TYPE;
-            case 3:
-                return Model.GRAPH_TYPE;
-            case 4:
-                return Model.COMMENT_TYPE;
-            default:
-                return -1;
+        if (items == null) {
+            return -1;
+        } else {
+            switch (items.get(position).getType()) {
+                case 0:
+                    return Model.TEXT_TYPE;
+                case 1:
+                    return Model.IMAGE_TYPE;
+                case 2:
+                    return Model.TWEET_TYPE;
+                case 3:
+                    return Model.GRAPH_TYPE;
+                case 4:
+                    return Model.COMMENT_TYPE;
+                default:
+                    return -1;
+            }
         }
     }
 

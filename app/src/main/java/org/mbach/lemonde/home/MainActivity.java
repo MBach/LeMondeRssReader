@@ -1,5 +1,6 @@
 package org.mbach.lemonde.home;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
@@ -7,9 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -34,11 +33,7 @@ import org.mbach.lemonde.settings.SettingsActivity;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.article.ArticleActivity;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * MainActivity class.
@@ -49,8 +44,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
+    private static final int GET_LATEST_RSS_FEED = 0;
 
-    private final RssParser parser = new RssParser();
     private DrawerLayout drawerLayout;
     private RecyclerView mainActivityRecyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -92,9 +87,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initCategories();
-        // TODO
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -132,11 +124,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mainActivityRecyclerView.scheduleLayoutAnimation();
     }
 
+    /**
+     * Initialize the toolbar with a custom icon.
+     */
     private void initToolbar() {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
-
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -149,31 +143,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    /**
+     * Fetch RSS news from a category by delegating calling and parsing to a dedicated service {@link RssService} in order to keep UI non blocking.
+     *
+     * @param category the news category to fetch from all available news feeds
+     * @see RssService
+     */
     private void getFeedFromCategory(final String category) {
-        ConnectivityManager cm = (ConnectivityManager)getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         if (isConnected) {
-            List<RssItem> rssItems = parser.parse(getInputStream(category));
-            RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter(rssItems);
-            adapter.setOnItemClickListener(new RecyclerRssItemAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, @NonNull RssItem rssItem) {
-                    Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
-                    Bundle extras = new Bundle();
-
-                    extras.putString(Constants.EXTRA_RSS_LINK, rssItem.getLink());
-                    extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
-                    extras.putString(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
-
-                    ImageView rssImage = (ImageView) view.findViewById(R.id.rss_image);
-                    rssImage.buildDrawingCache();
-                    extras.putParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP, rssImage.getDrawingCache());
-                    intent.putExtras(extras);
-                    startActivity(intent);
-                }
-            });
-            mainActivityRecyclerView.setAdapter(adapter);
+            PendingIntent pendingResult = createPendingResult(GET_LATEST_RSS_FEED, new Intent(), 0);
+            Intent intent = new Intent(getApplicationContext(), RssService.class);
+            intent.putExtra(RssService.CATEGORY, category);
+            intent.putExtra(RssService.PENDING_RESULT, pendingResult);
+            startService(intent);
         } else {
             Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
                     .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
@@ -187,6 +172,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == GET_LATEST_RSS_FEED && resultCode == RssService.FETCH_SUCCESS) {
+            ArrayList<RssItem> rssItems = data.getParcelableArrayListExtra(RssService.PARCELABLE_EXTRAS);
+            RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter(rssItems);
+            adapter.setOnItemClickListener(new RecyclerRssItemAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, @NonNull RssItem rssItem) {
+                    Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
+                    Bundle extras = new Bundle();
+
+                    extras.putString(Constants.EXTRA_RSS_LINK, rssItem.getLink());
+                    extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
+                    // extras.putString(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
+
+                    ImageView rssImage = (ImageView) view.findViewById(R.id.rss_image);
+                    rssImage.buildDrawingCache();
+                    extras.putParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP, rssImage.getDrawingCache());
+                    intent.putExtras(extras);
+                    startActivity(intent);
+                }
+            });
+            mainActivityRecyclerView.setAdapter(adapter);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         selectedMenuItem = menuItem;
         setTitle(menuItem.getTitle());
@@ -196,6 +208,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    /**
+     * Initialize the drawer and apply a custom color for every item.
+     */
     private void setupDrawerLayout() {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
@@ -216,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             MenuItem item = menu.getItem(i);
             int colorId = colorCats.get(item.getItemId());
             if (colorId > 0 && icon != null) {
+                // Item must be "cloned" in order to apply a new color, otherwise we're just updating the same object reference
                 Drawable.ConstantState constantState = icon.getConstantState();
                 if (constantState != null) {
                     Drawable clone = constantState.newDrawable();
@@ -240,26 +256,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Nullable
-    private InputStream getInputStream(String category) {
-        try {
-            URL url = new URL(Constants.BASE_URL + category);
-            URLConnection urlConnection = url.openConnection();
-            urlConnection.setUseCaches(true);
-
-            //long currentTime = System.currentTimeMillis();
-            //long expires = urlConnection.getHeaderFieldDate("Expires", currentTime);
-            //long lastModified = urlConnection.getHeaderFieldDate("Last-Modified", currentTime);
-
-            String cacheControl = urlConnection.getHeaderField("Cache-Control");
-            Log.d(TAG, "Cache-Control flag: " + cacheControl);
-            Log.d(TAG, "Last-Modified flag: " + urlConnection.getLastModified());
-            return urlConnection.getInputStream();
-        } catch (IOException e) {
-            Log.w(Constants.TAG, "Exception while retrieving the input stream", e);
-            return null;
-        }
     }
 }

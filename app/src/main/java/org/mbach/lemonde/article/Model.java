@@ -44,7 +44,6 @@ class Model {
 
     int getId() {
         return id;
-
     }
 
     Object getTheContent() {

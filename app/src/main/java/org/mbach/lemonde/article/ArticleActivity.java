@@ -21,6 +21,7 @@ import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -100,17 +101,12 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         //supportPostponeEnterTransition();
 
         Bundle extras = getIntent().getExtras();
-
-        if (extras == null) {
-            return;
-        }
         CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
 
-        final ImageView imageView = (ImageView) findViewById(R.id.imageArticle);
-        Picasso.with(getBaseContext()).load(extras.getString(Constants.EXTRA_RSS_IMAGE)).into(imageView);
-
-
+        Picasso.with(getBaseContext())
+               .load(extras.getString(Constants.EXTRA_RSS_IMAGE))
+               .into((ImageView) findViewById(R.id.imageArticle));
 
         // Start async job
         if (REQUEST_QUEUE == null) {
@@ -118,7 +114,6 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         }
         REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, extras.getString(Constants.EXTRA_RSS_LINK), articleReceived, errorResponse));
     }
-
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -156,14 +151,14 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     /**
      *
      */
-    private Response.Listener<String> articleReceived = new Response.Listener<String>() {
+    private final Response.Listener<String> articleReceived = new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
             Log.d(TAG, "onResponse");
             Document doc = Jsoup.parse(response);
 
             // Article is from a hosted blog
-            List<Model> items = new ArrayList<>();
+            List<Model> items;
             if (doc.getElementById("content") != null) {
                 items = extractBlogArticle(doc);
             } else {
@@ -201,13 +196,15 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 }
             }
             articleAdapter.insertItems(items);
+            ProgressBar progressBar = (ProgressBar) findViewById(R.id.articleLoader);
+            progressBar.setVisibility(View.GONE);
         }
     };
 
     /**
      *
      */
-    private Response.Listener<String> commentsReceived = new Response.Listener<String>() {
+    private final Response.Listener<String> commentsReceived = new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
             Document commentDoc = Jsoup.parse(response);
@@ -275,7 +272,7 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     /**
      *
      */
-    private Response.ErrorListener errorResponse = new Response.ErrorListener() {
+    private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.e(TAG, "onErrorResponse", error);
@@ -283,9 +280,11 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     };
 
     /**
+     * Check if elements has at least one child.
+     * This helper is useful because Elements.select() returns a collection of nodes.
      *
-     * @param elements
-     * @return
+     * @param elements nodes to check
+     * @return true if elements can be safely called with first()
      */
     private boolean atLeastOneChild(Elements elements) {
         return elements != null && !elements.isEmpty();

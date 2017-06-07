@@ -29,8 +29,6 @@ import java.util.List;
  */
 class ArticleAdapter extends RecyclerView.Adapter {
 
-    private static final String TAG = "ArticleAdapter";
-
     private List<Model> items;
 
     void insertItems(List<Model> items) {

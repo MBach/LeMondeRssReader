@@ -8,8 +8,6 @@ package org.mbach.lemonde;
  */
 public final class Constants {
 
-    public static final String TAG = "LeMondeRSSReader";
-
     private static final String RSS_FULL = "/rss_full.xml";
 
     public static final String BASE_URL = "http://www.lemonde.fr/";
@@ -33,13 +31,11 @@ public final class Constants {
     public static final String EXTRA_RSS_LINK = "RSS_LINK";
     public static final String EXTRA_NEWS_CATEGORY = "NEWS_CATEGORY";
     public static final String EXTRA_RSS_IMAGE = "org.mbach.lemonde.extraImage";
-    public static final String EXTRA_RSS_DESCRIPTION = "org.mbach.lemonde.extraTitle";
     public static final String EXTRA_RSS_IMAGE_BITMAP = "rssImage";
 
     public static final int PADDING_BOTTOM = 16;
     public static final int PADDING_TOP_SUBTITLE = 30;
     public static final int PADDING_BOTTOM_SUBTITLE = 20;
     public static final int PADDING_LEFT_RIGHT_TAG = 20;
-
     public static final int PADDING_COMMENT_ANSWER = 30;
 }

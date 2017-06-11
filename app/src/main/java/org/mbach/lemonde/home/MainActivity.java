@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -184,13 +185,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     extras.putString(Constants.EXTRA_RSS_LINK, rssItem.getLink());
                     extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
-                    // extras.putString(Constants.EXTRA_RSS_DESCRIPTION, rssItem.getDescription());
 
-                    ImageView rssImage = (ImageView) view.findViewById(R.id.rss_image);
+                    ImageView rssImage = view.findViewById(R.id.rss_image);
                     rssImage.buildDrawingCache();
                     extras.putParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP, rssImage.getDrawingCache());
                     intent.putExtras(extras);
-                    startActivity(intent);
+                    //startActivity(intent);
+
+                    String transitionName = getString(R.string.transition_open_article);
+                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this,
+                            rssImage,
+                            transitionName);
+                    startActivity(intent, options.toBundle());
                 }
             });
             mainActivityRecyclerView.setAdapter(adapter);

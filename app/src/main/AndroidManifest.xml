@@ -37,8 +37,6 @@
             android:name=".article.ArticleActivity"
             android:parentActivityName=".home.MainActivity" />
 
-        <!-- Service associated to ArticleActivity to fetch and display an article -->
-
         <!-- Settings page -->
         <activity
             android:name=".settings.SettingsActivity"

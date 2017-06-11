@@ -47,7 +47,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mbanje.kurt.fabbutton.FabButton;
-import mbanje.kurt.fabbutton.FabUtil;
 
 /**
  * ArticleActivity class.

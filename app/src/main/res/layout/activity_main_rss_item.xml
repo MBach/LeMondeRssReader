@@ -12,7 +12,8 @@
         android:layout_height="100dp"
         android:background="@color/primary_dark"
         android:contentDescription="@string/image_from_article"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:transitionName="@string/transition_open_article" />
 
     <TextView
         android:id="@+id/rss_title"

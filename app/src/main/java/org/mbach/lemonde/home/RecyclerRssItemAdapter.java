@@ -80,8 +80,8 @@ public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItem
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            image = (ImageView) itemView.findViewById(R.id.rss_image);
-            title = (TextView) itemView.findViewById(R.id.rss_title);
+            image = itemView.findViewById(R.id.rss_image);
+            title = itemView.findViewById(R.id.rss_title);
         }
     }
 }

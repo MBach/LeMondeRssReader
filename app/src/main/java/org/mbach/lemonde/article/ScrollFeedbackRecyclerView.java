@@ -7,12 +7,9 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewParent;
 
 import org.mbach.lemonde.R;
-
-import java.lang.ref.WeakReference;
 
 import mbanje.kurt.fabbutton.FabButton;
 
@@ -40,8 +37,8 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
     private void init() {
         ViewParent viewParent = getParent();
         if (viewParent instanceof CoordinatorLayout) {
-            fab = (FabButton) ((CoordinatorLayout) viewParent).findViewById(R.id.fab);
-            appBarLayout = (AppBarLayout) ((CoordinatorLayout) viewParent).findViewById(R.id.app_bar_layout);
+            fab = ((CoordinatorLayout) viewParent).findViewById(R.id.fab);
+            appBarLayout = ((CoordinatorLayout) viewParent).findViewById(R.id.app_bar_layout);
             appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
                 @Override
                 public void onOffsetChanged(AppBarLayout appBarLayout, int offset) {

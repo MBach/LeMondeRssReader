@@ -2,18 +2,19 @@ package org.mbach.lemonde.article;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ViewParent;
 
 import org.mbach.lemonde.R;
 
-import com.github.jorgecastilloprz.FABProgressCircle;
-
 import java.lang.ref.WeakReference;
+
+import mbanje.kurt.fabbutton.FabButton;
 
 /**
  * ScrollFeedbackRecyclerView class.
@@ -24,58 +25,43 @@ import java.lang.ref.WeakReference;
 public class ScrollFeedbackRecyclerView extends RecyclerView {
     private static final String TAG = "ScrollFeedbackRV";
 
-    private FloatingActionButton fab;
-    private FABProgressCircle fabProgressCircle;
-    private WeakReference<Callbacks> callbacks;
+    private FabButton fab;
+    private boolean collapsed;
+    private AppBarLayout appBarLayout;
 
     public ScrollFeedbackRecyclerView(@NonNull Context context) {
         super(context);
-        if (!isInEditMode()) {
-            attachCallbacks(context);
-        }
-    }
-
-    private void initFab() {
-        ViewParent viewParent = getParent();
-        if (viewParent instanceof CoordinatorLayout) {
-            fab = (FloatingActionButton) ((CoordinatorLayout) viewParent).findViewById(R.id.fab);
-            fabProgressCircle = (FABProgressCircle) ((CoordinatorLayout) viewParent).findViewById(R.id.fabProgressCircle);
-        }
     }
 
     public ScrollFeedbackRecyclerView(@NonNull Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (!isInEditMode()) {
-            attachCallbacks(context);
+    }
+
+    private void init() {
+        ViewParent viewParent = getParent();
+        if (viewParent instanceof CoordinatorLayout) {
+            fab = (FabButton) ((CoordinatorLayout) viewParent).findViewById(R.id.fab);
+            appBarLayout = (AppBarLayout) ((CoordinatorLayout) viewParent).findViewById(R.id.app_bar_layout);
+            appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+                @Override
+                public void onOffsetChanged(AppBarLayout appBarLayout, int offset) {
+                    collapsed = Math.abs(offset) == appBarLayout.getTotalScrollRange();
+                }
+            });
         }
     }
 
     @Override
     public void onScrolled(int dx, int dy) {
         LinearLayoutManager layout = (LinearLayoutManager) getLayoutManager();
-        if (layout.findFirstCompletelyVisibleItemPosition() == 0) {
-            if (callbacks != null && callbacks.get().isAppBarCollapsed()) {
-                callbacks.get().expand();
-            }
+        if (collapsed && layout.findFirstCompletelyVisibleItemPosition() == 0) {
+            this.appBarLayout.setExpanded(true);
         }
         if (fab != null) {
             if (layout.findLastCompletelyVisibleItemPosition() == getLayoutManager().getItemCount() - 1) {
-                fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
-                    @Override
-                    public void onShown(FloatingActionButton fab) {
-                        super.onShown(fab);
-                        fabProgressCircle.setVisibility(VISIBLE);
-                    }
-                });
-
+                fab.setVisibility(VISIBLE);
             } else {
-                fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
-                    @Override
-                    public void onHidden(FloatingActionButton fab) {
-                        super.onShown(fab);
-                        fabProgressCircle.setVisibility(INVISIBLE);
-                    }
-                });
+                fab.setVisibility(INVISIBLE);
             }
         }
         super.onScrolled(dx, dy);
@@ -86,21 +72,7 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
         if (!(layout instanceof LinearLayoutManager)) {
             throw new IllegalArgumentException(layout.toString() + " must be of type LinearLayoutManager");
         }
-        initFab();
+        init();
         super.setLayoutManager(layout);
-    }
-
-    private void attachCallbacks(@NonNull Context context) {
-        try {
-            callbacks = new WeakReference<>((Callbacks) context);
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement ScrollFeedbackRecyclerView.Callbacks");
-        }
-    }
-
-    interface Callbacks {
-        boolean isAppBarCollapsed();
-
-        void expand();
     }
 }

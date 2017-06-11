@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">LeMonde</string>
 
+    <!-- Right menu settings -->
     <string name="action_account">Mon compte</string>
     <string name="action_settings">Paramètres</string>
 
+    <!-- Drawer -->
     <string name="category_fav">Favoris</string>
     <string name="category_news">À la Une</string>
     <string name="category_international">International</string>
@@ -19,14 +21,19 @@
     <string name="category_campus">Campus</string>
     <string name="category_decoders">Les décodeurs</string>
 
-    <string name="image_from_article">Image de l\'article</string>
-
+    <!-- Drawer header -->
     <string name="drawer_header_img_content_desc">Image par défaut</string>
     <string name="drawer_header_username">Non connecté</string>
     <string name="drawer_header_email">Accéder à mon compte</string>
 
+    <!-- Article -->
+    <string name="no_more_comments_to_load">Pas de nouveau commentaire</string>
+
+    <!-- Bubble tag of article -->
     <string name="paid_article">Article Abonnés</string>
     <string name="video_article">Vidéo</string>
+    <string name="blog_article">Article de blog</string>
+    <string name="image_from_article">Image de l\'article</string>
 
     <!-- Strings related to errors -->
     <string name="error_no_connection">Aucune connexion Internet</string>

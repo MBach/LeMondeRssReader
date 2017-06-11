@@ -1,14 +1,16 @@
 package org.mbach.lemonde.article;
 
+import android.animation.Animator;
+import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -20,6 +22,8 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,7 +34,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.github.jorgecastilloprz.FABProgressCircle;
 import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
@@ -43,13 +46,16 @@ import org.mbach.lemonde.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import mbanje.kurt.fabbutton.FabButton;
+import mbanje.kurt.fabbutton.FabUtil;
+
 /**
  * ArticleActivity class.
  *
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-public class ArticleActivity extends AppCompatActivity implements ScrollFeedbackRecyclerView.Callbacks {
+public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedbackRecyclerView.Callbacks*/ {
 
     private static final String TAG = "ArticleActivity";
     private static final String ATTR_HEADLINE = "Headline";
@@ -61,37 +67,36 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     private static final String TAG_FORGOTTEN = "oubli";
     private static RequestQueue REQUEST_QUEUE = null;
 
-    private AppBarLayout appBarLayout;
-    private Toolbar toolbar;
-    private FABProgressCircle fabProgressCircle;
+    private FabButton fab;
     private String commentsURI;
     private final ArticleAdapter articleAdapter = new ArticleAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initActivityTransitions();
+        //initActivityTransitions();
         setContentView(R.layout.activity_article);
-        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        ScrollFeedbackRecyclerView articleActivityRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
-        articleActivityRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        articleActivityRecyclerView.setAdapter(articleAdapter);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ScrollFeedbackRecyclerView scrollFeedbackRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
+        scrollFeedbackRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        scrollFeedbackRecyclerView.setAdapter(articleAdapter);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fabProgressCircle = (FABProgressCircle) findViewById(R.id.fabProgressCircle);
+        fab = (FabButton) findViewById(R.id.fab);
+        //initFabTransitions();
+
         fab.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
+            @Override
+            public void onClick(View view) {
                 if (Constants.BASE_URL2.equals(commentsURI)) {
-                    Snackbar.make(findViewById(R.id.coordinatorArticle), "Pas de nouveau commentaire", Snackbar.LENGTH_LONG).show();
+                    fab.showProgress(false);
+                    Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
                 } else {
-                    fabProgressCircle.show();
+                    fab.showProgress(true);
                     REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
                 }
             }
@@ -105,13 +110,14 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
 
         Picasso.with(getBaseContext())
-               .load(extras.getString(Constants.EXTRA_RSS_IMAGE))
-               .into((ImageView) findViewById(R.id.imageArticle));
+                .load(extras.getString(Constants.EXTRA_RSS_IMAGE))
+                .into((ImageView) findViewById(R.id.imageArticle));
 
         // Start async job
         if (REQUEST_QUEUE == null) {
             REQUEST_QUEUE = Volley.newRequestQueue(this);
         }
+        // Log.d(TAG, "about to request page: " + extras.getString(Constants.EXTRA_RSS_LINK));
         REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, extras.getString(Constants.EXTRA_RSS_LINK), articleReceived, errorResponse));
     }
 
@@ -136,20 +142,31 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         getWindow().setReturnTransition(transition);
     }
 
-    @Override
-    public boolean isAppBarCollapsed() {
-        final int appBarVisibleHeight = (int) (appBarLayout.getY() + appBarLayout.getHeight());
-        final int toolbarHeight = toolbar.getHeight();
-        return (appBarVisibleHeight == toolbarHeight);
-    }
+    private void initFabTransitions() {
+        Animator scaleDown = ObjectAnimator.ofPropertyValuesHolder(fab,
+                PropertyValuesHolder.ofFloat("scaleX", 1, 0),
+                PropertyValuesHolder.ofFloat("scaleY", 1, 0));
+        scaleDown.setDuration(10);
+        scaleDown.setInterpolator(new AccelerateInterpolator());
 
-    @Override
-    public void expand() {
-        appBarLayout.setExpanded(true, true);
+        Animator scaleUp = ObjectAnimator.ofPropertyValuesHolder(fab,
+                PropertyValuesHolder.ofFloat("scaleX", 0, 1),
+                PropertyValuesHolder.ofFloat("scaleY", 0, 1));
+        scaleUp.setDuration(10);
+        scaleUp.setInterpolator(new AccelerateInterpolator());
+
+        LayoutTransition itemLayoutTransition = new LayoutTransition();
+        itemLayoutTransition.setAnimator(LayoutTransition.APPEARING, scaleUp);
+        itemLayoutTransition.setAnimator(LayoutTransition.DISAPPEARING, scaleDown);
+
+        ViewGroup av = (ViewGroup) findViewById(R.id.coordinatorArticle);
+        av.setLayoutTransition(itemLayoutTransition);
     }
 
     /**
-     *
+     * This listener is a callback which can parse and extract the HTML page that has been received after
+     * an asynchronous call to the web. Jsoup library is used to parse the response and not to make the call.
+     * Otherwise, a NetworkOnMainThreadException will be fired by the system.
      */
     private final Response.Listener<String> articleReceived = new Response.Listener<String>() {
         @Override
@@ -159,8 +176,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
 
             // Article is from a hosted blog
             List<Model> items;
-            if (doc.getElementById("content") != null) {
-                items = extractBlogArticle(doc);
+            Element content = doc.getElementById("main");
+            if (content != null) {
+                items = extractBlogArticle(content);
+                setTagInHeader(R.string.blog_article, R.color.accent_complementary, Color.WHITE);
             } else {
                 Elements category = doc.select("div.tt_rubrique_ombrelle");
                 if (atLeastOneChild(category)) {
@@ -171,30 +190,25 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 if (articles.isEmpty()) {
                     // Video
                     items = extractVideo(doc);
-                    TextView paidArticle = (TextView) findViewById(R.id.paidArticle);
-                    paidArticle.setText(getString(R.string.video_article));
-                    paidArticle.setBackgroundColor(getColor(R.color.accent_complementary));
-                    paidArticle.setTextColor(Color.WHITE);
-                    paidArticle.setVisibility(View.VISIBLE);
+                    setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);
                 } else {
                     // Standard article
                     items = extractStandardArticle(articles);
-                    Element react = doc.getElementById("liste_reactions");
                     if (doc.getElementById("teaser_article") != null) {
-                        TextView paidArticle = (TextView) findViewById(R.id.paidArticle);
-                        paidArticle.setText(getString(R.string.paid_article));
-                        paidArticle.setBackgroundColor(getColor(R.color.accent));
-                        paidArticle.setTextColor(Color.BLACK);
-                        paidArticle.setVisibility(View.VISIBLE);
+                        setTagInHeader(R.string.paid_article, R.color.accent, Color.BLACK);
                     }
                     // After parsing the article, start a new request for comments
-                    Elements dataAjURI = react.select("[^data-aj-uri]");
-                    if (atLeastOneChild(dataAjURI)) {
-                        String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
-                        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
+                    Element react = doc.getElementById("liste_reactions");
+                    if (react != null) {
+                        Elements dataAjURI = react.select("[^data-aj-uri]");
+                        if (atLeastOneChild(dataAjURI)) {
+                            String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
+                            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
+                        }
                     }
                 }
             }
+            Log.d(TAG, "items: " + items.size());
             articleAdapter.insertItems(items);
             ProgressBar progressBar = (ProgressBar) findViewById(R.id.articleLoader);
             progressBar.setVisibility(View.GONE);
@@ -202,7 +216,23 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
     };
 
     /**
+     * This helper method is used to customize the header (in the AppBar) to display a tag or a bubble when the current
+     * article comes from an hosted blog, or is restricted to paid members.
      *
+     * @param stringId string to display in the AppBar
+     * @param backgroundColor color of the background
+     * @param textColor color of the text to display
+     */
+    private void setTagInHeader(int stringId, int backgroundColor, int textColor) {
+        TextView tagArticle = (TextView) findViewById(R.id.tagArticle);
+        tagArticle.setText(getString(stringId));
+        tagArticle.setBackgroundColor(getColor(backgroundColor));
+        tagArticle.setTextColor(textColor);
+        tagArticle.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * See @articleReceived field.
      */
     private final Response.Listener<String> commentsReceived = new Response.Listener<String>() {
         @Override
@@ -222,12 +252,10 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
             }
 
             // Extract comments
-            Log.d(TAG, "Extract comments ICI");
             Elements comments = commentDoc.select("[itemprop='commentText']");
             for (Element comment : comments) {
                 Elements refs = comment.select("p.references");
                 if (atLeastOneChild(refs)) {
-                    Log.d(TAG, "Extract comments LA");
                     // Clear date
                     refs.select("span").remove();
                     TextView author = new TextView(getBaseContext());
@@ -261,16 +289,15 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 Elements next = fullComments.select("a");
                 if (atLeastOneChild(next)) {
                     commentsURI = Constants.BASE_URL2 + next.first().attr("href");
-                    Log.d(TAG, "Next URI for comments: " + commentsURI);
                 }
             }
             articleAdapter.insertItems(items);
-            fabProgressCircle.hide();
+            fab.showProgress(false);
         }
     };
 
     /**
-     *
+     * See @articleReceived field.
      */
     private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
         @Override
@@ -290,6 +317,15 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         return elements != null && !elements.isEmpty();
     }
 
+    /**
+     * Extract and parse a standard article. A standard article is published on the main page and by definition,
+     * is not: from a hosted blog, nor a video, nor a special multimedia content. It has some standardized fields like
+     * one (or multiple) author(s), a date, a description, an headline, a description and a list of paragraphs.
+     * Each paragraph is a block of text (comments included) or an image or an embedded tweet.
+     *
+     * @param articles article to analyze
+     * @return a list of formatted content that can be nicely displayed in the recycler view.
+     */
     @NonNull
     private List<Model> extractStandardArticle(@NonNull Elements articles) {
         Element article = articles.first();
@@ -322,6 +358,12 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         return views;
     }
 
+    /**
+     * This method is not functionnal at this moment.
+     *
+     * @param doc the document to analyze
+     * @return a list of formatted content that can be nicely displayed in the recycler view.
+     */
     @NonNull
     private List<Model> extractVideo(@NonNull Document doc) {
         Elements elements = doc.select("section.video");
@@ -366,8 +408,15 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         return views;
     }
 
+    /**
+     * See {@link ArticleActivity extractStandardArticle}.
+     *
+     * @param content the document to analyze
+     * @return a list of formatted content that can be nicely displayed in the recycler view.
+     */
     @NonNull
-    private List<Model> extractBlogArticle(@NonNull Document doc) {
+    private List<Model> extractBlogArticle(@NonNull Element content) {
+        Log.d(TAG, "extractBlog");
         TextView headLine = new TextView(getBaseContext());
         TextView dates = new TextView(getBaseContext());
 
@@ -377,22 +426,30 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
         headLine.setTextSize(getResources().getDimension(R.dimen.article_headline));
         dates.setTextSize(getResources().getDimension(R.dimen.article_authors));
 
-        Elements elements = doc.select("h1.entry-title");
-        if (!elements.isEmpty()) {
+
+        Elements elements = content.select(".entry-title");
+        Log.d(TAG, content.html());
+        if (atLeastOneChild(elements)) {
+            Log.d(TAG, "extractBlog headLine ! " + elements.first().text());
             headLine.setText(elements.first().text());
         }
 
-        elements = doc.select(".entry-date");
-        if (!elements.isEmpty()) {
+        elements = content.select(".entry-date");
+        if (atLeastOneChild(elements)) {
+            Log.d(TAG, "extractBlog dates ! " + elements.first().text());
             dates.setText(elements.first().text());
         }
         List<Model> views = new ArrayList<>();
         views.add(new Model(headLine));
         views.add(new Model(dates));
+        Log.d(TAG, "extractBlog headLine: " + headLine.getText());
+        Log.d(TAG, "extractBlog dates: " + dates.getText());
 
-        elements = doc.select(".entry-content");
-        if (elements != null) {
+        elements = content.select(".entry-content");
+        if (atLeastOneChild(elements)) {
             Element element = elements.first();
+            Log.d(TAG, "extractBlog content: " + element.children().size());
+
             for (int i = 0; i < element.children().size(); i++) {
                 Element child = element.children().get(i);
                 TextView textView = new TextView(getBaseContext());
@@ -403,7 +460,7 @@ public class ArticleActivity extends AppCompatActivity implements ScrollFeedback
                 views.add(new Model(textView));
             }
         }
-
+        Log.d(TAG, "extractBlog: " + views.size());
         return views;
     }
 

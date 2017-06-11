@@ -1,4 +1,5 @@
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinatorArticle"
@@ -39,7 +40,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/paidArticle"
+                    android:id="@+id/tagArticle"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
                     android:layout_marginEnd="16dp"
@@ -88,27 +89,19 @@
         android:layout_marginTop="100dp"
         tools:layout_editor_absoluteY="287dp" />
 
-    <com.github.jorgecastilloprz.FABProgressCircle
-        android:id="@+id/fabProgressCircle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@+id/articleActivityRecyclerView"
-        app:layout_anchorGravity="bottom|center"
-        app:arcColor="@color/accent_complementary"
-        app:arcWidth="4dp"
-        android:clipChildren="false"
-        android:visibility="invisible">
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_comment_black_24px"
-            android:layout_margin="@dimen/fab_margin"
-            app:rippleColor="@color/accent_bright"
-            app:elevation="6dp"
-            app:borderWidth="0dp" />
-
-    </com.github.jorgecastilloprz.FABProgressCircle>
+    <view
+        android:id="@+id/fab"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        class="mbanje.kurt.fabbutton.FabButton"
+        android:layout_gravity="bottom|center"
+        android:color="@color/accent"
+        android:src="@drawable/ic_comment_black_24dp"
+        android:visibility="invisible"
+        android:indeterminate="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        app:fbb_autoStart="false"
+        app:fbb_progressColor="@color/accent_complementary"
+        app:fbb_progressWidthRatio="0.1" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -3,6 +3,7 @@ package org.mbach.lemonde.article;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +16,6 @@ import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.squareup.picasso.Picasso;
-
-import org.mbach.lemonde.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
     private List<Model> items;
 
     void insertItems(List<Model> items) {
+        Log.d("ArticleAdapter", "items: " + items.size());
         if (this.items == null) {
             this.items = items;
         } else {
@@ -91,7 +91,6 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.IMAGE_TYPE:
                 ImageView imageView = new ImageView(parent.getContext());
-                imageView.setImageResource(R.drawable.avatar);
                 return new ViewHolderImage(imageView);
             case Model.TWEET_TYPE:
                 LinearLayout layout = new LinearLayout(parent.getContext());

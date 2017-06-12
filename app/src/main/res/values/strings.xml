@@ -29,6 +29,7 @@
     <!-- Article -->
     <string name="no_more_comments_to_load">Pas de nouveau commentaire</string>
     <string name="transition_open_article">transition_open_article</string>
+    <string name="open_tweet_external">Voir dans Twitter</string>
 
     <!-- Bubble tag of article -->
     <string name="paid_article">Article Abonnés</string>

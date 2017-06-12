@@ -5,17 +5,19 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.squareup.picasso.Picasso;
+
+import org.mbach.lemonde.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,19 +95,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 ImageView imageView = new ImageView(parent.getContext());
                 return new ViewHolderImage(imageView);
             case Model.TWEET_TYPE:
-                LinearLayout layout = new LinearLayout(parent.getContext());
-                layout.setOrientation(LinearLayout.VERTICAL);
-                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                );
-
-                layout.addView(new TextView(parent.getContext()));
-                layout.addView(new Button(parent.getContext()));
-                CardView cardView = new CardView(parent.getContext());
-                cardView.setLayoutParams(params);
-                cardView.addView(layout);
-                return new ViewHolderCardView(cardView);
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent,false);
+                return new ViewHolderTweet(view);
             case Model.GRAPH_TYPE:
                 BarChart barChart = new BarChart(parent.getContext());
                 return new ViewHolderBarChart(barChart);
@@ -148,8 +139,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 CardView cardView = (CardView) model.getTheContent();
                 TextView tweet = (TextView) cardView.getChildAt(0);
                 TextView link = (TextView) cardView.getChildAt(1);
-                ((ViewHolderCardView) holder).getTweet().setText(tweet.getText());
-                ((ViewHolderCardView) holder).getLink().setText(link.getText());
+                ((ViewHolderTweet) holder).getTweet().setText(tweet.getText());
+                //((ViewHolderTweet) holder).getLink().setText(link.getText());
                 break;
             case Model.GRAPH_TYPE:
                 BarChart barChart = (BarChart) model.getTheContent();
@@ -188,22 +179,21 @@ class ArticleAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    public static class ViewHolderCardView extends RecyclerView.ViewHolder {
+    public static class ViewHolderTweet extends RecyclerView.ViewHolder {
         @NonNull
-        private final CardView cardView;
+        private final View view;
 
-        ViewHolderCardView(@NonNull CardView view) {
+        ViewHolderTweet(@NonNull View view) {
             super(view);
-            cardView = view;
+            this.view = view;
         }
 
         TextView getTweet() {
-            LinearLayout layout = (LinearLayout) cardView.getChildAt(0);
-            return (TextView) layout.getChildAt(0);
+            return view.findViewById(R.id.tweet_text);
         }
+
         Button getLink() {
-            LinearLayout layout = (LinearLayout) cardView.getChildAt(0);
-            return (Button) layout.getChildAt(1);
+            return view.findViewById(R.id.tweet_button);
         }
     }
     /**

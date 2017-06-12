@@ -4,9 +4,11 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -160,6 +162,12 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
 
         ViewGroup av = (ViewGroup) findViewById(R.id.coordinatorArticle);
         av.setLayoutTransition(itemLayoutTransition);
+    }
+
+    public void goToTwitter (View view) {
+        Uri uriUrl = Uri.parse("https://www.twitter.com");
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+        startActivity(launchBrowser);
     }
 
     /**

@@ -24,7 +24,7 @@ A smartphone at least on Android 6.0
 You can get the app directly on GitHub, here is the [v1.2](https://github.com/MBach/LeMondeRssReader/releases/download/v1.2/LeMondeRssReader-1.2.apk)
 
 ## Video
-[Main page](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)
+[Overview of the App](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)
 
 ## Screenshots
 ![Main page](https://mbach.github.io/LeMondeRssReader/screenshots/main.jpg)

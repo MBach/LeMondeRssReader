@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -77,8 +78,8 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         super.onCreate(savedInstanceState);
         //initActivityTransitions();
         setContentView(R.layout.activity_article);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        ScrollFeedbackRecyclerView scrollFeedbackRecyclerView = (ScrollFeedbackRecyclerView) findViewById(R.id.articleActivityRecyclerView);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        ScrollFeedbackRecyclerView scrollFeedbackRecyclerView = findViewById(R.id.articleActivityRecyclerView);
         scrollFeedbackRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         scrollFeedbackRecyclerView.setAdapter(articleAdapter);
 
@@ -87,7 +88,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        fab = (FabButton) findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
         //initFabTransitions();
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -107,7 +108,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         //supportPostponeEnterTransition();
 
         Bundle extras = getIntent().getExtras();
-        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
         collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
 
         Picasso.with(getBaseContext())
@@ -120,6 +121,17 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         }
         // Log.d(TAG, "about to request page: " + extras.getString(Constants.EXTRA_RSS_LINK));
         REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, extras.getString(Constants.EXTRA_RSS_LINK), articleReceived, errorResponse));
+
+    }
+
+    @Override
+    public void onResume() {
+        // Do not display the loader once again after resuming this activity
+        if (articleAdapter.getItemCount() > 0) {
+            ProgressBar articleLoader = findViewById(R.id.articleLoader);
+            articleLoader.setVisibility(View.GONE);
+        }
+        super.onResume();
     }
 
     @Override
@@ -160,14 +172,20 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         itemLayoutTransition.setAnimator(LayoutTransition.APPEARING, scaleUp);
         itemLayoutTransition.setAnimator(LayoutTransition.DISAPPEARING, scaleDown);
 
-        ViewGroup av = (ViewGroup) findViewById(R.id.coordinatorArticle);
+        ViewGroup av = findViewById(R.id.coordinatorArticle);
         av.setLayoutTransition(itemLayoutTransition);
     }
 
-    public void goToTwitter (View view) {
-        Uri uriUrl = Uri.parse("https://www.twitter.com");
-        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
-        startActivity(launchBrowser);
+    public void openTweet(View view) {
+        Button button = view.findViewById(R.id.tweet_button);
+        String link = button.getContentDescription().toString();
+        Uri uri;
+        if (link.isEmpty()) {
+            uri = Uri.parse("https://www.twitter.com");
+        } else {
+            uri = Uri.parse(link);
+        }
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
     }
 
     /**
@@ -178,7 +196,6 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
     private final Response.Listener<String> articleReceived = new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
-            Log.d(TAG, "onResponse");
             Document doc = Jsoup.parse(response);
 
             // Article is from a hosted blog
@@ -215,9 +232,8 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
                     }
                 }
             }
-            Log.d(TAG, "items: " + items.size());
             articleAdapter.insertItems(items);
-            ProgressBar progressBar = (ProgressBar) findViewById(R.id.articleLoader);
+            ProgressBar progressBar = findViewById(R.id.articleLoader);
             progressBar.setVisibility(View.GONE);
         }
     };
@@ -231,7 +247,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
      * @param textColor color of the text to display
      */
     private void setTagInHeader(int stringId, int backgroundColor, int textColor) {
-        TextView tagArticle = (TextView) findViewById(R.id.tagArticle);
+        TextView tagArticle = findViewById(R.id.tagArticle);
         tagArticle.setText(getString(stringId));
         tagArticle.setBackgroundColor(getColor(backgroundColor));
         tagArticle.setTextColor(textColor);
@@ -499,6 +515,9 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
 
     @NonNull
     private List<Model> extractParagraphs(@NonNull Element article) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
+
         List<Model> p = new ArrayList<>();
         Elements articleBody = article.select("[itemprop='articleBody']");
         if (articleBody.isEmpty()) {
@@ -517,9 +536,6 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
             // Text or figure ?
             if (figures.isEmpty()) {
 
-                // Cleanup hyperlink and keep only the value
-                element.select("a[href]").unwrap();
-
                 if (element.is("div.snippet.multimedia-embed")) {
                     boolean hasGraph = !element.select("div.graphe").isEmpty();
                     boolean hasScript = !element.select("script").isEmpty();
@@ -531,15 +547,15 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
                 }
 
                 if (element.is("blockquote.twitter-tweet")) {
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                    boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
-
                     //element.remove();
                     if (displayTweets) {
                         TextView content = new TextView(getBaseContext());
                         content.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
-                        TextView link = new TextView(getBaseContext());
-                        link.setText(element.select("a").attr("href"));
+                        Button link = new Button(getBaseContext());
+                        Elements links = element.select("a[href]");
+                        if (atLeastOneChild(links)) {
+                            link.setContentDescription("https:" + links.first().attr("href"));
+                        }
                         CardView cardView = new CardView(getBaseContext());
                         cardView.addView(content);
                         cardView.addView(link);
@@ -547,6 +563,9 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
                     }
                     continue;
                 }
+
+                // Cleanup hyperlink and keep only the value
+                element.select("a[href]").unwrap();
 
                 // Cleanup style markup and script which should be placed on top
                 if (element.is("style")) {

@@ -33,7 +33,6 @@ class ArticleAdapter extends RecyclerView.Adapter {
     private List<Model> items;
 
     void insertItems(List<Model> items) {
-        Log.d("ArticleAdapter", "items: " + items.size());
         if (this.items == null) {
             this.items = items;
         } else {
@@ -138,9 +137,9 @@ class ArticleAdapter extends RecyclerView.Adapter {
             case Model.TWEET_TYPE:
                 CardView cardView = (CardView) model.getTheContent();
                 TextView tweet = (TextView) cardView.getChildAt(0);
-                TextView link = (TextView) cardView.getChildAt(1);
+                Button link = (Button) cardView.getChildAt(1);
                 ((ViewHolderTweet) holder).getTweet().setText(tweet.getText());
-                //((ViewHolderTweet) holder).getLink().setText(link.getText());
+                ((ViewHolderTweet) holder).getLink().setContentDescription(link.getContentDescription());
                 break;
             case Model.GRAPH_TYPE:
                 BarChart barChart = (BarChart) model.getTheContent();

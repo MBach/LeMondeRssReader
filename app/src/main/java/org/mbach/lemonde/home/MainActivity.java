@@ -92,10 +92,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mainActivityRecyclerView = (RecyclerView) findViewById(R.id.mainActivityRecyclerView);
+        mainActivityRecyclerView = findViewById(R.id.mainActivityRecyclerView);
         mainActivityRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -114,12 +114,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-    }
-
-    @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
         mainActivityRecyclerView.scheduleLayoutAnimation();
@@ -129,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * Initialize the toolbar with a custom icon.
      */
     private void initToolbar() {
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -218,8 +212,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * Initialize the drawer and apply a custom color for every item.
      */
     private void setupDrawerLayout() {
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.navigation_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(1).setChecked(true);

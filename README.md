@@ -11,7 +11,7 @@ This App was also built to be as fastest and simple as possible. Material design
 
 ### Comments
 
-Comments are loaded in the same view (ArticleActivity) and new comments are fetched using a custom [FloatingActionButton](https://developer.android.com/reference/android/support/design/widget/FloatingActionButton.html): the [FABProgressCircle](https://github.com/JorgeCastilloPrz/FABProgressCircle) which holds a circular progress bar when button is triggered
+Comments are loaded in the same view (ArticleActivity) and new comments are fetched using a custom [FloatingActionButton](https://developer.android.com/reference/android/support/design/widget/FloatingActionButton.html): the [FabButton](https://github.com/ckurtm/FabButton) which holds a circular progress bar when button is triggered
 
 Every comment page can be fetched by clicking this button until all comments are displayed: the URL is computed internally and the user has nothing to do
 
@@ -21,12 +21,17 @@ A smartphone at least on Android 6.0
 
 ## Download
 
-You can get the app directly on GitHub, here is the [v1.1](https://github.com/MBach/LeMondeRssReader/releases/download/v1.1/LeMondeRssReader-1.1.apk)
+You can get the app directly on GitHub, here is the [v1.2](https://github.com/MBach/LeMondeRssReader/releases/download/v1.2/LeMondeRssReader-1.2.apk)
+
+## Video
+[Main page](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)
 
 ## Screenshots
 ![Main page](https://mbach.github.io/LeMondeRssReader/screenshots/main.jpg)
 
 ![Article](https://mbach.github.io/LeMondeRssReader/screenshots/article.jpg)
+
+![Tweet](https://mbach.github.io/LeMondeRssReader/screenshots/tweet.jpg)
 
 ![Article](https://mbach.github.io/LeMondeRssReader/screenshots/fab_and_chart.png)
 

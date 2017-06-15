@@ -10,7 +10,7 @@
         android:id="@+id/rss_image"
         android:layout_width="125dp"
         android:layout_height="100dp"
-        android:background="@color/primary_dark"
+        android:background="?attr/colorPrimaryDark"
         android:contentDescription="@string/image_from_article"
         android:scaleType="centerCrop"
         android:transitionName="@string/transition_open_article" />
@@ -20,8 +20,8 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/primary_dark"
+        android:background="?attr/colorPrimaryDark"
         android:padding="@dimen/spacing_medium"
-        android:textColor="@android:color/white" />
+        android:textColor="?attr/android:textColorPrimary" />
 
 </LinearLayout>

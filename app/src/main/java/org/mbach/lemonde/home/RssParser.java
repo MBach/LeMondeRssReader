@@ -92,11 +92,7 @@ class RssParser {
                             item.setTitle(text);
                         } else if (tagName.equalsIgnoreCase(TAG_DESCRIPTION)) {
                             item.setDescription(text);
-                        } /*else if (tagName.equalsIgnoreCase(TAG_PUBDATE)) {
-                            item.setPubDate(text);
-                        } else if (tagName.equalsIgnoreCase(TAG_GUID)) {
-                            item.setGuid(text);
-                        }*/ else if (tagName.equalsIgnoreCase(TAG_ENCLOSURE)) {
+                        } else if (tagName.equalsIgnoreCase(TAG_ENCLOSURE)) {
                             text = parser.getAttributeValue(null, "url");
                             item.setEnclosure(text);
                         }

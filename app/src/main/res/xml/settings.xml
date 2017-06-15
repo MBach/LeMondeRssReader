@@ -10,7 +10,7 @@
     <PreferenceCategory android:title="@string/preference_general_display">
         <SwitchPreference
             android:defaultValue="true"
-            android:key="main_theme"
+            android:key="mainTheme"
             android:summary="@string/preference_app_dark_theme"
             android:title="@string/preference_app_style" />
     </PreferenceCategory>

@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -75,6 +76,11 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (isDarkTheme()) {
+            getTheme().applyStyle(R.style.DarkTheme, true);
+        } else {
+            getTheme().applyStyle(R.style.LightTheme, true);
+        }
         super.onCreate(savedInstanceState);
         //initActivityTransitions();
         setContentView(R.layout.activity_article);
@@ -121,7 +127,11 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         }
         // Log.d(TAG, "about to request page: " + extras.getString(Constants.EXTRA_RSS_LINK));
         REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, extras.getString(Constants.EXTRA_RSS_LINK), articleReceived, errorResponse));
+    }
 
+    private boolean isDarkTheme() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        return sharedPreferences.getBoolean("mainTheme", true);
     }
 
     @Override
@@ -261,6 +271,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         @Override
         public void onResponse(String response) {
             Document commentDoc = Jsoup.parse(response);
+            int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
 
             List<Model> items = new ArrayList<>();
             // Extract header
@@ -269,7 +280,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
                 TextView commentHeader = new TextView(getBaseContext());
                 commentHeader.setText(String.format("Commentaires %s", header.text()));
                 commentHeader.setTypeface(null, Typeface.BOLD);
-                commentHeader.setTextColor(Color.WHITE);
+                commentHeader.setTextColor(defaultText);
                 commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
                 items.add(new Model(commentHeader, 0));
             }
@@ -284,13 +295,13 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
                     TextView author = new TextView(getBaseContext());
                     author.setTypeface(null, Typeface.BOLD);
                     author.setText(refs.text());
-                    author.setTextColor(Color.WHITE);
+                    author.setTextColor(defaultText);
 
                     Elements commentComment = refs.next();
                     if (atLeastOneChild(commentComment)) {
                         TextView content = new TextView(getBaseContext());
                         content.setText(commentComment.first().text());
-                        content.setTextColor(Color.WHITE);
+                        content.setTextColor(defaultText);
                         if (comment.hasClass("reponse")) {
                             author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
                             content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
@@ -340,6 +351,19 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         return elements != null && !elements.isEmpty();
     }
 
+    private int getStyleableColor(int resourceId) {
+        int theme;
+        if (isDarkTheme()) {
+            theme = R.style.DarkTheme;
+        } else {
+            theme = R.style.LightTheme;
+        }
+        TypedArray ta = obtainStyledAttributes(theme, R.styleable.CustomTheme);
+        int styleableColor = ta.getColor(resourceId, 0);
+        ta.recycle();
+        return styleableColor;
+    }
+
     /**
      * Extract and parse a standard article. A standard article is published on the main page and by definition,
      * is not: from a hosted blog, nor a video, nor a special multimedia content. It has some standardized fields like
@@ -351,22 +375,25 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
      */
     @NonNull
     private List<Model> extractStandardArticle(@NonNull Elements articles) {
-        Element article = articles.first();
         TextView headLine = new TextView(getBaseContext());
         TextView authors = new TextView(getBaseContext());
         TextView dates = new TextView(getBaseContext());
         TextView description = new TextView(getBaseContext());
 
-        headLine.setTextColor(Color.WHITE);
-        authors.setTextColor(Color.GRAY);
-        dates.setTextColor(Color.GRAY);
-        description.setTextColor(Color.WHITE);
+        int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
+        int authorDateText = getStyleableColor(R.styleable.CustomTheme_authorDateText);
+
+        headLine.setTextColor(defaultText);
+        description.setTextColor(defaultText);
+        authors.setTextColor(authorDateText);
+        dates.setTextColor(authorDateText);
 
         headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
         authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
         dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
         description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
 
+        Element article = articles.first();
         headLine.setText(extractAttr(article, ATTR_HEADLINE));
         authors.setText(extractAttr(article, ATTR_AUTHOR));
         dates.setText(extractDates(article));
@@ -399,10 +426,13 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         TextView dates = new TextView(getBaseContext());
         TextView content = new TextView(getBaseContext());
 
-        headLine.setTextColor(Color.WHITE);
-        authors.setTextColor(Color.GRAY);
-        dates.setTextColor(Color.GRAY);
-        content.setTextColor(Color.WHITE);
+        int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
+        int authorDateText = getStyleableColor(R.styleable.CustomTheme_authorDateText);
+
+        headLine.setTextColor(defaultText);
+        content.setTextColor(defaultText);
+        authors.setTextColor(authorDateText);
+        dates.setTextColor(authorDateText);
 
         headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
         authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
@@ -443,12 +473,14 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         TextView headLine = new TextView(getBaseContext());
         TextView dates = new TextView(getBaseContext());
 
-        headLine.setTextColor(Color.WHITE);
-        dates.setTextColor(Color.GRAY);
+        int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
+        int authorDateText = getStyleableColor(R.styleable.CustomTheme_authorDateText);
+
+        headLine.setTextColor(defaultText);
+        dates.setTextColor(authorDateText);
 
         headLine.setTextSize(getResources().getDimension(R.dimen.article_headline));
         dates.setTextSize(getResources().getDimension(R.dimen.article_authors));
-
 
         Elements elements = content.select(".entry-title");
         Log.d(TAG, content.html());
@@ -478,7 +510,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
                 TextView textView = new TextView(getBaseContext());
                 textView.setText(child.text());
                 textView.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-                textView.setTextColor(Color.WHITE);
+                textView.setTextColor(defaultText);
                 textView.setTextSize(getResources().getDimension(R.dimen.article_body));
                 views.add(new Model(textView));
             }
@@ -517,6 +549,8 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
     private List<Model> extractParagraphs(@NonNull Element article) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
+
+        int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
 
         List<Model> p = new ArrayList<>();
         Elements articleBody = article.select("[itemprop='articleBody']");
@@ -579,7 +613,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
 
                 TextView t = new TextView(getBaseContext());
                 t.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
-                t.setTextColor(Color.WHITE);
+                t.setTextColor(defaultText);
 
                 boolean hasIntertitre = element.is("h2.intertitre");
                 if (!hasIntertitre) {

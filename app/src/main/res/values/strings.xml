@@ -42,7 +42,7 @@
     <string name="error_no_connection_retry">Réessayer</string>
 
     <!-- Work in Progress! -->
-    <string name="work_in_progress">Cette action n\'a pas encore été implémentée !</string>
+    <string name="restart_to_apply_theme">Veuillez relancer l\'App pour appliquer le changement de thème</string>
 
     <!-- Strings related to Settings -->
     <string name="preference_general_display">Affichage</string>

@@ -1,15 +1,41 @@
 <resources>
 
-    <style name="AppTheme" parent="BaseTheme" />
+    <style name="AppTheme" parent="DarkTheme" />
 
-    <style name="BaseTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimary">@color/primary</item> 
-        <item name="colorPrimaryDark">@color/primary_dark</item> 
+    <color name="primary">#616161</color>
+    <color name="primary_dark">#212121</color>
+    <color name="primary_light">#ffffff</color>
+    <color name="primary_light_dark">#e0e0e0</color>
+    <color name="accent">#ffc400</color>
+    <!--
+    <color name="accent_bright">#ffecb3</color>
+    -->
+    <color name="accent_complementary">#304ffe</color>
+
+    <!-- Default theme is dark -->
+    <style name="DarkTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="background">@color/primary_dark</item>
+        <item name="defaultText">@android:color/white</item>
+        <item name="authorDateText">#e0e0e0</item>
         <item name="colorControlHighlight">@color/accent</item> 
         <item name="colorAccent">@color/accent</item>
         <item name="selectableItemBackground">@drawable/selectable_item_background</item>
-        <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+    </style>
+
+    <!-- Alternate theme is light -->
+    <style name="LightTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary_light</item> 
+        <item name="colorPrimaryDark">@color/primary_light_dark</item> 
+        <item name="background">@color/primary_light_dark</item>
+        <item name="defaultText">@android:color/black</item>
+        <item name="authorDateText">#212121</item>
+        <item name="colorControlHighlight">@color/accent</item> 
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:textColorPrimaryInverse">@android:color/white</item>
+        <item name="android:statusBarColor">?android:attr/colorForeground</item>
     </style>
 
     <style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
@@ -18,21 +44,11 @@
     </style>
 
     <style name="ThemeOverlay.AppCompat.navTheme">
-        <item name="colorPrimary">@android:color/white</item>
-        <item name="colorControlHighlight">@color/primary</item>
+        <item name="android:colorPrimary">@android:color/white</item>
+        <item name="android:colorControlHighlight">@color/primary</item>
     </style>
 
-    <color name="primary">#616161</color>
-    <color name="primary_dark">#212121</color>
-    <color name="accent">#ffc400</color>
-    <color name="accent_bright">#ffecb3</color>
-    <color name="accent_complementary">#304ffe</color>
-
-    <color name="tag_green">#00c853</color>
-    <color name="tag_red">#f44336</color>
-    <color name="tag_yellow">#ff9800</color>
-    <color name="tag_grey">#212121</color>
-
+    <!-- Colors for the drawer -->
     <color name="cat_color_news">#FFC600</color>
     <color name="cat_color_international">#0386C3</color>
     <color name="cat_color_politics">#1F0D67</color>
@@ -46,4 +62,10 @@
     <color name="cat_color_pixels">#06B586</color>
     <color name="cat_color_campus">#FF6E17</color>
     <color name="cat_color_decoders">#1F0D67</color>
+
+    <!-- Colors for the custom category "Les Décodeurs" -->
+    <color name="tag_green">#00c853</color>
+    <color name="tag_red">#f44336</color>
+    <color name="tag_yellow">#ff9800</color>
+    <color name="tag_grey">#212121</color>
 </resources>

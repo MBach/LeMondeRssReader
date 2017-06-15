@@ -3,11 +3,13 @@ package org.mbach.lemonde.home;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -20,7 +22,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Menu;
@@ -89,6 +90,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         initCategories();
 
+        if (isDarkTheme()) {
+            getTheme().applyStyle(R.style.DarkTheme, true);
+        } else {
+            getTheme().applyStyle(R.style.LightTheme, true);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -113,6 +120,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getFeedFromCategory(Constants.CAT_NEWS);
     }
 
+    private boolean isDarkTheme() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        return sharedPreferences.getBoolean("mainTheme", true);
+    }
+
     @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
@@ -127,7 +139,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
+            if (isDarkTheme()) {
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
+            } else {
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu_black);
+            }
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }

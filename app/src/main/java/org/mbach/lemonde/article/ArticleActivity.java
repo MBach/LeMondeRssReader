@@ -46,6 +46,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
+import org.mbach.lemonde.ThemeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,7 @@ import mbanje.kurt.fabbutton.FabButton;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedbackRecyclerView.Callbacks*/ {
+public class ArticleActivity extends AppCompatActivity {
 
     private static final String TAG = "ArticleActivity";
     private static final String ATTR_HEADLINE = "Headline";
@@ -76,12 +77,8 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (isDarkTheme()) {
-            getTheme().applyStyle(R.style.DarkTheme, true);
-        } else {
-            getTheme().applyStyle(R.style.LightTheme, true);
-        }
         super.onCreate(savedInstanceState);
+        ThemeUtils.applyTheme(getBaseContext(), getTheme());
         //initActivityTransitions();
         setContentView(R.layout.activity_article);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -125,13 +122,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
         if (REQUEST_QUEUE == null) {
             REQUEST_QUEUE = Volley.newRequestQueue(this);
         }
-        // Log.d(TAG, "about to request page: " + extras.getString(Constants.EXTRA_RSS_LINK));
         REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, extras.getString(Constants.EXTRA_RSS_LINK), articleReceived, errorResponse));
-    }
-
-    private boolean isDarkTheme() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        return sharedPreferences.getBoolean("mainTheme", true);
     }
 
     @Override
@@ -353,7 +344,7 @@ public class ArticleActivity extends AppCompatActivity /*implements ScrollFeedba
 
     private int getStyleableColor(int resourceId) {
         int theme;
-        if (isDarkTheme()) {
+        if (ThemeUtils.isDarkTheme(getBaseContext())) {
             theme = R.style.DarkTheme;
         } else {
             theme = R.style.LightTheme;

@@ -42,10 +42,6 @@ class Model {
         return type;
     }
 
-    int getId() {
-        return id;
-    }
-
     Object getTheContent() {
         return theContent;
     }

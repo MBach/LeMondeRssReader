@@ -28,6 +28,7 @@ import com.android.volley.toolbox.Volley;
 
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
+import org.mbach.lemonde.ThemeUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeUtils.applyTheme(getBaseContext(), getTheme());
         setContentView(R.layout.activity_login);
 
         // Set up the toolbar.

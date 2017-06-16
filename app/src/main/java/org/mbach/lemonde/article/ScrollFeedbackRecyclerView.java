@@ -26,10 +26,6 @@ public class ScrollFeedbackRecyclerView extends RecyclerView {
     private boolean collapsed;
     private AppBarLayout appBarLayout;
 
-    public ScrollFeedbackRecyclerView(@NonNull Context context) {
-        super(context);
-    }
-
     public ScrollFeedbackRecyclerView(@NonNull Context context, AttributeSet attrs) {
         super(context, attrs);
     }

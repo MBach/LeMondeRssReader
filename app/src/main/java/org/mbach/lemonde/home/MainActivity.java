@@ -3,13 +3,11 @@ package org.mbach.lemonde.home;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -30,6 +28,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import org.mbach.lemonde.Constants;
+import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.settings.SettingsActivity;
 import org.mbach.lemonde.R;
@@ -47,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final String TAG = "MainActivity";
     private static final int GET_LATEST_RSS_FEED = 0;
+    private static final int FROM_SETTINGS_ACTIVITY = 1;
 
     private DrawerLayout drawerLayout;
     private RecyclerView mainActivityRecyclerView;
@@ -89,14 +89,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initCategories();
-
-        if (isDarkTheme()) {
+        super.onCreate(savedInstanceState);
+        ThemeUtils.applyTheme(getBaseContext(), getTheme());
+        /*if (ThemeUtils.isDarkTheme(getBaseContext())) {
             getTheme().applyStyle(R.style.DarkTheme, true);
         } else {
             getTheme().applyStyle(R.style.LightTheme, true);
-        }
-
-        super.onCreate(savedInstanceState);
+        }*/
         setContentView(R.layout.activity_main);
 
         mainActivityRecyclerView = findViewById(R.id.mainActivityRecyclerView);
@@ -120,11 +119,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getFeedFromCategory(Constants.CAT_NEWS);
     }
 
-    private boolean isDarkTheme() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        return sharedPreferences.getBoolean("mainTheme", true);
-    }
-
     @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
@@ -139,8 +133,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            if (isDarkTheme()) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
+            if (ThemeUtils.isDarkTheme(getBaseContext())) {
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu_white);
             } else {
                 actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu_black);
             }
@@ -210,6 +204,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
             mainActivityRecyclerView.setAdapter(adapter);
+        } else if (requestCode == FROM_SETTINGS_ACTIVITY && resultCode == Constants.THEME_CHANGED) {
+            recreate();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -265,7 +261,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(new Intent(getApplicationContext(), LoginActivity.class));
                 return true;
             case R.id.action_settings:
-                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                //startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                startActivityForResult(new Intent(getApplicationContext(), SettingsActivity.class), FROM_SETTINGS_ACTIVITY);
                 return true;
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);

@@ -1,15 +1,15 @@
 package org.mbach.lemonde.settings;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
-import android.view.View;
 
+import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
+import org.mbach.lemonde.ThemeUtils;
 
 /**
  * SettingsActivity class.
@@ -19,30 +19,30 @@ import org.mbach.lemonde.R;
  */
 public class SettingsActivity extends PreferenceActivity {
 
+    private static boolean themeHasChanged;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applyTheme(getBaseContext(), getTheme());
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        boolean isDark = sharedPreferences.getBoolean("mainTheme", true);
-        if (isDark) {
-            getTheme().applyStyle(R.style.DarkTheme, true);
-        } else {
-            getTheme().applyStyle(R.style.LightTheme, true);
-        }
         getFragmentManager().beginTransaction().replace(android.R.id.content, new GeneralPreferenceFragment()).commit();
-
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                Log.d("SettingsActivity", key);
                 if ("mainTheme".equals(key)) {
-                    View root = SettingsActivity.this.getListView();
-                    Snackbar.make(root, getString(R.string.restart_to_apply_theme), Snackbar.LENGTH_LONG)
-                            .show();
+                    themeHasChanged = true;
+                    recreate();
                 }
             }
         });
+    }
 
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        setResult(themeHasChanged ? Constants.THEME_CHANGED : 0, intent);
+        themeHasChanged = false;
+        finish();
     }
 
     @Override

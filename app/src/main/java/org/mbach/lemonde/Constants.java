@@ -38,4 +38,6 @@ public final class Constants {
     public static final int PADDING_BOTTOM_SUBTITLE = 20;
     public static final int PADDING_LEFT_RIGHT_TAG = 20;
     public static final int PADDING_COMMENT_ANSWER = 30;
+    public static final int THEME_CHANGED = 0;
+
 }

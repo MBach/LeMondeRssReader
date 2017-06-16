@@ -15,13 +15,42 @@ Comments are loaded in the same view (ArticleActivity) and new comments are fetc
 
 Every comment page can be fetched by clicking this button until all comments are displayed: the URL is computed internally and the user has nothing to do
 
+### Dynamic theme
+
+In addition, this App has 2 themes. Dark Theme is the default theme, but it can be easily switched to Light Theme in settings. To do so, these themes are defined in [styles.xml](https://developer.android.com/guide/topics/ui/themes.html) and some utility functions are used to paint or repaint remaining items accordingly. In layouts, colors aren't hardcoded and are using extensively ```?attr/myColor```
+
+```xml
+<android.support.v7.widget.Toolbar
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="?attr/colorPrimary" />
+```
+
+Dynamic widgets built by parsing to render a web page are in pure Java code, so the trick is to retrieve the color from the current applied style. These custom colors must be declared as styleable attributes in ```attrs.xml``` file.
+
+```java
+private int getStyleableColor(int resourceId) {
+    int theme;
+    if (ThemeUtils.isDarkTheme(getBaseContext())) {
+        theme = R.style.DarkTheme;
+    } else {
+        theme = R.style.LightTheme;
+    }
+    TypedArray ta = obtainStyledAttributes(theme, R.styleable.CustomTheme);
+    int styleableColor = ta.getColor(resourceId, 0);
+    ta.recycle();
+    return styleableColor;
+}
+```
+
 ## Requirements
 
 A smartphone at least on Android 6.0
 
 ## Download
 
-You can get the app directly on GitHub, here is the [v1.2](https://github.com/MBach/LeMondeRssReader/releases/download/v1.2/LeMondeRssReader-1.2.apk)
+You can get the app directly on GitHub, here is the [v1.3](https://github.com/MBach/LeMondeRssReader/releases/download/v1.3/LeMondeRssReader-1.3.apk)
 
 ## Video
 [Overview of the App](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)

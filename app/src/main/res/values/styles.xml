@@ -1,16 +1,12 @@
 <resources>
 
-    <style name="AppTheme" parent="DarkTheme" />
-
-    <color name="primary">#616161</color>
+    <color name="primary">#424242</color>
     <color name="primary_dark">#212121</color>
     <color name="primary_light">#ffffff</color>
     <color name="primary_light_dark">#e0e0e0</color>
     <color name="accent">#ffc400</color>
-    <!--
-    <color name="accent_bright">#ffecb3</color>
-    -->
     <color name="accent_complementary">#304ffe</color>
+    <color name="grey">#5A5A5A</color>
 
     <!-- Default theme is dark -->
     <style name="DarkTheme" parent="Theme.AppCompat.NoActionBar">
@@ -21,8 +17,7 @@
         <item name="authorDateText">#e0e0e0</item>
         <item name="colorControlHighlight">@color/accent</item> 
         <item name="colorAccent">@color/accent</item>
-        <item name="selectableItemBackground">@drawable/selectable_item_background</item>
-        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="articleHeaderGradient">#88000000</item>
     </style>
 
     <!-- Alternate theme is light -->
@@ -32,20 +27,10 @@
         <item name="background">@color/primary_light_dark</item>
         <item name="defaultText">@android:color/black</item>
         <item name="authorDateText">#212121</item>
-        <item name="colorControlHighlight">@color/accent</item> 
-        <item name="colorAccent">@color/accent</item>
-        <item name="android:textColorPrimaryInverse">@android:color/white</item>
-        <item name="android:statusBarColor">?android:attr/colorForeground</item>
-    </style>
-
-    <style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
-        <item name="spinBars">true</item>
-        <item name="color">@android:color/white</item>
-    </style>
-
-    <style name="ThemeOverlay.AppCompat.navTheme">
-        <item name="android:colorPrimary">@android:color/white</item>
-        <item name="android:colorControlHighlight">@color/primary</item>
+        <item name="colorControlHighlight">#ffab00</item> 
+        <item name="colorAccent">#ffab00</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="articleHeaderGradient">#88aaaaaa</item>
     </style>
 
     <!-- Colors for the drawer -->

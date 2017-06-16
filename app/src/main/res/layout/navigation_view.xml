@@ -7,6 +7,5 @@
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:fitsSystemWindows="true"
-    android:theme="@style/ThemeOverlay.AppCompat.navTheme"
     app:headerLayout="@layout/drawer_header"
     app:menu="@menu/drawer_menu_items" />

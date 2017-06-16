@@ -3,5 +3,6 @@
     <declare-styleable name="CustomTheme" >
         <attr name="defaultText" />
         <attr name="authorDateText" />
+        <attr name="articleHeaderGradient" />
     </declare-styleable>
 </resources>

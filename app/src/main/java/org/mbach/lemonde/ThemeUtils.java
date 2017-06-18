@@ -3,6 +3,7 @@ package org.mbach.lemonde;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
 
 /**
@@ -25,5 +26,18 @@ public final class ThemeUtils {
         } else {
             theme.applyStyle(R.style.LightTheme, true);
         }
+    }
+
+    public static int getStyleableColor(Context context, int resourceId) {
+        int theme;
+        if (ThemeUtils.isDarkTheme(context)) {
+            theme = R.style.DarkTheme;
+        } else {
+            theme = R.style.LightTheme;
+        }
+        TypedArray ta = context.obtainStyledAttributes(theme, R.styleable.CustomTheme);
+        int styleableColor = ta.getColor(resourceId, 0);
+        ta.recycle();
+        return styleableColor;
     }
 }

@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.squareup.picasso.Picasso;
@@ -29,8 +30,14 @@ import java.util.List;
  */
 class ArticleAdapter extends RecyclerView.Adapter {
 
+    //private static final String TAG = "ArticleAdapter";
+
     private List<Model> items;
 
+    /**
+     *
+     * @param items list of items (incl. comments) to display
+     */
     void insertItems(List<Model> items) {
         if (this.items == null) {
             this.items = items;
@@ -62,24 +69,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (items == null) {
-            return -1;
-        } else {
-            switch (items.get(position).getType()) {
-                case 0:
-                    return Model.TEXT_TYPE;
-                case 1:
-                    return Model.IMAGE_TYPE;
-                case 2:
-                    return Model.TWEET_TYPE;
-                case 3:
-                    return Model.GRAPH_TYPE;
-                case 4:
-                    return Model.COMMENT_TYPE;
-                default:
-                    return -1;
-            }
-        }
+        return items == null ? -1 : items.get(position).getType();
     }
 
     @NonNull
@@ -90,16 +80,15 @@ class ArticleAdapter extends RecyclerView.Adapter {
             case Model.TEXT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.IMAGE_TYPE:
-                ImageView imageView = new ImageView(parent.getContext());
-                return new ViewHolderImage(imageView);
+                return new ViewHolderImage(new ImageView(parent.getContext()));
             case Model.TWEET_TYPE:
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent,false);
-                return new ViewHolderTweet(view);
-            case Model.GRAPH_TYPE:
-                BarChart barChart = new BarChart(parent.getContext());
-                return new ViewHolderBarChart(barChart);
+                return new ViewHolderTweet(LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent,false));
             case Model.COMMENT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
+            case Model.GRAPH_TYPE_BARS:
+                return new ViewHolderHorizontalBarChart(new HorizontalBarChart(parent.getContext()));
+            case Model.GRAPH_TYPE_COLUMNS:
+                return new ViewHolderBarChart(new BarChart(parent.getContext()));
         }
     }
 
@@ -140,10 +129,15 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 ((ViewHolderTweet) holder).getTweet().setText(tweet.getText());
                 ((ViewHolderTweet) holder).getLink().setContentDescription(link.getContentDescription());
                 break;
-            case Model.GRAPH_TYPE:
+            case Model.GRAPH_TYPE_BARS:
+                HorizontalBarChart horizontalBarChart = (HorizontalBarChart) model.getTheContent();
+                ((ViewHolderHorizontalBarChart) holder).chart.setData(horizontalBarChart.getData());
+                ((ViewHolderHorizontalBarChart) holder).chart.setLayoutParams(lp2);
+                break;
+            case Model.GRAPH_TYPE_COLUMNS:
                 BarChart barChart = (BarChart) model.getTheContent();
-                ((ViewHolderBarChart) holder).barChart.setLayoutParams(lp2);
-                ((ViewHolderBarChart) holder).barChart.setData(barChart.getData());
+                ((ViewHolderBarChart) holder).chart.setData(barChart.getData());
+                ((ViewHolderBarChart) holder).chart.setLayoutParams(lp2);
                 break;
         }
     }
@@ -194,23 +188,46 @@ class ArticleAdapter extends RecyclerView.Adapter {
             return view.findViewById(R.id.tweet_button);
         }
     }
+
     /**
      *
      */
     public static class ViewHolderBarChart extends RecyclerView.ViewHolder {
         @NonNull
-        private final BarChart barChart;
+        private final BarChart chart;
 
         ViewHolderBarChart(@NonNull BarChart view) {
             super(view);
-            barChart = view;
-            barChart.setPinchZoom(false);
-            barChart.setMaxVisibleValueCount(10);
-            barChart.setDrawGridBackground(false);
-            XAxis xAxis = barChart.getXAxis();
-            xAxis.setEnabled(false);
-            YAxis rightAxis = barChart.getAxisRight();
+            this.chart = view;
+            chart.setPinchZoom(false);
+            chart.setMaxVisibleValueCount(10);
+            chart.setDrawGridBackground(false);
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setEnabled(true);
+            xAxis.setLabelRotationAngle(-45);
+            YAxis rightAxis = chart.getAxisRight();
             rightAxis.setEnabled(false);
+        }
+    }
+
+    /**
+     *
+     */
+    public static class ViewHolderHorizontalBarChart extends RecyclerView.ViewHolder {
+        @NonNull
+        private final HorizontalBarChart chart;
+
+        ViewHolderHorizontalBarChart(@NonNull HorizontalBarChart view) {
+            super(view);
+            this.chart = view;
+            /*chart.setPinchZoom(false);
+            chart.setMaxVisibleValueCount(10);
+            chart.setDrawGridBackground(false);
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setEnabled(true);
+            xAxis.setLabelRotationAngle(-45);
+            YAxis rightAxis = chart.getAxisRight();
+            rightAxis.setEnabled(false);*/
         }
     }
 }

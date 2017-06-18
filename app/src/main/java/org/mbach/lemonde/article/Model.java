@@ -10,11 +10,13 @@ import android.widget.TextView;
  */
 class Model {
 
+    static final int UNKNOWN_TYPE = -1;
     static final int TEXT_TYPE = 0;
     static final int IMAGE_TYPE = 1;
     static final int TWEET_TYPE = 2;
-    static final int GRAPH_TYPE = 3;
-    static final int COMMENT_TYPE = 4;
+    static final int COMMENT_TYPE = 3;
+    static final int GRAPH_TYPE_BARS = 4;
+    static final int GRAPH_TYPE_COLUMNS = 5;
 
     private final int id;
     private final int type;

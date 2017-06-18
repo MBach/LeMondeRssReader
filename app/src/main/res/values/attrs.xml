@@ -4,5 +4,6 @@
         <attr name="defaultText" />
         <attr name="authorDateText" />
         <attr name="articleHeaderGradient" />
+        <attr name="colorBackgroundDrawer" />
     </declare-styleable>
 </resources>

@@ -20,7 +20,7 @@ import mbanje.kurt.fabbutton.FabButton;
  * @since 2017-05
  */
 public class ScrollFeedbackRecyclerView extends RecyclerView {
-    private static final String TAG = "ScrollFeedbackRV";
+    //private static final String TAG = "ScrollFeedbackRV";
 
     private FabButton fab;
     private boolean collapsed;

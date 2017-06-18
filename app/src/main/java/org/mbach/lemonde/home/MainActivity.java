@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Menu;
@@ -88,14 +89,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        initCategories();
         super.onCreate(savedInstanceState);
         ThemeUtils.applyTheme(getBaseContext(), getTheme());
-        /*if (ThemeUtils.isDarkTheme(getBaseContext())) {
-            getTheme().applyStyle(R.style.DarkTheme, true);
-        } else {
-            getTheme().applyStyle(R.style.LightTheme, true);
-        }*/
+        initCategories();
         setContentView(R.layout.activity_main);
 
         mainActivityRecyclerView = findViewById(R.id.mainActivityRecyclerView);
@@ -247,7 +243,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Drawable.ConstantState constantState = icon.getConstantState();
                 if (constantState != null) {
                     Drawable clone = constantState.newDrawable();
-                    clone.setColorFilter(getColor(colorId), PorterDuff.Mode.SRC);
+                    int color = getColor(colorId);
+                    if (colorId == R.color.cat_color_news && ThemeUtils.isDarkTheme(getBaseContext())) {
+                        color = getColor(R.color.cat_color_news_dark);
+                    }
+                    clone.setColorFilter(color, PorterDuff.Mode.SRC);
                     item.setIcon(clone);
                 }
             }

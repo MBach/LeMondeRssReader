@@ -6,7 +6,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -38,6 +37,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.github.mikephil.charting.charts.Chart;
 import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
@@ -262,7 +262,7 @@ public class ArticleActivity extends AppCompatActivity {
         @Override
         public void onResponse(String response) {
             Document commentDoc = Jsoup.parse(response);
-            int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
+            int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
 
             List<Model> items = new ArrayList<>();
             // Extract header
@@ -342,19 +342,6 @@ public class ArticleActivity extends AppCompatActivity {
         return elements != null && !elements.isEmpty();
     }
 
-    private int getStyleableColor(int resourceId) {
-        int theme;
-        if (ThemeUtils.isDarkTheme(getBaseContext())) {
-            theme = R.style.DarkTheme;
-        } else {
-            theme = R.style.LightTheme;
-        }
-        TypedArray ta = obtainStyledAttributes(theme, R.styleable.CustomTheme);
-        int styleableColor = ta.getColor(resourceId, 0);
-        ta.recycle();
-        return styleableColor;
-    }
-
     /**
      * Extract and parse a standard article. A standard article is published on the main page and by definition,
      * is not: from a hosted blog, nor a video, nor a special multimedia content. It has some standardized fields like
@@ -371,8 +358,8 @@ public class ArticleActivity extends AppCompatActivity {
         TextView dates = new TextView(getBaseContext());
         TextView description = new TextView(getBaseContext());
 
-        int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
-        int authorDateText = getStyleableColor(R.styleable.CustomTheme_authorDateText);
+        int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
+        int authorDateText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_authorDateText);
 
         headLine.setTextColor(defaultText);
         description.setTextColor(defaultText);
@@ -417,8 +404,8 @@ public class ArticleActivity extends AppCompatActivity {
         TextView dates = new TextView(getBaseContext());
         TextView content = new TextView(getBaseContext());
 
-        int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
-        int authorDateText = getStyleableColor(R.styleable.CustomTheme_authorDateText);
+        int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
+        int authorDateText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_authorDateText);
 
         headLine.setTextColor(defaultText);
         content.setTextColor(defaultText);
@@ -464,8 +451,8 @@ public class ArticleActivity extends AppCompatActivity {
         TextView headLine = new TextView(getBaseContext());
         TextView dates = new TextView(getBaseContext());
 
-        int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
-        int authorDateText = getStyleableColor(R.styleable.CustomTheme_authorDateText);
+        int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
+        int authorDateText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_authorDateText);
 
         headLine.setTextColor(defaultText);
         dates.setTextColor(authorDateText);
@@ -541,7 +528,7 @@ public class ArticleActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
 
-        int defaultText = getStyleableColor(R.styleable.CustomTheme_defaultText);
+        int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
 
         List<Model> p = new ArrayList<>();
         Elements articleBody = article.select("[itemprop='articleBody']");
@@ -565,8 +552,11 @@ public class ArticleActivity extends AppCompatActivity {
                     boolean hasGraph = !element.select("div.graphe").isEmpty();
                     boolean hasScript = !element.select("script").isEmpty();
                     if (hasGraph && hasScript) {
-                        GraphExtractor graphExtractor = new GraphExtractor(getBaseContext(), element.select("script").first());
-                        p.add(new Model(Model.GRAPH_TYPE, graphExtractor.generate()));
+                        GraphExtractor graphExtractor = new GraphExtractor(getBaseContext(), element.select("script").html());
+                        Chart graph = graphExtractor.generate();
+                        if (graph != null) {
+                            p.add(new Model(GraphExtractor.getModelType(graph), graph));
+                        }
                         continue;
                     }
                 }

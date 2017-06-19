@@ -7,10 +7,10 @@ import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 
 import org.json.JSONArray;
@@ -39,8 +39,10 @@ class GraphExtractor {
         } else {
             String type = chart.getTag().toString();
             if (HorizontalBarChart.class.getSimpleName().equals(type)) {
+                Log.d(TAG, "HorizontalBarChart");
                 return Model.GRAPH_TYPE_BARS;
             } else if (BarChart.class.getSimpleName().equals(type)) {
+                Log.d(TAG, "BarChart");
                 return Model.GRAPH_TYPE_COLUMNS;
             } else {
                 return Model.UNKNOWN_TYPE;
@@ -158,19 +160,36 @@ class GraphExtractor {
      */
     private BarChart generateHorizontalBarChart() throws JSONException {
         HorizontalBarChart barChart = new HorizontalBarChart(context);
-        List<BarEntry> yVals1 = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            float mult = 5;
-            float val = (float) (Math.random() * mult);
-            yVals1.add(new BarEntry(i, val));
+        List<BarEntry> values = new ArrayList<>();
+        JSONArray series = data.getJSONArray("series");
+        JSONObject first = series.getJSONObject(0);
+        JSONArray dataSeries = first.getJSONArray("data");
+        for (int i = 0; i < dataSeries.length(); i++) {
+            JSONArray array = dataSeries.getJSONArray(i);
+            int length = array.length();
+            if (length > 1) {
+                String value = array.getString(1);
+                values.add(new BarEntry(i, Float.valueOf(value)));
+            }
         }
 
-        BarDataSet set1 = new BarDataSet(yVals1, "The year 2017");
+        BarDataSet dataSet = new BarDataSet(values, "TODO");
         List<IBarDataSet> dataSets = new ArrayList<>();
-        dataSets.add(set1);
+        dataSets.add(dataSet);
         BarData barData = new BarData(dataSets);
         barChart.setData(barData);
         barChart.setTag(HorizontalBarChart.class.getSimpleName());
+
+        YAxis yAxis = barChart.getAxisLeft();
+        yAxis.setDrawGridLines(false);
+        yAxis.setGranularity(1f);
+        yAxis.setLabelCount(values.size());
+        JSONArray categories = data.getJSONObject("xAxis").getJSONArray("categories");
+        List<String> labels = new ArrayList<>();
+        for (int i = 0; i < categories.length(); i++) {
+            labels.add(categories.getString(i));
+        }
+        yAxis.setValueFormatter(new XAxisValueFormatter(labels));
         return barChart;
     }
 }

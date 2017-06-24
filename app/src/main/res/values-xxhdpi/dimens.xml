@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="article_headline">10sp</dimen>
+    <dimen name="article_description">6sp</dimen>
+    <dimen name="article_authors">4sp</dimen>
+    <dimen name="article_body">5sp</dimen>
+</resources>

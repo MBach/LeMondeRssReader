@@ -13,13 +13,13 @@ import java.util.List;
  * @author Matthieu BACHELIER
  * @since 2017-06
  */
-public class XAxisValueFormatter implements IAxisValueFormatter {
+class XAxisValueFormatter implements IAxisValueFormatter {
 
     private static final String TAG = "XAxisVF";
 
     private List<String> labels;
 
-    public XAxisValueFormatter(List<String> labels) {
+    XAxisValueFormatter(List<String> labels) {
         this.labels = labels;
     }
 

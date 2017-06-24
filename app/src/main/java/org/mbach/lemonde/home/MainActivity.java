@@ -1,5 +1,6 @@
 package org.mbach.lemonde.home;
 
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +12,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -20,7 +20,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Menu;
@@ -45,7 +44,7 @@ import java.util.ArrayList;
  */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String TAG = "MainActivity";
+    //private static final String TAG = "MainActivity";
     private static final int GET_LATEST_RSS_FEED = 0;
     private static final int FROM_SETTINGS_ACTIVITY = 1;
 
@@ -187,13 +186,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
 
                     ImageView rssImage = view.findViewById(R.id.rss_image);
-                    rssImage.buildDrawingCache();
-                    extras.putParcelable(Constants.EXTRA_RSS_IMAGE_BITMAP, rssImage.getDrawingCache());
                     intent.putExtras(extras);
-                    //startActivity(intent);
 
                     String transitionName = getString(R.string.transition_open_article);
-                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this,
+                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this,
                             rssImage,
                             transitionName);
                     startActivity(intent, options.toBundle());

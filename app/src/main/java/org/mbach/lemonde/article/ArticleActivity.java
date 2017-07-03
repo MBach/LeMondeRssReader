@@ -14,14 +14,17 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.transition.Slide;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -135,6 +138,8 @@ public class ArticleActivity extends AppCompatActivity {
         super.onResume();
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -142,10 +147,43 @@ public class ArticleActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.action_settings:
+            /*case R.id.action_share_facebook:
+                Log.d(TAG, "share on facebook");
                 return true;
+            case R.id.action_share_twitter:
+                Log.d(TAG, "share on twitter");
+                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean shareOnSocialNetworks = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
+        if (shareOnSocialNetworks) {
+            getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
+            MenuItem item = menu.findItem(R.id.action_share);
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+            /*MenuItem shareFbItem = menu.getItem(0);
+            MenuItem shareTwitterItem = menu.getItem(1);
+            /*if (ThemeUtils.isDarkTheme(getBaseContext())) {
+                shareFbItem.setIcon(R.drawable.icon_fb_dark_24dp);
+                shareTwitterItem.setIcon(R.drawable.icon_twitter_dark_24dp);
+            } else {
+                shareFbItem.setIcon(R.drawable.icon_fb_light_24dp);
+                shareTwitterItem.setIcon(R.drawable.icon_twitter_light_24dp);
+            }*/
+        }
+        return true;
+    }
+
+    private ShareActionProvider shareActionProvider;
+
+    private void setShareIntent(Intent shareIntent) {
+        if (shareActionProvider != null) {
+            shareActionProvider.setShareIntent(shareIntent);
         }
     }
 

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">LeMonde</string>
 
-    <!-- Right menu settings -->
+    <!-- MainActivity: Right menu settings -->
     <string name="action_account">Mon compte</string>
     <string name="action_settings">Paramètres</string>
 
@@ -31,23 +31,33 @@
     <string name="transition_open_article">transition_open_article</string>
     <string name="open_tweet_external">Voir dans Twitter</string>
 
+    <!-- ArticleActivity: Right menu settings -->
+    <string name="action_share">Partager…</string>
+    <string name="action_share_facebook">Partager sur Facebook</string>
+    <string name="action_share_twitter">Partager sur Twitter</string>
+
     <!-- Bubble tag of article -->
     <string name="paid_article">Article Abonnés</string>
     <string name="video_article">Vidéo</string>
     <string name="blog_article">Article de blog</string>
-    <string name="image_from_article">Image de l\'article</string>
+    <string name="image_from_article">Image de l’article</string>
 
     <!-- Strings related to errors -->
     <string name="error_no_connection">Aucune connexion Internet</string>
     <string name="error_no_connection_retry">Réessayer</string>
 
     <!-- Strings related to Settings -->
-    <string name="preference_general_display">Affichage</string>
-    <string name="preference_app_style">Style de l\'App</string>
-    <string name="preference_app_dark_theme">Thème sombre</string>
     <string name="preference_article_layout">Mise en page</string>
     <string name="preference_article_content">Contenu des articles</string>
-    <string name="preference_article_display_tweets">Inclure les tweets dans le corps d\'un article</string>
+    <string name="preference_article_display_tweets">Inclure les tweets dans le corps d’un article</string>
+    <string name="preference_general_display">Affichage</string>
+    <string name="preference_app_style">Style de l’App</string>
+    <string name="preference_app_dark_theme">Thème sombre</string>
+    <string name="preference_share_icons">Icônes réseaux sociaux</string>
+    <string name="preference_share_description">Activer le partage d’un article sur Facebook ou sur Twitter</string>
+
+
+
     <string name="title_activity_login">Connexion</string>
 
     <!-- Strings related to login -->

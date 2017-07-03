@@ -13,6 +13,11 @@
             android:key="mainTheme"
             android:summary="@string/preference_app_dark_theme"
             android:title="@string/preference_app_style" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="shareOnSocialNetworks"
+            android:summary="@string/preference_share_description"
+            android:title="@string/preference_share_icons" />
     </PreferenceCategory>
 
 </PreferenceScreen>

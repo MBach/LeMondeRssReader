@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_share"
+        android:actionProviderClass="android.widget.ShareActionProvider"
+        android:icon="@android:drawable/ic_menu_share"
+        android:orderInCategory="100"
+        android:titleCondensed="Test"
+        app:showAsAction="ifRoom" />
+    <!--<item
+        android:id="@+id/action_share_facebook"
+        android:icon="@drawable/icon_fb_dark_24dp"
+        android:orderInCategory="100"
+        android:title="@string/action_share_facebook"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_share_twitter"
+        android:icon="@drawable/icon_twitter_dark_24dp"
+        android:orderInCategory="100"
+        android:title="@string/action_share_twitter"
+        app:showAsAction="ifRoom" />-->
+</menu>

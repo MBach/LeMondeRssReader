@@ -88,7 +88,7 @@ class GraphExtractor {
 
     /**
      *
-     * @return
+     * @return the chart
      */
     Chart generate() {
         if (data == null) {
@@ -116,7 +116,7 @@ class GraphExtractor {
 
     /**
      *
-     * @return
+     * @return the chart
      */
     private BarChart generateBarChart() throws JSONException {
         List<BarEntry> values = new ArrayList<>();
@@ -156,7 +156,7 @@ class GraphExtractor {
 
     /**
      *
-     * @return
+     * @return the chart
      */
     private BarChart generateHorizontalBarChart() throws JSONException {
         HorizontalBarChart barChart = new HorizontalBarChart(context);

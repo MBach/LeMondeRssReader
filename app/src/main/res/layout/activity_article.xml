@@ -58,9 +58,10 @@
             </android.support.constraint.ConstraintLayout>
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/toolbarArticle"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:clickable="false"
                 android:elevation="0dp"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
@@ -69,7 +70,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <org.mbach.lemonde.article.ScrollFeedbackRecyclerView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/articleActivityRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -77,9 +78,7 @@
         android:paddingRight="8dp"
         android:paddingBottom="80dp"
         android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-    </org.mbach.lemonde.article.ScrollFeedbackRecyclerView>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <ProgressBar
         android:id="@+id/articleLoader"

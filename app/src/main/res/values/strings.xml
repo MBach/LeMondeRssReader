@@ -31,11 +31,6 @@
     <string name="transition_open_article">transition_open_article</string>
     <string name="open_tweet_external">Voir dans Twitter</string>
 
-    <!-- ArticleActivity: Right menu settings -->
-    <string name="action_share">Partager…</string>
-    <string name="action_share_facebook">Partager sur Facebook</string>
-    <string name="action_share_twitter">Partager sur Twitter</string>
-
     <!-- Bubble tag of article -->
     <string name="paid_article">Article Abonnés</string>
     <string name="video_article">Vidéo</string>

@@ -14,11 +14,10 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.transition.Slide;
@@ -81,18 +80,40 @@ public class ArticleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemeUtils.applyTheme(getBaseContext(), getTheme());
+        ThemeUtils.applyTheme(this, getTheme());
         //initActivityTransitions();
-        setContentView(R.layout.activity_article);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        ScrollFeedbackRecyclerView scrollFeedbackRecyclerView = findViewById(R.id.articleActivityRecyclerView);
-        scrollFeedbackRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        scrollFeedbackRecyclerView.setAdapter(articleAdapter);
 
+        setContentView(R.layout.activity_article);
+
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        RecyclerView recyclerView = findViewById(R.id.articleActivityRecyclerView);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(articleAdapter);
+        Toolbar toolbar = findViewById(R.id.toolbarArticle);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        /*recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+                Log.d(TAG, "onInterceptTouchEvent");
+                Log.d(TAG, child.toString());
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                Log.d(TAG, "onTouchEvent");
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean b) {
+
+            }
+        });*/
 
         fab = findViewById(R.id.fab);
         //initFabTransitions();
@@ -110,6 +131,23 @@ public class ArticleActivity extends AppCompatActivity {
             }
         });
 
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
+                    fab.setVisibility(View.VISIBLE);
+                } else {
+                    fab.setVisibility(View.INVISIBLE);
+                }
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
+
         //ViewCompat.setTransitionName(appBarLayout, Constants.EXTRA_RSS_IMAGE);
         //supportPostponeEnterTransition();
 
@@ -117,7 +155,7 @@ public class ArticleActivity extends AppCompatActivity {
         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
         collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
 
-        Picasso.with(getBaseContext())
+        Picasso.with(this)
                 .load(extras.getString(Constants.EXTRA_RSS_IMAGE))
                 .into((ImageView) findViewById(R.id.imageArticle));
 
@@ -143,16 +181,15 @@ public class ArticleActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+        Log.d(TAG, "ici");
+
         switch (id) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            /*case R.id.action_share_facebook:
-                Log.d(TAG, "share on facebook");
+            case R.id.action_share:
+                Log.d(TAG, "share");
                 return true;
-            case R.id.action_share_twitter:
-                Log.d(TAG, "share on twitter");
-                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -160,31 +197,12 @@ public class ArticleActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean shareOnSocialNetworks = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
         if (shareOnSocialNetworks) {
             getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
-            MenuItem item = menu.findItem(R.id.action_share);
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-            /*MenuItem shareFbItem = menu.getItem(0);
-            MenuItem shareTwitterItem = menu.getItem(1);
-            /*if (ThemeUtils.isDarkTheme(getBaseContext())) {
-                shareFbItem.setIcon(R.drawable.icon_fb_dark_24dp);
-                shareTwitterItem.setIcon(R.drawable.icon_twitter_dark_24dp);
-            } else {
-                shareFbItem.setIcon(R.drawable.icon_fb_light_24dp);
-                shareTwitterItem.setIcon(R.drawable.icon_twitter_light_24dp);
-            }*/
         }
         return true;
-    }
-
-    private ShareActionProvider shareActionProvider;
-
-    private void setShareIntent(Intent shareIntent) {
-        if (shareActionProvider != null) {
-            shareActionProvider.setShareIntent(shareIntent);
-        }
     }
 
     private void initActivityTransitions() {
@@ -300,13 +318,13 @@ public class ArticleActivity extends AppCompatActivity {
         @Override
         public void onResponse(String response) {
             Document commentDoc = Jsoup.parse(response);
-            int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
+            int defaultText = ThemeUtils.getStyleableColor(ArticleActivity.this, R.styleable.CustomTheme_defaultText);
 
             List<Model> items = new ArrayList<>();
             // Extract header
             Elements header = commentDoc.select("[itemprop='InteractionCount']");
             if (atLeastOneChild(header)) {
-                TextView commentHeader = new TextView(getBaseContext());
+                TextView commentHeader = new TextView(ArticleActivity.this);
                 commentHeader.setText(String.format("Commentaires %s", header.text()));
                 commentHeader.setTypeface(null, Typeface.BOLD);
                 commentHeader.setTextColor(defaultText);
@@ -321,14 +339,14 @@ public class ArticleActivity extends AppCompatActivity {
                 if (atLeastOneChild(refs)) {
                     // Clear date
                     refs.select("span").remove();
-                    TextView author = new TextView(getBaseContext());
+                    TextView author = new TextView(ArticleActivity.this);
                     author.setTypeface(null, Typeface.BOLD);
                     author.setText(refs.text());
                     author.setTextColor(defaultText);
 
                     Elements commentComment = refs.next();
                     if (atLeastOneChild(commentComment)) {
-                        TextView content = new TextView(getBaseContext());
+                        TextView content = new TextView(ArticleActivity.this);
                         content.setText(commentComment.first().text());
                         content.setTextColor(defaultText);
                         if (comment.hasClass("reponse")) {
@@ -391,13 +409,13 @@ public class ArticleActivity extends AppCompatActivity {
      */
     @NonNull
     private List<Model> extractStandardArticle(@NonNull Elements articles) {
-        TextView headLine = new TextView(getBaseContext());
-        TextView authors = new TextView(getBaseContext());
-        TextView dates = new TextView(getBaseContext());
-        TextView description = new TextView(getBaseContext());
+        TextView headLine = new TextView(this);
+        TextView authors = new TextView(this);
+        TextView dates = new TextView(this);
+        TextView description = new TextView(this);
 
-        int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
-        int authorDateText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_authorDateText);
+        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
+        int authorDateText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_authorDateText);
 
         headLine.setTextColor(defaultText);
         description.setTextColor(defaultText);
@@ -437,13 +455,13 @@ public class ArticleActivity extends AppCompatActivity {
             return new ArrayList<>();
         }
 
-        TextView headLine = new TextView(getBaseContext());
-        TextView authors = new TextView(getBaseContext());
-        TextView dates = new TextView(getBaseContext());
-        TextView content = new TextView(getBaseContext());
+        TextView headLine = new TextView(this);
+        TextView authors = new TextView(this);
+        TextView dates = new TextView(this);
+        TextView content = new TextView(this);
 
-        int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
-        int authorDateText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_authorDateText);
+        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
+        int authorDateText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_authorDateText);
 
         headLine.setTextColor(defaultText);
         content.setTextColor(defaultText);
@@ -486,11 +504,11 @@ public class ArticleActivity extends AppCompatActivity {
     @NonNull
     private List<Model> extractBlogArticle(@NonNull Element content) {
         Log.d(TAG, "extractBlog");
-        TextView headLine = new TextView(getBaseContext());
-        TextView dates = new TextView(getBaseContext());
+        TextView headLine = new TextView(this);
+        TextView dates = new TextView(this);
 
-        int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
-        int authorDateText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_authorDateText);
+        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
+        int authorDateText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_authorDateText);
 
         headLine.setTextColor(defaultText);
         dates.setTextColor(authorDateText);
@@ -523,7 +541,7 @@ public class ArticleActivity extends AppCompatActivity {
 
             for (int i = 0; i < element.children().size(); i++) {
                 Element child = element.children().get(i);
-                TextView textView = new TextView(getBaseContext());
+                TextView textView = new TextView(this);
                 textView.setText(child.text());
                 textView.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
                 textView.setTextColor(defaultText);
@@ -563,10 +581,10 @@ public class ArticleActivity extends AppCompatActivity {
 
     @NonNull
     private List<Model> extractParagraphs(@NonNull Element article) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
 
-        int defaultText = ThemeUtils.getStyleableColor(getBaseContext(), R.styleable.CustomTheme_defaultText);
+        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
 
         List<Model> p = new ArrayList<>();
         Elements articleBody = article.select("[itemprop='articleBody']");
@@ -590,7 +608,7 @@ public class ArticleActivity extends AppCompatActivity {
                     boolean hasGraph = !element.select("div.graphe").isEmpty();
                     boolean hasScript = !element.select("script").isEmpty();
                     if (hasGraph && hasScript) {
-                        GraphExtractor graphExtractor = new GraphExtractor(getBaseContext(), element.select("script").html());
+                        GraphExtractor graphExtractor = new GraphExtractor(this, element.select("script").html());
                         Chart graph = graphExtractor.generate();
                         if (graph != null) {
                             p.add(new Model(GraphExtractor.getModelType(graph), graph));
@@ -602,14 +620,14 @@ public class ArticleActivity extends AppCompatActivity {
                 if (element.is("blockquote.twitter-tweet")) {
                     //element.remove();
                     if (displayTweets) {
-                        TextView content = new TextView(getBaseContext());
+                        TextView content = new TextView(this);
                         content.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
-                        Button link = new Button(getBaseContext());
+                        Button link = new Button(this);
                         Elements links = element.select("a[href]");
                         if (atLeastOneChild(links)) {
                             link.setContentDescription("https:" + links.first().attr("href"));
                         }
-                        CardView cardView = new CardView(getBaseContext());
+                        CardView cardView = new CardView(this);
                         cardView.addView(content);
                         cardView.addView(link);
                         p.add(new Model(Model.TWEET_TYPE, cardView));
@@ -630,7 +648,7 @@ public class ArticleActivity extends AppCompatActivity {
                     continue;
                 }
 
-                TextView t = new TextView(getBaseContext());
+                TextView t = new TextView(this);
                 t.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
                 t.setTextColor(defaultText);
 

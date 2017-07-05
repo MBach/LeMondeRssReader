@@ -77,6 +77,9 @@ public class ArticleActivity extends AppCompatActivity {
     private String commentsURI;
     private final ArticleAdapter articleAdapter = new ArticleAdapter();
 
+    private String shareText;
+    private String shareLink;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,26 +97,6 @@ public class ArticleActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
-        /*recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
-                Log.d(TAG, "onInterceptTouchEvent");
-                Log.d(TAG, child.toString());
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-                Log.d(TAG, "onTouchEvent");
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean b) {
-
-            }
-        });*/
 
         fab = findViewById(R.id.fab);
         //initFabTransitions();
@@ -163,7 +146,8 @@ public class ArticleActivity extends AppCompatActivity {
         if (REQUEST_QUEUE == null) {
             REQUEST_QUEUE = Volley.newRequestQueue(this);
         }
-        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, extras.getString(Constants.EXTRA_RSS_LINK), articleReceived, errorResponse));
+        shareLink = extras.getString(Constants.EXTRA_RSS_LINK);
+        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
     }
 
     @Override
@@ -176,22 +160,15 @@ public class ArticleActivity extends AppCompatActivity {
         super.onResume();
     }
 
-
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        Log.d(TAG, "ici");
-
         switch (id) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.action_share:
-                Log.d(TAG, "share");
-                return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return true;
         }
     }
 
@@ -201,6 +178,18 @@ public class ArticleActivity extends AppCompatActivity {
         boolean shareOnSocialNetworks = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
         if (shareOnSocialNetworks) {
             getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
+            menu.findItem(R.id.action_share).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    Log.d(TAG, "MENU ?");
+                    Intent shareIntent = new Intent();
+                    shareIntent.setAction(Intent.ACTION_SEND);
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, shareText + " " + shareLink);
+                    shareIntent.setType("text/plain");
+                    startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.share_article)));
+                    return false;
+                }
+            });
         }
         return true;
     }
@@ -431,7 +420,8 @@ public class ArticleActivity extends AppCompatActivity {
         headLine.setText(extractAttr(article, ATTR_HEADLINE));
         authors.setText(extractAttr(article, ATTR_AUTHOR));
         dates.setText(extractDates(article));
-        description.setText(extractAttr(article, ATTR_DESCRIPTION));
+        shareText = extractAttr(article, ATTR_DESCRIPTION);
+        description.setText(shareText);
 
         List<Model> views = new ArrayList<>();
         views.add(new Model(headLine));

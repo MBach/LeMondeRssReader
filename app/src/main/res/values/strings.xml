@@ -30,6 +30,7 @@
     <string name="no_more_comments_to_load">Pas de nouveau commentaire</string>
     <string name="transition_open_article">transition_open_article</string>
     <string name="open_tweet_external">Voir dans Twitter</string>
+    <string name="share_article">Partager cet article</string>
 
     <!-- Bubble tag of article -->
     <string name="paid_article">Article Abonnés</string>
@@ -50,8 +51,6 @@
     <string name="preference_app_dark_theme">Thème sombre</string>
     <string name="preference_share_icons">Icônes réseaux sociaux</string>
     <string name="preference_share_description">Activer le partage d’un article sur Facebook ou sur Twitter</string>
-
-
 
     <string name="title_activity_login">Connexion</string>
 

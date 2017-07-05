@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bwq="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_share"
         android:icon="@android:drawable/ic_menu_share"
         android:orderInCategory="100"
         android:title=""
-        bwq:actionProviderClass="android.support.v7.widget.ShareActionProvider"
-        bwq:showAsAction="always" />
+        app:showAsAction="always" />
 </menu>

@@ -24,10 +24,7 @@ class RssParser {
 
     private static final String TAG_TITLE = "title";
     private static final String TAG_LINK = "link";
-    private static final String TAG_DESCRIPTION = "description";
-    // private static final String TAG_GUID = "guid";
     private static final String TAG_ENCLOSURE = "enclosure";
-    // private static final String TAG_PUBDATE = "pubDate";
     private static final String TAG_RSS = "rss";
     private static final String TAG_ITEM = "item";
 
@@ -90,8 +87,6 @@ class RssParser {
                             item.setLink(text);
                         } else if (tagName.equalsIgnoreCase(TAG_TITLE)) {
                             item.setTitle(text);
-                        } else if (tagName.equalsIgnoreCase(TAG_DESCRIPTION)) {
-                            item.setDescription(text);
                         } else if (tagName.equalsIgnoreCase(TAG_ENCLOSURE)) {
                             text = parser.getAttributeValue(null, "url");
                             item.setEnclosure(text);

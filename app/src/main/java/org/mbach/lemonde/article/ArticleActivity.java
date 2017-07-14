@@ -260,6 +260,8 @@ public class ArticleActivity extends AppCompatActivity {
                     // Standard article
                     items = extractStandardArticle(articles);
                     if (doc.getElementById("teaser_article") != null) {
+                        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
+                        collapsingToolbar.setContentScrimResource(R.color.accent);
                         setTagInHeader(R.string.paid_article, R.color.accent, Color.BLACK);
                     }
                     // After parsing the article, start a new request for comments

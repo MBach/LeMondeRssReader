@@ -4,10 +4,14 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -27,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
+
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
@@ -35,6 +40,7 @@ import org.mbach.lemonde.R;
 import org.mbach.lemonde.article.ArticleActivity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * MainActivity class.
@@ -56,36 +62,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final SparseIntArray colorCats = new SparseIntArray();
     private MenuItem selectedMenuItem;
 
-    private void initCategories() {
-        rssCats.append(R.id.cat_news, Constants.CAT_NEWS);
-        rssCats.append(R.id.cat_international, Constants.CAT_INTERNATIONAL);
-        rssCats.append(R.id.cat_politics, Constants.CAT_POLITICS);
-        rssCats.append(R.id.cat_society, Constants.CAT_SOCIETY);
-        rssCats.append(R.id.cat_economy, Constants.CAT_ECONOMY);
-        rssCats.append(R.id.cat_culture, Constants.CAT_CULTURE);
-        rssCats.append(R.id.cat_ideas, Constants.CAT_IDEAS);
-        rssCats.append(R.id.cat_planet, Constants.CAT_PLANET);
-        rssCats.append(R.id.cat_sports, Constants.CAT_SPORTS);
-        rssCats.append(R.id.cat_sciences, Constants.CAT_SCIENCES);
-        rssCats.append(R.id.cat_pixels, Constants.CAT_PIXELS);
-        rssCats.append(R.id.cat_campus, Constants.CAT_CAMPUS);
-        rssCats.append(R.id.cat_decoders, Constants.CAT_DECODERS);
-
-        colorCats.append(R.id.cat_news, R.color.cat_color_news);
-        colorCats.append(R.id.cat_international, R.color.cat_color_international);
-        colorCats.append(R.id.cat_politics, R.color.cat_color_politics);
-        colorCats.append(R.id.cat_society, R.color.cat_color_society);
-        colorCats.append(R.id.cat_economy, R.color.cat_color_economy);
-        colorCats.append(R.id.cat_culture, R.color.cat_color_culture);
-        colorCats.append(R.id.cat_ideas, R.color.cat_color_ideas);
-        colorCats.append(R.id.cat_planet, R.color.cat_color_planet);
-        colorCats.append(R.id.cat_sports, R.color.cat_color_sports);
-        colorCats.append(R.id.cat_sciences, R.color.cat_color_sciences);
-        colorCats.append(R.id.cat_pixels, R.color.cat_color_pixels);
-        colorCats.append(R.id.cat_campus, R.color.cat_color_campus);
-        colorCats.append(R.id.cat_decoders, R.color.cat_color_decoders);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         initToolbar();
+        initDynamicShortcuts();
         setupDrawerLayout();
 
         mainActivityRecyclerView.setAdapter(adapter);
@@ -120,55 +97,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mainActivityRecyclerView.scheduleLayoutAnimation();
     }
 
-    /**
-     * Initialize the toolbar with a custom icon.
-     */
-    private void initToolbar() {
-        final Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            if (ThemeUtils.isDarkTheme(getBaseContext())) {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu_white);
-            } else {
-                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu_black);
-            }
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.mainactivity_right_menu, menu);
         return true;
-    }
-
-    /**
-     * Fetch RSS news from a category by delegating calling and parsing to a dedicated service {@link RssService} in order to keep UI non blocking.
-     *
-     * @param category the news category to fetch from all available news feeds
-     * @see RssService
-     */
-    private void getFeedFromCategory(final String category) {
-        ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-        if (isConnected) {
-            PendingIntent pendingResult = createPendingResult(GET_LATEST_RSS_FEED, new Intent(), 0);
-            Intent intent = new Intent(getApplicationContext(), RssService.class);
-            intent.putExtra(RssService.CATEGORY, category);
-            intent.putExtra(RssService.PENDING_RESULT, pendingResult);
-            startService(intent);
-        } else {
-            Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
-                    .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            getFeedFromCategory(category);
-                        }
-                    }).show();
-        }
-        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -209,7 +141,121 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String category = rssCats.get(menuItem.getItemId());
         getFeedFromCategory(category);
         drawerLayout.closeDrawers();
+
+        // Save the category that has been selected by one, in order to create dynamic shortcuts.
+        // It's based on how often this category is selected: the most selected in placed at the bottom on a long touch event
+        // The 4th most selected is placed at the top
+        // TODO
+        StatisticDB statisticDB = new StatisticDB(this);
+        statisticDB.saveSelectedEntry(menuItem.getItemId());
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_account:
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                return true;
+            case R.id.action_settings:
+                startActivityForResult(new Intent(getApplicationContext(), SettingsActivity.class), FROM_SETTINGS_ACTIVITY);
+                return true;
+            case android.R.id.home:
+                drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void initCategories() {
+        rssCats.append(R.id.cat_news, Constants.CAT_NEWS);
+        rssCats.append(R.id.cat_international, Constants.CAT_INTERNATIONAL);
+        rssCats.append(R.id.cat_politics, Constants.CAT_POLITICS);
+        rssCats.append(R.id.cat_society, Constants.CAT_SOCIETY);
+        rssCats.append(R.id.cat_economy, Constants.CAT_ECONOMY);
+        rssCats.append(R.id.cat_culture, Constants.CAT_CULTURE);
+        rssCats.append(R.id.cat_ideas, Constants.CAT_IDEAS);
+        rssCats.append(R.id.cat_planet, Constants.CAT_PLANET);
+        rssCats.append(R.id.cat_sports, Constants.CAT_SPORTS);
+        rssCats.append(R.id.cat_sciences, Constants.CAT_SCIENCES);
+        rssCats.append(R.id.cat_pixels, Constants.CAT_PIXELS);
+        rssCats.append(R.id.cat_campus, Constants.CAT_CAMPUS);
+        rssCats.append(R.id.cat_decoders, Constants.CAT_DECODERS);
+
+        colorCats.append(R.id.cat_news, R.color.cat_color_news);
+        colorCats.append(R.id.cat_international, R.color.cat_color_international);
+        colorCats.append(R.id.cat_politics, R.color.cat_color_politics);
+        colorCats.append(R.id.cat_society, R.color.cat_color_society);
+        colorCats.append(R.id.cat_economy, R.color.cat_color_economy);
+        colorCats.append(R.id.cat_culture, R.color.cat_color_culture);
+        colorCats.append(R.id.cat_ideas, R.color.cat_color_ideas);
+        colorCats.append(R.id.cat_planet, R.color.cat_color_planet);
+        colorCats.append(R.id.cat_sports, R.color.cat_color_sports);
+        colorCats.append(R.id.cat_sciences, R.color.cat_color_sciences);
+        colorCats.append(R.id.cat_pixels, R.color.cat_color_pixels);
+        colorCats.append(R.id.cat_campus, R.color.cat_color_campus);
+        colorCats.append(R.id.cat_decoders, R.color.cat_color_decoders);
+    }
+
+    /**
+     * Initialize the toolbar with a custom icon.
+     */
+    private void initToolbar() {
+        final Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            if (ThemeUtils.isDarkTheme(getBaseContext())) {
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu_white);
+            } else {
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu_black);
+            }
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    /**
+     *
+     */
+    private void initDynamicShortcuts() {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+            ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "second_shortcut")
+                    .setShortLabel("dynamic shortcut")
+                    .setLongLabel("dynamic shortcut long label")
+                    //.setIcon(Icon.createWithResource(this, R.mipmap.ic_launcher))
+                    .setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com")))
+                    .build();
+            shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
+        }
+    }
+
+    /**
+     * Fetch RSS news from a category by delegating calling and parsing to a dedicated service {@link RssService} in order to keep UI non blocking.
+     *
+     * @param category the news category to fetch from all available news feeds
+     * @see RssService
+     */
+    private void getFeedFromCategory(final String category) {
+        ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        if (isConnected) {
+            PendingIntent pendingResult = createPendingResult(GET_LATEST_RSS_FEED, new Intent(), 0);
+            Intent intent = new Intent(getApplicationContext(), RssService.class);
+            intent.putExtra(RssService.CATEGORY, category);
+            intent.putExtra(RssService.PENDING_RESULT, pendingResult);
+            startService(intent);
+        } else {
+            Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
+                    .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            getFeedFromCategory(category);
+                        }
+                    }).show();
+        }
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     /**
@@ -248,22 +294,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_account:
-                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                return true;
-            case R.id.action_settings:
-                //startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
-                startActivityForResult(new Intent(getApplicationContext(), SettingsActivity.class), FROM_SETTINGS_ACTIVITY);
-                return true;
-            case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

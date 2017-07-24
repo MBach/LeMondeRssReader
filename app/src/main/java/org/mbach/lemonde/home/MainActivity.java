@@ -31,7 +31,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
-
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
@@ -145,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Save the category that has been selected by one, in order to create dynamic shortcuts.
         // It's based on how often this category is selected: the most selected in placed at the bottom on a long touch event
         // The 4th most selected is placed at the top
-        // TODO
         StatisticDB statisticDB = new StatisticDB(this);
         statisticDB.saveSelectedEntry(menuItem.getItemId());
         return true;

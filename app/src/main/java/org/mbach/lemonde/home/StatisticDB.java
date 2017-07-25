@@ -4,6 +4,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * StatisticDB class.
@@ -54,5 +58,27 @@ class StatisticDB {
         }
         catWasSavedOnce.close();
         close();
+    }
+
+    List<Integer> getSavedEntries() {
+        open();
+        Cursor entries = sqLiteDatabase.query(StatisticSQLiteOpenHelper.TABLE_STATS,
+                new String[] { StatisticSQLiteOpenHelper.COL_CATEGORY },
+                StatisticSQLiteOpenHelper.COL_CATEGORY,
+                null, null,null,
+                StatisticSQLiteOpenHelper.COL_TIMES_OPENED + " DESC, " + StatisticSQLiteOpenHelper.COL_LAST_OPENED + " DESC", "4");
+        List<Integer> results = new ArrayList<>();
+        if (entries.getCount() != 0) {
+            while (entries.moveToNext()) {
+                int cat = entries.getInt(0);
+                //int total = entries.getInt(1);
+                //long time = entries.getLong(2);
+                //Log.d(TAG, "Cat: " + cat + ", total: " + total + ", time: " + time);
+                results.add(cat);
+            }
+        }
+        entries.close();
+        close();
+        return results;
     }
 }

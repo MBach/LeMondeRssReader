@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Menu;
@@ -39,7 +40,7 @@ import org.mbach.lemonde.R;
 import org.mbach.lemonde.article.ArticleActivity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * MainActivity class.
@@ -141,11 +142,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getFeedFromCategory(category);
         drawerLayout.closeDrawers();
 
-        // Save the category that has been selected by one, in order to create dynamic shortcuts.
-        // It's based on how often this category is selected: the most selected in placed at the bottom on a long touch event
-        // The 4th most selected is placed at the top
-        StatisticDB statisticDB = new StatisticDB(this);
-        statisticDB.saveSelectedEntry(menuItem.getItemId());
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            // Save the category that has been selected by one, in order to create dynamic shortcuts.
+            // It's based on how often this category is selected: the most selected in placed at the bottom on a long touch event
+            // The 4th most selected is placed at the top
+            StatisticDB statisticDB = new StatisticDB(this);
+            statisticDB.saveSelectedEntry(menuItem.getItemId());
+        }
         return true;
     }
 
@@ -217,14 +220,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     private void initDynamicShortcuts() {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            StatisticDB statisticDB = new StatisticDB(this);
+            List<Integer> entries = statisticDB.getSavedEntries();
+            List<ShortcutInfo> dynamicShortcuts = new ArrayList<>();
             ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-            ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "second_shortcut")
-                    .setShortLabel("dynamic shortcut")
-                    .setLongLabel("dynamic shortcut long label")
-                    //.setIcon(Icon.createWithResource(this, R.mipmap.ic_launcher))
-                    .setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com")))
-                    .build();
-            shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
+
+            NavigationView navigationView = findViewById(R.id.navigation_view);
+            Menu menu = navigationView.getMenu();
+            Drawable icon = getDrawable(R.drawable.circle);
+            for (Integer entry : entries) {
+                for (int i = 0; i < menu.size(); i++) {
+                    MenuItem menuItem = menu.getItem(i);
+                    if (menuItem.getItemId() == entry) {
+
+                        ShortcutInfo.Builder shortcut = new ShortcutInfo.Builder(this, entry + "_shortcut")
+                                .setShortLabel(menuItem.getTitleCondensed())
+                                .setLongLabel(menuItem.getTitle())
+                                .setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com")));
+
+                        int colorId = colorCats.get(entry);
+                        if (colorId > 0 && icon != null) {
+                            Drawable.ConstantState constantState = icon.getConstantState();
+                            if (constantState != null) {
+                                Drawable clone = constantState.newDrawable();
+                                int color = getColor(colorId);
+                                clone.setColorFilter(color, PorterDuff.Mode.SRC);
+                                //Bitmap bitmap = ((GradientDrawable)clone).get();
+                                //shortcut.setIcon(bitmap);
+                            }
+                        }
+                        Log.d("MainActivity", "label " + menuItem.getTitle());
+                        dynamicShortcuts.add(shortcut.build());
+                        //break;
+                    }
+                }
+            }
+            if (!dynamicShortcuts.isEmpty()) {
+                shortcutManager.setDynamicShortcuts(dynamicShortcuts);
+            }
         }
     }
 

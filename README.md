@@ -8,6 +8,7 @@ This App was also built to be as fastest and simple as possible. Material design
 * A collapsing toolbar layout when you're consulting an article from the feed: expanded toolbar with header image is fading to simple toolbar
 * [Settings activity](https://developer.android.com/reference/android/preference/PreferenceActivity.html) lets you customize the article you're currently reading, by excluding unnecessary content (like tweets), to leverage written content instead
 * ArticleActivity is using a [RecyclerView](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html) where items are layout vertically. It has a complex [RecyclerView.Adapter](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Adapter.html) which holds at least more than one [ViewHolder](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.ViewHolder.html)
+* For Android 7.1 (API 25): [dynamic App Shortcuts](https://developer.android.com/guide/topics/ui/shortcuts.html#dynamic) to quickly open the category that you're reading the most!
 
 ### Comments
 
@@ -44,13 +45,33 @@ private int getStyleableColor(int resourceId) {
 }
 ```
 
+### Dynamic App Shortcuts
+
+Introduced with Android 7.1, App Shortcuts are a way to provide a link to specific content with a long press on the App Icon. In LeMondeRssReader, it's implemented on how often one is using the navbar: every time one is clicking on a category, this action is tracked to make basic statistics.
+
+An embedded SQLite database stores this:
+
+```java
+    private static final String CREATE_DATABASE = "CREATE TABLE " + TABLE_STATS + " ("
+            + COL_CATEGORY + " INTEGER PRIMARY KEY, "
+            + COL_TIMES_OPENED + " INTEGER NOT NULL, "
+            + COL_LAST_OPENED + " INTEGER NOT NULL);";
+```
+
+Another small class has only 2 methods in order to track just what is useful for the user:
+
+```java
+    void saveSelectedEntry(int categoryId) { ... }
+    List<Integer> getSavedEntries() { ... }
+```
+
 ## Requirements
 
 A smartphone at least on Android 6.0
 
 ## Download
 
-You can get the app directly on GitHub, here is the [v1.3](https://github.com/MBach/LeMondeRssReader/releases/download/v1.3/LeMondeRssReader-1.3.apk)
+You can get the app directly on GitHub, here is the [v1.4](https://github.com/MBach/LeMondeRssReader/releases/download/v1.4/LeMondeRssReader-1.4.apk)
 
 ## Video
 [Overview of the App](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)
@@ -63,6 +84,8 @@ You can get the app directly on GitHub, here is the [v1.3](https://github.com/MB
 ![Tweet](https://mbach.github.io/LeMondeRssReader/screenshots/tweet.jpg)
 
 ![Article](https://mbach.github.io/LeMondeRssReader/screenshots/fab_and_chart.png)
+
+![Dynamic App Shortcut](https://mbach.github.io/LeMondeRssReader/screenshots/dynamic_app_shortcut.jpg)
 
 ## Support or Contact
 

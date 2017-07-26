@@ -6,8 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -24,7 +28,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Menu;
@@ -50,7 +53,6 @@ import java.util.List;
  */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    //private static final String TAG = "MainActivity";
     private static final int GET_LATEST_RSS_FEED = 0;
     private static final int FROM_SETTINGS_ACTIVITY = 1;
 
@@ -86,9 +88,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setupDrawerLayout();
 
         mainActivityRecyclerView.setAdapter(adapter);
-
-        setTitle(getString(R.string.category_news));
-        getFeedFromCategory(Constants.CAT_NEWS);
+        Bundle bundle = getIntent().getExtras();
+        if (bundle == null) {
+            setTitle(getString(R.string.category_news));
+            getFeedFromCategory(Constants.CAT_NEWS);
+        } else {
+            int category = getIntent().getIntExtra(Constants.EXTRA_NEWS_CATEGORY, -1);
+            if (category > 0) {
+                setTitle(getIntent().getStringExtra(Constants.EXTRA_TITLE_CATEGORY));
+                getFeedFromCategory(rssCats.get(category));
+            } else {
+                setTitle(getString(R.string.category_news));
+                getFeedFromCategory(Constants.CAT_NEWS);
+            }
+        }
     }
 
     @Override
@@ -219,45 +232,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      *
      */
     private void initDynamicShortcuts() {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            StatisticDB statisticDB = new StatisticDB(this);
-            List<Integer> entries = statisticDB.getSavedEntries();
-            List<ShortcutInfo> dynamicShortcuts = new ArrayList<>();
-            ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
+            return;
+        }
+        List<ShortcutInfo> dynamicShortcuts = new ArrayList<>();
 
-            NavigationView navigationView = findViewById(R.id.navigation_view);
-            Menu menu = navigationView.getMenu();
-            Drawable icon = getDrawable(R.drawable.circle);
-            for (Integer entry : entries) {
-                for (int i = 0; i < menu.size(); i++) {
-                    MenuItem menuItem = menu.getItem(i);
-                    if (menuItem.getItemId() == entry) {
+        NavigationView navigationView = findViewById(R.id.navigation_view);
+        Menu menu = navigationView.getMenu();
 
-                        ShortcutInfo.Builder shortcut = new ShortcutInfo.Builder(this, entry + "_shortcut")
-                                .setShortLabel(menuItem.getTitleCondensed())
-                                .setLongLabel(menuItem.getTitle())
-                                .setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com")));
+        // A colored icon will be generated for every dynamic shortcut
+        Drawable drawable = getDrawable(R.drawable.circle);
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+        for (Integer entry : new StatisticDB(this).getSavedEntries()) {
+            for (int i = 0; i < menu.size(); i++) {
+                MenuItem menuItem = menu.getItem(i);
+                if (menuItem.getItemId() == entry) {
+                    Intent intent = new Intent(Intent.ACTION_MAIN, Uri.EMPTY, this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.putExtra(Constants.EXTRA_NEWS_CATEGORY, menuItem.getItemId());
+                    intent.putExtra(Constants.EXTRA_TITLE_CATEGORY, menuItem.getTitle());
+                    intent.putExtra(Constants.EXTRA_INDEX_CATEGORY, i);
 
-                        int colorId = colorCats.get(entry);
-                        if (colorId > 0 && icon != null) {
-                            Drawable.ConstantState constantState = icon.getConstantState();
-                            if (constantState != null) {
-                                Drawable clone = constantState.newDrawable();
-                                int color = getColor(colorId);
-                                clone.setColorFilter(color, PorterDuff.Mode.SRC);
-                                //Bitmap bitmap = ((GradientDrawable)clone).get();
-                                //shortcut.setIcon(bitmap);
-                            }
-                        }
-                        Log.d("MainActivity", "label " + menuItem.getTitle());
-                        dynamicShortcuts.add(shortcut.build());
-                        //break;
+                    ShortcutInfo.Builder shortcut = new ShortcutInfo.Builder(this, entry + "_shortcut")
+                            .setShortLabel(menuItem.getTitleCondensed())
+                            .setLongLabel(menuItem.getTitle())
+                            .setIntent(intent);
+
+                    int colorId = colorCats.get(entry);
+                    if (colorId > 0 && drawable != null) {
+                        Bitmap bitmap = Bitmap.createBitmap(192, 192, conf);
+                        Canvas canvas = new Canvas(bitmap);
+                        Paint paint = new Paint();
+                        paint.setColor(getColor(colorId));
+                        paint.setStyle(Paint.Style.FILL);
+                        canvas.drawCircle(96, 96, 80, paint);
+                        shortcut.setIcon(Icon.createWithBitmap(bitmap));
                     }
+                    dynamicShortcuts.add(shortcut.build());
+                    break;
                 }
             }
-            if (!dynamicShortcuts.isEmpty()) {
-                shortcutManager.setDynamicShortcuts(dynamicShortcuts);
-            }
+        }
+        if (!dynamicShortcuts.isEmpty()) {
+            getSystemService(ShortcutManager.class).setDynamicShortcuts(dynamicShortcuts);
         }
     }
 
@@ -297,7 +313,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.navigation_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.getMenu().getItem(1).setChecked(true);
         View header = navigationView.getHeaderView(0);
         header.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -306,8 +321,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawerLayout.closeDrawers();
             }
         });
-        Menu menu = navigationView.getMenu();
+
         Drawable icon = getDrawable(R.drawable.circle);
+        Menu menu = navigationView.getMenu();
+        if (getIntent().getExtras() == null) {
+            menu.getItem(1).setChecked(true);
+        } else {
+            int index = getIntent().getExtras().getInt(Constants.EXTRA_INDEX_CATEGORY, 1);
+            menu.getItem(index).setChecked(true);
+        }
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             int colorId = colorCats.get(item.getItemId());

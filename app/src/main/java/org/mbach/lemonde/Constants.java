@@ -30,6 +30,9 @@ public final class Constants {
 
     public static final String EXTRA_RSS_LINK = "RSS_LINK";
     public static final String EXTRA_NEWS_CATEGORY = "NEWS_CATEGORY";
+    public static final String EXTRA_TITLE_CATEGORY = "TITLE_CATEGORY";
+    public static final String EXTRA_INDEX_CATEGORY = "INDEX_CATEGORY";
+
     public static final String EXTRA_RSS_IMAGE = "org.mbach.lemonde.extraImage";
 
     public static final int PADDING_BOTTOM = 16;

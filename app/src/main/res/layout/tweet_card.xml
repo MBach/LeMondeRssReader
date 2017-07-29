@@ -1,11 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/tweet_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="4dp"
     android:layout_marginTop="4dp"
     android:background="?attr/colorBackgroundFloating"
-    android:elevation="2dp"
+    android:elevation="2dp" tools:targetApi="LOLLIPOP"
     android:orientation="vertical"
     android:paddingTop="24dp">
 

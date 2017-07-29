@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -134,10 +135,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     intent.putExtras(extras);
 
                     String transitionName = getString(R.string.transition_open_article);
-                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this,
-                            rssImage,
-                            transitionName);
-                    startActivity(intent, options.toBundle());
+                    if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this,
+                                rssImage,
+                                transitionName);
+                        startActivity(intent, options.toBundle());
+                    } else {
+                        startActivity(intent);
+                    }
                 }
             });
             mainActivityRecyclerView.setAdapter(adapter);
@@ -322,7 +327,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        Drawable icon = getDrawable(R.drawable.circle);
+        Drawable icon;
+        if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            icon = getDrawable(R.drawable.circle);
+        } else {
+            icon = getResources().getDrawable(R.drawable.circle);
+        }
         Menu menu = navigationView.getMenu();
         if (getIntent().getExtras() == null) {
             menu.getItem(1).setChecked(true);
@@ -338,9 +348,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Drawable.ConstantState constantState = icon.getConstantState();
                 if (constantState != null) {
                     Drawable clone = constantState.newDrawable();
-                    int color = getColor(colorId);
+                    int color = ContextCompat.getColor(getBaseContext(), colorId);
                     if (colorId == R.color.cat_color_news && ThemeUtils.isDarkTheme(getBaseContext())) {
-                        color = getColor(R.color.cat_color_news_dark);
+                        color = ContextCompat.getColor(getBaseContext(), R.color.cat_color_news_dark);
                     }
                     clone.setColorFilter(color, PorterDuff.Mode.SRC);
                     item.setIcon(clone);

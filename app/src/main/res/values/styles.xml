@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <color name="primary">#424242</color>
     <color name="primary_dark">#212121</color>
@@ -29,9 +29,9 @@
         <item name="authorDateText">#212121</item>
         <item name="colorControlHighlight">#ffab00</item> 
         <item name="colorAccent">#ffab00</item>
-        <item name="android:windowLightStatusBar">true</item>
         <item name="articleHeaderGradient">#88eeeeee</item>
         <item name="colorBackgroundDrawer">@color/primary_light_dark</item>
+        <item name="android:statusBarColor" tools:targetApi="lollipop">@android:color/black</item>
     </style>
 
     <!-- Colors for the drawer -->

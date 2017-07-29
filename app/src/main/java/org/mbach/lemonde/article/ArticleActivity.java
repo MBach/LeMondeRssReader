@@ -15,6 +15,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -191,10 +192,12 @@ public class ArticleActivity extends AppCompatActivity {
     }
 
     private void initActivityTransitions() {
-        Slide transition = new Slide();
-        transition.excludeTarget(android.R.id.statusBarBackground, true);
-        getWindow().setEnterTransition(transition);
-        getWindow().setReturnTransition(transition);
+        if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            Slide transition = new Slide();
+            transition.excludeTarget(android.R.id.statusBarBackground, true);
+            getWindow().setEnterTransition(transition);
+            getWindow().setReturnTransition(transition);
+        }
     }
 
     private void initFabTransitions() {
@@ -293,7 +296,7 @@ public class ArticleActivity extends AppCompatActivity {
     private void setTagInHeader(int stringId, int backgroundColor, int textColor) {
         TextView tagArticle = findViewById(R.id.tagArticle);
         tagArticle.setText(getString(stringId));
-        tagArticle.setBackgroundColor(getColor(backgroundColor));
+        tagArticle.setBackgroundColor(ContextCompat.getColor(getBaseContext(), backgroundColor));
         tagArticle.setTextColor(textColor);
         tagArticle.setVisibility(View.VISIBLE);
     }
@@ -673,16 +676,17 @@ public class ArticleActivity extends AppCompatActivity {
                     t.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM);
                     switch (cssClass) {
                         case TAG_FAKE:
-                            t.setBackgroundColor(getResources().getColor(R.color.tag_red, null));
+
+                            t.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.tag_red));
                             break;
                         case TAG_TRUE:
-                            t.setBackgroundColor(getResources().getColor(R.color.tag_green, null));
+                            t.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.tag_green));
                             break;
                         case TAG_MOSTLY_TRUE:
-                            t.setBackgroundColor(getResources().getColor(R.color.tag_yellow, null));
+                            t.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.tag_yellow));
                             break;
                         case TAG_FORGOTTEN:
-                            t.setBackgroundColor(getResources().getColor(R.color.tag_grey, null));
+                            t.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.tag_grey));
                             break;
                         default:
                             break;

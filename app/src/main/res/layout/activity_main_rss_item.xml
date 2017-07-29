@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/cardview_compat_inset_shadow"
@@ -13,7 +14,7 @@
         android:background="?attr/colorPrimaryDark"
         android:contentDescription="@string/image_from_article"
         android:scaleType="centerCrop"
-        android:transitionName="@string/transition_open_article" />
+        android:transitionName="@string/transition_open_article" tools:targetApi="LOLLIPOP" />
 
     <TextView
         android:id="@+id/rss_title"

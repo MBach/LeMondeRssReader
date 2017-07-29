@@ -33,7 +33,7 @@
                     android:fitsSystemWindows="true"
                     android:scaleType="centerCrop"
                     android:foreground="@drawable/gradient_shape"
-                    android:transitionName="@string/transition_open_article"
+                    android:transitionName="@string/transition_open_article" tools:targetApi="LOLLIPOP"
                     app:layout_collapseMode="parallax"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -62,7 +62,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:clickable="false"
-                android:elevation="0dp"
+                android:elevation="0dp" tools:targetApi="LOLLIPOP"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 

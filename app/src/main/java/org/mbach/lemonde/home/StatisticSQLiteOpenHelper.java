@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * @author Matthieu BACHELIER
  * @since 2017-07
  */
-public class StatisticSQLiteOpenHelper extends SQLiteOpenHelper {
+class StatisticSQLiteOpenHelper extends SQLiteOpenHelper {
 
     static final String TABLE_STATS = "table_stats";
     static final String COL_CATEGORY = "CATEGORY";

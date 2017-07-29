@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -472,7 +473,7 @@ public class ArticleActivity extends AppCompatActivity {
             els.select("h2").remove();
             els.select("span.txt_gris_soutenu").remove();
             els.select("#recos_videos_outbrain").remove();
-            content.setText(Html.fromHtml(els.html(), Html.FROM_HTML_MODE_COMPACT));
+            fromHtml(content, els.html());
         }
         List<Model> views = new ArrayList<>();
         views.add(new Model(headLine));
@@ -480,6 +481,14 @@ public class ArticleActivity extends AppCompatActivity {
         views.add(new Model(dates));
         views.add(new Model(content));
         return views;
+    }
+
+    private void fromHtml(TextView textView, String html) {
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            textView.setText(Html.fromHtml(html));
+        } else {
+            textView.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT));
+        }
     }
 
     /**
@@ -608,7 +617,7 @@ public class ArticleActivity extends AppCompatActivity {
                     //element.remove();
                     if (displayTweets) {
                         TextView content = new TextView(this);
-                        content.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
+                        fromHtml(content, element.html());
                         Button link = new Button(this);
                         Elements links = element.select("a[href]");
                         if (atLeastOneChild(links)) {
@@ -636,7 +645,7 @@ public class ArticleActivity extends AppCompatActivity {
                 }
 
                 TextView t = new TextView(this);
-                t.setText(Html.fromHtml(element.html(), Html.FROM_HTML_MODE_COMPACT));
+                fromHtml(t, element.html());
                 t.setTextColor(defaultText);
 
                 boolean hasIntertitre = element.is("h2.intertitre");

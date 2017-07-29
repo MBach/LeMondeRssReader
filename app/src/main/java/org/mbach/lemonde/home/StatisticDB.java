@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +15,9 @@ import java.util.List;
  * @since 2017-07
  */
 class StatisticDB {
-    private static final String TAG = "StatisticDB";
-
     private SQLiteDatabase sqLiteDatabase;
     private static final int DB_VERSION = 1;
-    private StatisticSQLiteOpenHelper statisticSQLiteOpenHelper;
+    private final StatisticSQLiteOpenHelper statisticSQLiteOpenHelper;
 
     private static final String DB_NAME = "stats.db";
 

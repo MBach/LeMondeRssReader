@@ -1,5 +1,6 @@
 package org.mbach.lemonde.article;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -85,9 +86,9 @@ class ArticleAdapter extends RecyclerView.Adapter {
             case Model.COMMENT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.GRAPH_TYPE_BARS:
-                return new ViewHolderChart(new HorizontalBarChart(parent.getContext()));
+                return new ViewHolderChart<>(new HorizontalBarChart(parent.getContext()));
             case Model.GRAPH_TYPE_COLUMNS:
-                return new ViewHolderChart(new BarChart(parent.getContext()));
+                return new ViewHolderChart<>(new BarChart(parent.getContext()));
         }
     }
 
@@ -109,7 +110,9 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 ((ViewHolderText) holder).text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
                 ((ViewHolderText) holder).text.setTypeface(textView.getTypeface());
                 ((ViewHolderText) holder).text.setTextColor(textView.getCurrentTextColor());
-                ((ViewHolderText) holder).text.setBackground(textView.getBackground());
+                if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                    ((ViewHolderText) holder).text.setBackground(textView.getBackground());
+                }
                 if (textView.getBackground() != null) {
                     ((ViewHolderText) holder).text.setAllCaps(true);
                 }

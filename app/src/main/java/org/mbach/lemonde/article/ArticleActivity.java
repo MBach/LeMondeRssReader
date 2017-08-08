@@ -256,7 +256,11 @@ public class ArticleActivity extends AppCompatActivity {
                     setTitle(category.text());
                 }
                 Elements articles = doc.getElementsByTag("article");
-                if (articles.isEmpty()) {
+                Element largeFormat = doc.getElementById("hors_format");
+                if (largeFormat != null) {
+                    items = new ArrayList<>();
+                    setTagInHeader(R.string.large_article, R.color.primary_dark, Color.WHITE);
+                } else if (articles.isEmpty()) {
                     // Video
                     items = extractVideo(doc);
                     setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);

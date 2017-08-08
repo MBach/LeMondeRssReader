@@ -36,6 +36,7 @@
     <string name="paid_article">Article Abonnés</string>
     <string name="video_article">Vidéo</string>
     <string name="blog_article">Article de blog</string>
+    <string name="large_article">Grands Formats</string>
     <string name="image_from_article">Image de l’article</string>
 
     <!-- Strings related to errors -->

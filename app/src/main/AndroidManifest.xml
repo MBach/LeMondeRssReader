@@ -34,13 +34,13 @@
         <!-- Article to display when one has clicked on an item previously loaded from the RSS feed -->
         <activity
             android:name=".article.ArticleActivity"
-            android:parentActivityName=".home.MainActivity" />
+            android:parentActivityName=".home.MainActivity" tools:targetApi="JELLY_BEAN" />
 
         <!-- Settings page -->
         <activity
             android:name=".settings.SettingsActivity"
             android:label="@string/action_settings"
-            android:parentActivityName=".home.MainActivity" />
+            android:parentActivityName=".home.MainActivity" tools:targetApi="JELLY_BEAN" />
 
         <!-- Account page -->
         <activity

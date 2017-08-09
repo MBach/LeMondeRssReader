@@ -131,19 +131,26 @@ public class ArticleActivity extends AppCompatActivity {
         //ViewCompat.setTransitionName(appBarLayout, Constants.EXTRA_RSS_IMAGE);
         //supportPostponeEnterTransition();
 
-        Bundle extras = getIntent().getExtras();
-        CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
-        collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
+        // If user is opening a link from another App, like a mail client for instance
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            shareLink = intent.getDataString();
+        } else {
+            Bundle extras = getIntent().getExtras();
+            CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
+            collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
 
-        Picasso.with(this)
-                .load(extras.getString(Constants.EXTRA_RSS_IMAGE))
-                .into((ImageView) findViewById(R.id.imageArticle));
+            Picasso.with(this)
+                    .load(extras.getString(Constants.EXTRA_RSS_IMAGE))
+                    .into((ImageView) findViewById(R.id.imageArticle));
+            shareLink = extras.getString(Constants.EXTRA_RSS_LINK);
+        }
 
         // Start async job
         if (REQUEST_QUEUE == null) {
             REQUEST_QUEUE = Volley.newRequestQueue(this);
         }
-        shareLink = extras.getString(Constants.EXTRA_RSS_LINK);
         REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
     }
 
@@ -242,6 +249,17 @@ public class ArticleActivity extends AppCompatActivity {
         @Override
         public void onResponse(String response) {
             Document doc = Jsoup.parse(response);
+
+            // If article was loaded from an external App, no image was passed from MainActivity,
+            // so it must be fetched in the Collapsing Toolbar
+            if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+                Elements image = doc.select("meta[property=og:image]");
+                if (atLeastOneChild(image)) {
+                    Picasso.with(ArticleActivity.this)
+                            .load(image.first().attr("content"))
+                            .into((ImageView) findViewById(R.id.imageArticle));
+                }
+            }
 
             // Article is from a hosted blog
             List<Model> items;

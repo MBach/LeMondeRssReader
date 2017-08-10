@@ -1,9 +1,5 @@
 package org.mbach.lemonde.article;
 
-import android.animation.Animator;
-import android.animation.LayoutTransition;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -22,14 +18,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.transition.Slide;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -51,11 +44,10 @@ import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
+import org.mbach.lemonde.home.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import mbanje.kurt.fabbutton.FabButton;
 
 /**
  * ArticleActivity class.
@@ -75,7 +67,7 @@ public class ArticleActivity extends AppCompatActivity {
     private static final String TAG_FORGOTTEN = "oubli";
     private static RequestQueue REQUEST_QUEUE = null;
 
-    private FabButton fab;
+    private ExtendedFabButton fab;
     private String commentsURI;
     private final ArticleAdapter articleAdapter = new ArticleAdapter();
 
@@ -86,8 +78,6 @@ public class ArticleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeUtils.applyTheme(this, getTheme());
-        //initActivityTransitions();
-
         setContentView(R.layout.activity_article);
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -120,16 +110,13 @@ public class ArticleActivity extends AppCompatActivity {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
-                    fab.setVisibility(View.VISIBLE);
+                    fab.show();
                 } else {
-                    fab.setVisibility(View.INVISIBLE);
+                    fab.hide();
                 }
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
-
-        //ViewCompat.setTransitionName(appBarLayout, Constants.EXTRA_RSS_IMAGE);
-        //supportPostponeEnterTransition();
 
         // If user is opening a link from another App, like a mail client for instance
         final Intent intent = getIntent();
@@ -169,7 +156,11 @@ public class ArticleActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home:
-                onBackPressed();
+                if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                } else {
+                    onBackPressed();
+                }
                 return true;
             default:
                 return true;
@@ -198,35 +189,7 @@ public class ArticleActivity extends AppCompatActivity {
         return true;
     }
 
-    private void initActivityTransitions() {
-        if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-            Slide transition = new Slide();
-            transition.excludeTarget(android.R.id.statusBarBackground, true);
-            getWindow().setEnterTransition(transition);
-            getWindow().setReturnTransition(transition);
-        }
-    }
 
-    private void initFabTransitions() {
-        Animator scaleDown = ObjectAnimator.ofPropertyValuesHolder(fab,
-                PropertyValuesHolder.ofFloat("scaleX", 1, 0),
-                PropertyValuesHolder.ofFloat("scaleY", 1, 0));
-        scaleDown.setDuration(10);
-        scaleDown.setInterpolator(new AccelerateInterpolator());
-
-        Animator scaleUp = ObjectAnimator.ofPropertyValuesHolder(fab,
-                PropertyValuesHolder.ofFloat("scaleX", 0, 1),
-                PropertyValuesHolder.ofFloat("scaleY", 0, 1));
-        scaleUp.setDuration(10);
-        scaleUp.setInterpolator(new AccelerateInterpolator());
-
-        LayoutTransition itemLayoutTransition = new LayoutTransition();
-        itemLayoutTransition.setAnimator(LayoutTransition.APPEARING, scaleUp);
-        itemLayoutTransition.setAnimator(LayoutTransition.DISAPPEARING, scaleDown);
-
-        ViewGroup av = findViewById(R.id.coordinatorArticle);
-        av.setLayoutTransition(itemLayoutTransition);
-    }
 
     public void openTweet(View view) {
         Button button = view.findViewById(R.id.tweet_button);

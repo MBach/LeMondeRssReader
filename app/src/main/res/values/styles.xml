@@ -20,6 +20,8 @@
         <item name="colorBackgroundDrawer">@color/primary</item>
     </style>
 
+    <item name="fab_interpolator" type="interpolator">@android:interpolator/decelerate_cubic</item>
+
     <!-- Alternate theme is light -->
     <style name="LightTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/primary_light</item> 

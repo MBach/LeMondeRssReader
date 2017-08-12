@@ -13,10 +13,11 @@ import org.mbach.lemonde.R;
 import mbanje.kurt.fabbutton.FabButton;
 
 /**
- * ExtendedFabButton class adds motion animation to Floating Action Button.
+ * ExtendedFabButton class adds motion to Floating Action Button.
  *
- * @author Cícero Moura from post on StackOverflow
+ * @author Cícero Moura
  * @link https://stackoverflow.com/questions/27922191/floating-action-button-animation
+ * @since 2017-08
  */
 public class ExtendedFabButton extends FabButton {
 

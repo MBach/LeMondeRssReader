@@ -123,15 +123,13 @@ public class ArticleActivity extends AppCompatActivity {
         final String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
             shareLink = intent.getDataString();
-        } else {
-            Bundle extras = getIntent().getExtras();
+        } else if (getIntent().getExtras() != null){
             CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
-            collapsingToolbar.setTitle(extras.getString(Constants.EXTRA_NEWS_CATEGORY));
-
+            collapsingToolbar.setTitle(getIntent().getExtras().getString(Constants.EXTRA_NEWS_CATEGORY));
             Picasso.with(this)
-                    .load(extras.getString(Constants.EXTRA_RSS_IMAGE))
+                    .load(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE))
                     .into((ImageView) findViewById(R.id.imageArticle));
-            shareLink = extras.getString(Constants.EXTRA_RSS_LINK);
+            shareLink = getIntent().getExtras().getString(Constants.EXTRA_RSS_LINK);
         }
 
         // Start async job

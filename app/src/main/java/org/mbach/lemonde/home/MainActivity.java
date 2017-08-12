@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.ConnectivityManager;
@@ -18,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -85,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         initToolbar();
-        initDynamicShortcuts();
         setupDrawerLayout();
 
         mainActivityRecyclerView.setAdapter(adapter);
@@ -102,6 +103,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setTitle(getString(R.string.category_news));
                 getFeedFromCategory(Constants.CAT_NEWS);
             }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            setDynamicShortcuts();
         }
     }
 
@@ -160,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getFeedFromCategory(category);
         drawerLayout.closeDrawers();
 
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+        if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
             // Save the category that has been selected by one, in order to create dynamic shortcuts.
             // It's based on how often this category is selected: the most selected in placed at the bottom on a long touch event
             // The 4th most selected is placed at the top
@@ -236,14 +245,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     /**
      *
      */
-    private void initDynamicShortcuts() {
-        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
-            return;
-        }
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
+    private void setDynamicShortcuts() {
         List<ShortcutInfo> dynamicShortcuts = new ArrayList<>();
 
         NavigationView navigationView = findViewById(R.id.navigation_view);
         Menu menu = navigationView.getMenu();
+
+        final SparseIntArray iconCats = new SparseIntArray();
+        iconCats.append(R.id.cat_news, R.drawable.ic_mic_black_48dp);
+        iconCats.append(R.id.cat_international, R.drawable.ic_language_white_48dp);
+        iconCats.append(R.id.cat_politics, R.drawable.ic_tie_white_48dp);
+        iconCats.append(R.id.cat_society, R.drawable.ic_location_city_white_48dp);
+        iconCats.append(R.id.cat_economy, R.drawable.ic_trending_up_white_48dp);
+        iconCats.append(R.id.cat_culture, R.drawable.ic_color_lens_white_48dp);
+        iconCats.append(R.id.cat_ideas, R.drawable.ic_lightbulb_outline_white_48dp);
+        iconCats.append(R.id.cat_planet, R.drawable.ic_landscape_white_48dp);
+        iconCats.append(R.id.cat_sports, R.drawable.ic_pool_white_48dp);
+        iconCats.append(R.id.cat_sciences, R.drawable.ic_colorize_white_48dp);
+        iconCats.append(R.id.cat_pixels, R.drawable.ic_videogame_asset_white_48dp);
+        iconCats.append(R.id.cat_campus, R.drawable.ic_school_white_48dp);
+        iconCats.append(R.id.cat_decoders, R.drawable.ic_vpn_key_white_48dp);
 
         // A colored icon will be generated for every dynamic shortcut
         Drawable drawable = getDrawable(R.drawable.circle);
@@ -264,21 +286,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     int colorId = colorCats.get(entry);
                     if (colorId > 0 && drawable != null) {
-                        Bitmap bitmap = Bitmap.createBitmap(192, 192, conf);
-                        Canvas canvas = new Canvas(bitmap);
+                        Bitmap result = Bitmap.createBitmap(192, 192, conf);
+                        Canvas canvas = new Canvas(result);
                         Paint paint = new Paint();
                         paint.setColor(getColor(colorId));
                         paint.setStyle(Paint.Style.FILL);
-                        canvas.drawCircle(96, 96, 80, paint);
-                        shortcut.setIcon(Icon.createWithBitmap(bitmap));
+                        canvas.drawCircle(96, 96, 96, paint);
+
+                        // Check if an icon exists for this category
+                        if (iconCats.get(entry) > 0) {
+                            Drawable drawableTmp = getDrawable(iconCats.get(entry));
+                            BitmapDrawable bitmapDrawable = ((BitmapDrawable)drawableTmp);
+                            if (bitmapDrawable != null) {
+                                Bitmap icon = bitmapDrawable.getBitmap();
+                                canvas.drawBitmap(icon, 48, 48, null);
+                            }
+                        }
+                        shortcut.setIcon(Icon.createWithBitmap(result));
                     }
                     dynamicShortcuts.add(shortcut.build());
                     break;
                 }
             }
         }
-        if (!dynamicShortcuts.isEmpty()) {
-            getSystemService(ShortcutManager.class).setDynamicShortcuts(dynamicShortcuts);
+        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+        if (shortcutManager != null && !dynamicShortcuts.isEmpty()) {
+            shortcutManager.setDynamicShortcuts(dynamicShortcuts);
         }
     }
 
@@ -290,6 +323,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     private void getFeedFromCategory(final String category) {
         ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) {
+            return;
+        }
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         if (isConnected) {

@@ -13,7 +13,6 @@ class RssItem implements Parcelable {
 
     private String link = null;
     private String title = null;
-    //private String description = null;
     private String enclosure = null;
 
     public static final Parcelable.Creator<RssItem> CREATOR = new Parcelable.Creator<RssItem>() {
@@ -29,7 +28,6 @@ class RssItem implements Parcelable {
     private RssItem(Parcel in) {
         link = in.readString();
         title = in.readString();
-        //description = in.readString();
         enclosure = in.readString();
     }
 
@@ -53,10 +51,6 @@ class RssItem implements Parcelable {
         this.title = title;
     }
 
-    //void setDescription(String description) {
-    //    this.description = description;
-    //}
-
     String getEnclosure() {
         return enclosure;
     }
@@ -74,7 +68,6 @@ class RssItem implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(link);
         dest.writeString(title);
-        //dest.writeString(description);
         dest.writeString(enclosure);
     }
 }

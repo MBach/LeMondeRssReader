@@ -1,14 +1,11 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-
-    <color name="primary">#424242</color>
-    <color name="primary_dark">#212121</color>
-    <color name="primary_light">#ffffff</color>
-    <color name="primary_light_dark">#e0e0e0</color>
-    <color name="accent">#ffc400</color>
-    <color name="accent_complementary">#304ffe</color>
+<resources>
 
     <!-- Default theme is dark -->
     <style name="DarkTheme" parent="Theme.AppCompat.NoActionBar">
+        <!-- custom v21 -->
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowSharedElementsUseOverlay">false</item>
+        <!--  -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="background">@color/primary_dark</item>
@@ -22,10 +19,12 @@
         <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
     </style>
 
-    <item name="fab_interpolator" type="interpolator">@android:interpolator/decelerate_cubic</item>
-
     <!-- Alternate theme is light -->
     <style name="LightTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- custom v21 -->
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowSharedElementsUseOverlay">false</item>
+        <!--  -->
         <item name="colorPrimary">@color/primary_light</item> 
         <item name="colorPrimaryDark">@color/primary_light_dark</item> 
         <item name="background">@color/primary_light_dark</item>
@@ -35,30 +34,9 @@
         <item name="colorAccent">#ffab00</item>
         <item name="articleHeaderGradient">#88eeeeee</item>
         <item name="colorBackgroundDrawer">@color/primary_light_dark</item>
-        <item name="android:statusBarColor" tools:targetApi="lollipop">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/black</item>
         <item name="selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
     </style>
 
-    <!-- Colors for the drawer -->
-    <color name="cat_color_news">#FFC600</color>
-    <color name="cat_color_news_dark">#ffab00</color>
-    <color name="cat_color_international">#0386C3</color>
-    <color name="cat_color_politics">#1F0D67</color>
-    <color name="cat_color_society">#D50303</color>
-    <color name="cat_color_economy">#FE2F2F</color>
-    <color name="cat_color_culture">#F20559</color>
-    <color name="cat_color_ideas">#464F57</color>
-    <color name="cat_color_planet">#30932E</color>
-    <color name="cat_color_sports">#30932E</color>
-    <color name="cat_color_sciences">#0CB4AE</color>
-    <color name="cat_color_pixels">#06B586</color>
-    <color name="cat_color_campus">#FF6E17</color>
-    <color name="cat_color_decoders">#1F0D67</color>
-
-    <!-- Colors for the custom category "Les Décodeurs" -->
-    <color name="tag_green">#00c853</color>
-    <color name="tag_red">#f44336</color>
-    <color name="tag_yellow">#ff9800</color>
-    <color name="tag_grey">#212121</color>
 </resources>

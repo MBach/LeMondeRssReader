@@ -57,10 +57,6 @@ public class RssService extends IntentService {
             URLConnection urlConnection = url.openConnection();
             urlConnection.setUseCaches(true);
 
-            //long currentTime = System.currentTimeMillis();
-            //long expires = urlConnection.getHeaderFieldDate("Expires", currentTime);
-            //long lastModified = urlConnection.getHeaderFieldDate("Last-Modified", currentTime);
-
             String cacheControl = urlConnection.getHeaderField("Cache-Control");
             Log.d(TAG, "Cache-Control flag: " + cacheControl);
             Log.d(TAG, "Last-Modified flag: " + urlConnection.getLastModified());

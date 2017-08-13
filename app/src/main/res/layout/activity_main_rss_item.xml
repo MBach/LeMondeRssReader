@@ -1,28 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/cardview_compat_inset_shadow"
-    android:orientation="horizontal"
-    android:weightSum="1">
+    android:foreground="?attr/selectableItemBackground">
 
-    <ImageView
-        android:id="@+id/rss_image"
-        android:layout_width="125dp"
-        android:layout_height="100dp"
-        android:background="?attr/colorPrimaryDark"
-        android:contentDescription="@string/image_from_article"
-        android:scaleType="centerCrop"
-        android:transitionName="@string/transition_open_article" tools:targetApi="LOLLIPOP" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/cardview_compat_inset_shadow"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/rss_title"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="?attr/colorPrimaryDark"
-        android:padding="@dimen/spacing_medium"
-        android:textColor="?attr/android:textColorPrimary" />
+        <ImageView
+            android:id="@+id/rss_image"
+            android:layout_width="125dp"
+            android:layout_height="100dp"
+            android:contentDescription="@string/image_from_article"
+            android:scaleType="centerCrop"
+            android:background="?attr/colorPrimaryDark"
+            android:transitionName="@string/transition_open_article" tools:targetApi="LOLLIPOP"/>
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/rss_title"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="@dimen/spacing_medium"
+            android:background="?attr/colorPrimaryDark"
+            android:textColor="?attr/android:textColorPrimary" />
+
+    </LinearLayout>
+
+</FrameLayout>

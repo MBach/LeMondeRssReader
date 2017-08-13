@@ -50,8 +50,8 @@
     <string name="preference_general_display">Affichage</string>
     <string name="preference_app_style">Style de l’App</string>
     <string name="preference_app_dark_theme">Thème sombre</string>
-    <string name="preference_share_icons">Icônes réseaux sociaux</string>
-    <string name="preference_share_description">Activer le partage d’un article sur Facebook ou sur Twitter</string>
+    <string name="preference_share_icons">Icône de partage</string>
+    <string name="preference_share_description">Activer le partage d’un article (email, réseaux sociaux, etc.)</string>
 
     <string name="title_activity_login">Connexion</string>
 

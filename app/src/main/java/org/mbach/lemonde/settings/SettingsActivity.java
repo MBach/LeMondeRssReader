@@ -21,20 +21,22 @@ public class SettingsActivity extends PreferenceActivity {
 
     private static boolean themeHasChanged;
 
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if ("mainTheme".equals(key)) {
+                themeHasChanged = true;
+                PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+                recreate();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ThemeUtils.applyTheme(getBaseContext(), getTheme());
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new GeneralPreferenceFragment()).commit();
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if ("mainTheme".equals(key)) {
-                    themeHasChanged = true;
-                    recreate();
-                }
-            }
-        });
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(prefChangeListener);
     }
 
     @Override

@@ -21,6 +21,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     private static boolean themeHasChanged;
 
+    private final SharedPreferences.OnSharedPreferenceChangeListener prefChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if ("mainTheme".equals(key)) {

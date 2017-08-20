@@ -6,6 +6,8 @@
     <string name="action_settings">Paramètres</string>
 
     <!-- Drawer -->
+    <string name="navigation_drawer_open">Open</string>
+    <string name="navigation_drawer_close">Close</string>
     <string name="category_fav">Favoris</string>
     <string name="category_news">À la Une</string>
     <string name="category_international">International</string>

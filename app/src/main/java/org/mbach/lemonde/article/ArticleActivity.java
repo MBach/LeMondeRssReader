@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -102,7 +103,7 @@ public class ArticleActivity extends AppCompatActivity {
         //initActivityTransitions();
         ThemeUtils.applyTheme(this, getTheme());
         setContentView(R.layout.activity_article);
-
+        setTitle("");
         //ViewCompat.setTransitionName(findViewById(R.id.articleAppBarLayout), "transition_open_article");
         //supportPostponeEnterTransition();
 
@@ -115,6 +116,19 @@ public class ArticleActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        final CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
+        AppBarLayout appBarLayout = findViewById(R.id.articleAppBarLayout);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                TextView tagArticle = findViewById(R.id.tagArticle);
+                if (tagArticle.isShown()) {
+                    collapsingToolbar.setCollapsedTitleTextColor(getResources().getColor(R.color.primary_dark));
+                }
+            }
+        });
 
         fab = findViewById(R.id.fab);
         //initFabTransitions();
@@ -150,7 +164,6 @@ public class ArticleActivity extends AppCompatActivity {
         if (Intent.ACTION_VIEW.equals(action)) {
             shareLink = intent.getDataString();
         } else if (getIntent().getExtras() != null){
-            CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
             collapsingToolbar.setTitle(getIntent().getExtras().getString(Constants.EXTRA_NEWS_CATEGORY));
             Picasso.with(this)
                     .load(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE))
@@ -194,8 +207,8 @@ public class ArticleActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean shareOnSocialNetworks = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
-        if (shareOnSocialNetworks) {
+        boolean shareContent = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
+        if (shareContent) {
             getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
             menu.findItem(R.id.action_share).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override

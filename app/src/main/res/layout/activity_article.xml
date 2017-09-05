@@ -63,9 +63,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:clickable="false"
-                android:elevation="0dp" tools:targetApi="LOLLIPOP"
+                android:elevation="0dp"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                tools:targetApi="LOLLIPOP" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

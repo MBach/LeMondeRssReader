@@ -8,7 +8,7 @@
     android:fitsSystemWindows="true">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/appBarLayout"
+        android:id="@+id/articleAppBarLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/detail_backdrop_height">
 

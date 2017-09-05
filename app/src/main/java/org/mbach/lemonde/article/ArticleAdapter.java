@@ -116,7 +116,12 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 if (textView.getBackground() != null) {
                     ((ViewHolderText) holder).text.setAllCaps(true);
                 }
-                ((ViewHolderText) holder).text.setLayoutParams(lp);
+                // Tag doesn't expand horizontally to the max
+                if (textView.getLayoutParams() != null) {
+                    ((ViewHolderText) holder).text.setLayoutParams(textView.getLayoutParams());
+                } else {
+                    ((ViewHolderText) holder).text.setLayoutParams(lp);
+                }
                 ((ViewHolderText) holder).text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize());
                 break;
             case Model.IMAGE_TYPE:

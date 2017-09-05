@@ -23,8 +23,6 @@ import java.util.List;
  */
 public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItemAdapter.ViewHolder> implements View.OnClickListener {
 
-    // private static String TAG = "RecyclerRssItemAdapter";
-
     private final List<RssItem> items;
     private OnItemClickListener onItemClickListener;
 

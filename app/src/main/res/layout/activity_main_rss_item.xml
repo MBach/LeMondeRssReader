@@ -11,14 +11,13 @@
         android:layout_marginBottom="@dimen/cardview_compat_inset_shadow"
         android:orientation="horizontal">
 
-        <ImageView
+        <android.support.v7.widget.AppCompatImageView
             android:id="@+id/rss_image"
             android:layout_width="125dp"
             android:layout_height="100dp"
             android:contentDescription="@string/image_from_article"
             android:scaleType="centerCrop"
-            android:background="?attr/colorPrimaryDark"
-            android:transitionName="@string/transition_open_article" tools:targetApi="LOLLIPOP"/>
+            android:background="@android:color/transparent" />
 
         <TextView
             android:id="@+id/rss_title"

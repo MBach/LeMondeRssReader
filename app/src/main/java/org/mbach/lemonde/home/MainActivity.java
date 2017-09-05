@@ -1,5 +1,6 @@
 package org.mbach.lemonde.home;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -22,6 +23,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -29,6 +32,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -116,12 +120,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onEnterAnimationComplete() {
-        super.onEnterAnimationComplete();
-        mainActivityRecyclerView.scheduleLayoutAnimation();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.mainactivity_right_menu, menu);
         return true;
@@ -141,15 +139,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     extras.putString(Constants.EXTRA_RSS_LINK, rssItem.getLink());
                     extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
 
-                    ImageView rssImage = view.findViewById(R.id.rss_image);
+                    AppCompatImageView rssImage = view.findViewById(R.id.rss_image);
                     intent.putExtras(extras);
 
-                    String transitionName = getString(R.string.transition_open_article);
+                    String transitionName = "transition_open_article";
                     if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this,
+                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this,
                                 rssImage,
                                 transitionName);
-                        startActivity(intent, options.toBundle());
+                        ActivityCompat.startActivity(MainActivity.this, intent, options.toBundle());
                     } else {
                         startActivity(intent);
                     }
@@ -160,6 +158,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             recreate();
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onEnterAnimationComplete() {
+        super.onEnterAnimationComplete();
     }
 
     @Override

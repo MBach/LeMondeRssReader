@@ -12,17 +12,21 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.transition.Slide;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -74,11 +78,33 @@ public class ArticleActivity extends AppCompatActivity {
     private String shareText;
     private String shareLink;
 
+    private void initActivityTransitions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Slide transition = new Slide();
+            transition.excludeTarget(android.R.id.statusBarBackground, true);
+            getWindow().setEnterTransition(transition);
+            getWindow().setReturnTransition(transition);
+        }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+        try {
+            return super.dispatchTouchEvent(motionEvent);
+        } catch (NullPointerException e) {
+            return false;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //initActivityTransitions();
         ThemeUtils.applyTheme(this, getTheme());
         setContentView(R.layout.activity_article);
+
+        //ViewCompat.setTransitionName(findViewById(R.id.articleAppBarLayout), "transition_open_article");
+        //supportPostponeEnterTransition();
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         RecyclerView recyclerView = findViewById(R.id.articleActivityRecyclerView);
@@ -187,8 +213,6 @@ public class ArticleActivity extends AppCompatActivity {
         return true;
     }
 
-
-
     public void openTweet(View view) {
         Button button = view.findViewById(R.id.tweet_button);
         String link = button.getContentDescription().toString();
@@ -246,6 +270,7 @@ public class ArticleActivity extends AppCompatActivity {
                 } else {
                     // Standard article
                     items = extractStandardArticle(articles);
+                    // Full article is restricted to paid members
                     if (doc.getElementById("teaser_article") != null) {
                         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
                         collapsingToolbar.setContentScrimResource(R.color.accent);
@@ -587,6 +612,7 @@ public class ArticleActivity extends AppCompatActivity {
             if (figures.isEmpty()) {
 
                 if (element.is("div.snippet.multimedia-embed")) {
+                    // Parse graphs if possible, otherwise just ignore this multimedia snippet
                     boolean hasGraph = !element.select("div.graphe").isEmpty();
                     boolean hasScript = !element.select("script").isEmpty();
                     if (hasGraph && hasScript) {
@@ -595,12 +621,11 @@ public class ArticleActivity extends AppCompatActivity {
                         if (graph != null) {
                             p.add(new Model(GraphExtractor.getModelType(graph), graph));
                         }
-                        continue;
                     }
+                    continue;
                 }
 
                 if (element.is("blockquote.twitter-tweet")) {
-                    //element.remove();
                     if (displayTweets) {
                         TextView content = new TextView(this);
                         fromHtml(content, element.html());
@@ -656,10 +681,11 @@ public class ArticleActivity extends AppCompatActivity {
                     String cssClass = element.child(0).attr("class");
                     Log.d(TAG, cssClass);
                     t.setAllCaps(true);
+                    RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    t.setLayoutParams(lp);
                     t.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM);
                     switch (cssClass) {
                         case TAG_FAKE:
-
                             t.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.tag_red));
                             break;
                         case TAG_TRUE:

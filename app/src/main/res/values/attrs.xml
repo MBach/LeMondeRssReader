@@ -5,6 +5,5 @@
         <attr name="authorDateText" />
         <attr name="articleHeaderGradient" />
         <attr name="colorBackgroundDrawer" />
-        <attr name="rippleEffect" />
     </declare-styleable>
 </resources>

@@ -17,13 +17,7 @@
         <item name="colorBackgroundDrawer">@color/primary</item>
         <item name="selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
-        <item name="rippleEffect">@color/primary_light_dark</item>
 
-        <item name="android:windowContentTransitions">true</item>
-        <item name="android:windowAllowEnterTransitionOverlap">true</item>
-        <item name="android:windowAllowReturnTransitionOverlap">true</item>
-        <item name="android:windowSharedElementEnterTransition">@android:transition/fade</item>
-        <item name="android:windowSharedElementExitTransition">@android:transition/fade</item>
     </style>
 
     <!-- Alternate theme is light -->
@@ -44,13 +38,7 @@
         <item name="android:statusBarColor">@android:color/black</item>
         <item name="selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
-        <item name="rippleEffect">@color/primary_dark</item>
 
-        <item name="android:windowContentTransitions">true</item>
-        <item name="android:windowAllowEnterTransitionOverlap">true</item>
-        <item name="android:windowAllowReturnTransitionOverlap">true</item>
-        <item name="android:windowSharedElementEnterTransition">@android:transition/fade</item>
-        <item name="android:windowSharedElementExitTransition">@android:transition/fade</item>
     </style>
 
 </resources>

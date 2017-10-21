@@ -13,7 +13,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -163,7 +162,7 @@ public class ArticleActivity extends AppCompatActivity {
         final String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
             shareLink = intent.getDataString();
-        } else if (getIntent().getExtras() != null){
+        } else if (getIntent().getExtras() != null) {
             collapsingToolbar.setTitle(getIntent().getExtras().getString(Constants.EXTRA_NEWS_CATEGORY));
             Picasso.with(this)
                     .load(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE))
@@ -261,7 +260,7 @@ public class ArticleActivity extends AppCompatActivity {
 
             // Article is from a hosted blog
             List<Model> items;
-            Element content = doc.getElementById("main");
+            Element content = doc.getElementById("content");
             if (content != null) {
                 items = extractBlogArticle(content);
                 setTagInHeader(R.string.blog_article, R.color.accent_complementary, Color.WHITE);

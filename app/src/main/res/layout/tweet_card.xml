@@ -18,6 +18,7 @@
         android:layout_marginStart="8dp" />
 
     <LinearLayout
+        android:id="@+id/tweet_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="0dp"
@@ -40,6 +41,7 @@
             android:typeface="normal" />
 
         <Space
+            android:id="@+id/tweet_space"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />

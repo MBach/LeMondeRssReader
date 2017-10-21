@@ -43,6 +43,9 @@
                     android:host="lemonde.fr"
                     android:pathPrefix="/" />
                 <data android:scheme="http"
+                    android:host="*.blog.lemonde.fr"
+                    android:pathPrefix="/" />
+                <data android:scheme="http"
                     android:host="www.lemonde.fr"
                     android:pathPrefix="/" />
             </intent-filter>

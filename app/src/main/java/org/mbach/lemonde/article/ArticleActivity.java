@@ -3,7 +3,9 @@ package org.mbach.lemonde.article;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -287,6 +289,11 @@ public class ArticleActivity extends AppCompatActivity {
                         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
                         collapsingToolbar.setContentScrimResource(R.color.accent);
                         setTagInHeader(R.string.paid_article, R.color.accent, Color.BLACK);
+
+                        if (getSupportActionBar() != null) {
+                            final Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp);
+                            getSupportActionBar().setHomeAsUpIndicator(upArrow);
+                        }
                     }
                     // After parsing the article, start a new request for comments
                     Element react = doc.getElementById("liste_reactions");
@@ -503,6 +510,8 @@ public class ArticleActivity extends AppCompatActivity {
         views.add(new Model(authors));
         views.add(new Model(dates));
         views.add(new Model(content));
+
+
         return views;
     }
 

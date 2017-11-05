@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -149,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(String response) {
                             Snackbar.make(findViewById(R.id.login), getString(R.string.snackbar_not_implemented), Snackbar.LENGTH_LONG).show();
-                            System.out.println(response);
+                            Log.d(TAG, response);
                             showProgress(false);
                         }
                     }, new Response.ErrorListener() {
@@ -166,13 +167,14 @@ public class LoginActivity extends AppCompatActivity {
                     params.put("connection[password]", password);
                     params.put("connection[stay_connected]", "1");
                     params.put("connection[save]", "");
-                    params.put("connection[_token]", "3fJJs3eTq6aB-1q_zxENeANAN5D7RfjrpyYfbmBNlS0");
+                    params.put("connection[_token]", "IunrpdKM3pRale3pfBJNWVUieGyO1SH0xbx7BG3FXHE");
                     return params;
                 }
 
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<>();
+                    params.put("Referer", Constants.LOGIN_URI);
                     params.put("Content-Type","application/x-www-form-urlencoded");
                     return params;
                 }

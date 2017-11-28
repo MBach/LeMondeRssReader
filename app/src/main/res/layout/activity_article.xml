@@ -109,4 +109,15 @@
         app:fbb_progressColor="@color/accent_complementary"
         app:fbb_progressWidthRatio="0.1" />
 
+    <ProgressBar
+        android:id="@+id/autoLoader"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:visibility="invisible"
+        android:indeterminate="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        />
+
 </android.support.design.widget.CoordinatorLayout>

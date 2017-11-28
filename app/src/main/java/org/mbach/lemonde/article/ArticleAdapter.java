@@ -19,6 +19,7 @@ import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.squareup.picasso.Picasso;
 
 import org.mbach.lemonde.R;
+import org.mbach.lemonde.ThemeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -185,6 +186,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
         ViewHolderTweet(@NonNull View view) {
             super(view);
             this.view = view;
+            this.view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
         }
 
         TextView getTweet() {

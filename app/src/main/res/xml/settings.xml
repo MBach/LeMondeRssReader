@@ -6,6 +6,13 @@
             android:key="displayTweets"
             android:summary="@string/preference_article_display_tweets"
             android:title="@string/preference_article_content" />
+        <SwitchPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="true"
+            android:key="autoloadComments"
+            android:summary="@string/preference_article_autoload_comments"
+            android:title="@string/preference_article_comments" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_general_display">
         <SwitchPreference

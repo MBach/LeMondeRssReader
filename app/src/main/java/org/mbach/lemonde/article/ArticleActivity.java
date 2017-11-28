@@ -3,7 +3,6 @@ package org.mbach.lemonde.article;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -74,8 +73,10 @@ public class ArticleActivity extends AppCompatActivity {
     private static RequestQueue REQUEST_QUEUE = null;
 
     private ExtendedFabButton fab;
+    private ProgressBar autoLoader;
     private String commentsURI;
     private final ArticleAdapter articleAdapter = new ArticleAdapter();
+    private boolean autoloadComments;
 
     private String shareText;
     private String shareLink;
@@ -131,29 +132,47 @@ public class ArticleActivity extends AppCompatActivity {
             }
         });
 
-        fab = findViewById(R.id.fab);
-        //initFabTransitions();
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Constants.BASE_URL2.equals(commentsURI)) {
-                    fab.showProgress(false);
-                    Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
-                } else {
-                    fab.showProgress(true);
-                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        autoloadComments = sharedPreferences.getBoolean("autoloadComments", true);
+        if (autoloadComments) {
+            autoLoader = findViewById(R.id.autoLoader);
+        } else {
+            fab = findViewById(R.id.fab);
+            //initFabTransitions();
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (Constants.BASE_URL2.equals(commentsURI)) {
+                        fab.showProgress(false);
+                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
+                    } else {
+                        fab.showProgress(true);
+                        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
+                    }
                 }
-            }
-        });
-
+            });
+        }
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
-                    fab.show();
+                    if (autoloadComments) {
+                        if (Constants.BASE_URL2.equals(commentsURI)) {
+                            autoLoader.setVisibility(View.INVISIBLE);
+                            Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
+                        } else {
+                            autoLoader.setVisibility(View.VISIBLE);
+                            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
+                        }
+                    } else {
+                        fab.show();
+                    }
                 } else {
-                    fab.hide();
+                    if (autoloadComments) {
+                        autoLoader.setVisibility(View.INVISIBLE);
+                    } else {
+                        fab.hide();
+                    }
                 }
                 super.onScrolled(recyclerView, dx, dy);
             }
@@ -390,7 +409,11 @@ public class ArticleActivity extends AppCompatActivity {
                 }
             }
             articleAdapter.insertItems(items);
-            fab.showProgress(false);
+            if (autoloadComments) {
+
+            } else {
+                fab.showProgress(false);
+            }
         }
     };
 

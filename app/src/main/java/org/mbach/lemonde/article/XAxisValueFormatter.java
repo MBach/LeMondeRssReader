@@ -17,7 +17,7 @@ class XAxisValueFormatter implements IAxisValueFormatter {
 
     private static final String TAG = "XAxisVF";
 
-    private List<String> labels;
+    private final List<String> labels;
 
     XAxisValueFormatter(List<String> labels) {
         this.labels = labels;

@@ -325,13 +325,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-        if (isConnected) {
+        //if (isConnected) {
             PendingIntent pendingResult = createPendingResult(GET_LATEST_RSS_FEED, new Intent(), 0);
             Intent intent = new Intent(getApplicationContext(), RssService.class);
             intent.putExtra(RssService.CATEGORY, category);
             intent.putExtra(RssService.PENDING_RESULT, pendingResult);
             startService(intent);
-        } else {
+        //} else {
+        if (!isConnected) {
             Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
                     .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
                         @Override

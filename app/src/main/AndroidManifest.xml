@@ -19,7 +19,7 @@
         tools:replace="android:allowBackup">
 
         <!-- Main page: RSS feed, drawer -->
-        <activity android:name=".home.MainActivity">
+        <activity android:name=".home.MainActivity" android:label="LeMonde.fr">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

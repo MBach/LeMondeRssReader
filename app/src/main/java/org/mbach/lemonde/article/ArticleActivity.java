@@ -1,10 +1,13 @@
 package org.mbach.lemonde.article;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,7 +23,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.transition.Slide;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -77,18 +79,10 @@ public class ArticleActivity extends AppCompatActivity {
     private String commentsURI;
     private final ArticleAdapter articleAdapter = new ArticleAdapter();
     private boolean autoloadComments;
-
+    //private MenuItem menuItem;
+    private Menu menu;
     private String shareText;
     private String shareLink;
-
-    private void initActivityTransitions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Slide transition = new Slide();
-            transition.excludeTarget(android.R.id.statusBarBackground, true);
-            getWindow().setEnterTransition(transition);
-            getWindow().setReturnTransition(transition);
-        }
-    }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent motionEvent) {
@@ -102,12 +96,9 @@ public class ArticleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //initActivityTransitions();
         ThemeUtils.applyTheme(this, getTheme());
         setContentView(R.layout.activity_article);
         setTitle("");
-        //ViewCompat.setTransitionName(findViewById(R.id.articleAppBarLayout), "transition_open_article");
-        //supportPostponeEnterTransition();
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         RecyclerView recyclerView = findViewById(R.id.articleActivityRecyclerView);
@@ -138,7 +129,6 @@ public class ArticleActivity extends AppCompatActivity {
             autoLoader = findViewById(R.id.autoLoader);
         } else {
             fab = findViewById(R.id.fab);
-            //initFabTransitions();
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -202,8 +192,7 @@ public class ArticleActivity extends AppCompatActivity {
     public void onResume() {
         // Do not display the loader once again after resuming this activity
         if (articleAdapter.getItemCount() > 0) {
-            ProgressBar articleLoader = findViewById(R.id.articleLoader);
-            articleLoader.setVisibility(View.GONE);
+            findViewById(R.id.articleLoader).setVisibility(View.GONE);
         }
         super.onResume();
     }
@@ -230,7 +219,9 @@ public class ArticleActivity extends AppCompatActivity {
         boolean shareContent = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
         if (shareContent) {
             getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
-            menu.findItem(R.id.action_share).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            this.menu = menu;
+            MenuItem menuItem = menu.findItem(R.id.action_share);
+            menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem menuItem) {
                     Log.d(TAG, "MENU ?");
@@ -266,6 +257,9 @@ public class ArticleActivity extends AppCompatActivity {
     private final Response.Listener<String> articleReceived = new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
+            // Hide icon
+            findViewById(R.id.noNetwork).setVisibility(View.INVISIBLE);
+
             Document doc = Jsoup.parse(response);
 
             // If article was loaded from an external App, no image was passed from MainActivity,
@@ -305,6 +299,15 @@ public class ArticleActivity extends AppCompatActivity {
                     items = extractStandardArticle(articles);
                     // Full article is restricted to paid members
                     if (doc.getElementById("teaser_article") != null) {
+                        if (menu != null) {
+                            MenuItem menuItem = menu.findItem(R.id.action_share);
+                            if (menuItem != null) {
+                                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_share_black));
+                            }
+                        } else {
+                            Log.e(TAG, "menu should not be null at this point!");
+                        }
+
                         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
                         collapsingToolbar.setContentScrimResource(R.color.accent);
                         setTagInHeader(R.string.paid_article, R.color.accent, Color.BLACK);
@@ -326,8 +329,7 @@ public class ArticleActivity extends AppCompatActivity {
                 }
             }
             articleAdapter.insertItems(items);
-            ProgressBar progressBar = findViewById(R.id.articleLoader);
-            progressBar.setVisibility(View.GONE);
+            findViewById(R.id.articleLoader).setVisibility(View.GONE);
         }
     };
 
@@ -423,7 +425,25 @@ public class ArticleActivity extends AppCompatActivity {
     private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.e(TAG, "onErrorResponse", error);
+            Log.e(TAG, "onErrorResponse: " + error.toString());
+            findViewById(R.id.articleLoader).setVisibility(View.GONE);
+
+            ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()) {
+                    // Display icon
+                    findViewById(R.id.noNetwork).setVisibility(View.VISIBLE);
+                    // Display permanent message
+                    Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
+                            .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
+                                }
+                            }).show();
+                }
+            }
         }
     };
 

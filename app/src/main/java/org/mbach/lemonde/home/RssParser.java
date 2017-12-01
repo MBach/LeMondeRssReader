@@ -10,6 +10,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 
 /**
@@ -29,25 +30,18 @@ class RssParser {
     private static final String TAG_ITEM = "item";
 
     @NonNull
-    ArrayList<RssItem> parse(@Nullable InputStream inputStream) {
+    ArrayList<RssItem> parse(String stream) {
         ArrayList<RssItem> items = null;
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(inputStream, "utf-8");
+            parser.setInput(new StringReader(stream));
             parser.nextTag();
             parser.require(XmlPullParser.START_TAG, null, TAG_RSS);
             items = readFeed(parser);
         } catch (@NonNull XmlPullParserException | IOException e) {
             Log.w(e.getMessage(), e);
         } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "Cannot close inputStream! " + e.getMessage());
-                }
-            }
             if (items == null) {
                 items = new ArrayList<>();
             }

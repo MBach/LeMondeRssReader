@@ -3,15 +3,18 @@ package org.mbach.lemonde.home;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.mbach.lemonde.Constants;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -23,12 +26,15 @@ import java.util.ArrayList;
 public class RssService extends IntentService {
 
     private static final String TAG = "RssService";
-    private final RssParser parser = new RssParser();
+    private static RequestQueue REQUEST_QUEUE = null;
 
     public static final int FETCH_SUCCESS = 0;
     public static final String CATEGORY = "CATEGORY";
     public static final String PENDING_RESULT = "RSS_SERVICE_PENDING_RESULT";
     public static final String PARCELABLE_EXTRAS = "PARCELABLE_EXTRAS";
+
+    private final RssParser parser = new RssParser();
+    private PendingIntent reply;
 
     public RssService() {
         super("RssService");
@@ -36,33 +42,37 @@ public class RssService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        try {
-            InputStream is = getInputStream(intent.getStringExtra(CATEGORY));
-            if (is != null) {
-                ArrayList<RssItem> rssItems = parser.parse(is);
+        if (REQUEST_QUEUE == null) {
+            REQUEST_QUEUE = Volley.newRequestQueue(this);
+        }
+        reply = intent.getParcelableExtra(PENDING_RESULT);
+        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, Constants.BASE_URL + intent.getStringExtra(CATEGORY), onFeedReceived, onErrorResponse));
+    }
+
+    /**
+     *
+     */
+    private final Response.Listener<String> onFeedReceived = new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            try {
+                ArrayList<RssItem> rssItems = parser.parse(new String(response.getBytes("ISO-8859-1")));
                 Intent result = new Intent();
                 result.putParcelableArrayListExtra(PARCELABLE_EXTRAS, rssItems);
-                PendingIntent reply = intent.getParcelableExtra(PENDING_RESULT);
-                reply.send(this, FETCH_SUCCESS, result);
+                reply.send(RssService.this, FETCH_SUCCESS, result);
+            } catch (PendingIntent.CanceledException | UnsupportedEncodingException e) {
+                Log.e(TAG, "onHandleIntent error", e);
             }
-        } catch (PendingIntent.CanceledException e) {
-            Log.e(TAG, "onHandleIntent error", e);
         }
-    }
+    };
 
-    @Nullable
-    private InputStream getInputStream(String category) {
-        try {
-            URL url = new URL(Constants.BASE_URL + category);
-            URLConnection urlConnection = url.openConnection();
-            urlConnection.setUseCaches(true);
-
-            String cacheControl = urlConnection.getHeaderField("Cache-Control");
-            Log.d(TAG, "Cache-Control flag: " + cacheControl);
-            Log.d(TAG, "Last-Modified flag: " + urlConnection.getLastModified());
-            return urlConnection.getInputStream();
-        } catch (IOException e) {
-            return null;
+    /**
+     *
+     */
+    private final Response.ErrorListener onErrorResponse = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.e(TAG, error.toString());
         }
-    }
+    };
 }

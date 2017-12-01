@@ -91,8 +91,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginTop="100dp" />
+
+    <ImageView
+        android:id="@+id/noNetwork"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginTop="100dp"
-        tools:layout_editor_absoluteY="287dp" />
+        android:background="@drawable/ic_signal_cellular_connected_no_internet_4_bar_black_48dp"
+        android:backgroundTint="?attr/colorAccent"
+        android:contentDescription="@string/app_name"
+        android:fitsSystemWindows="true"
+        android:visibility="invisible" />
 
     <view
         android:id="@+id/fab"

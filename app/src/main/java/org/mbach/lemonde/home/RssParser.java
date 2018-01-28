@@ -1,7 +1,6 @@
 package org.mbach.lemonde.home;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Xml;
 
@@ -9,7 +8,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 
@@ -60,7 +58,6 @@ class RssParser {
         ArrayList<RssItem> items = new ArrayList<>();
         RssItem item = new RssItem();
         String text = null;
-        /// TODO: store cache calls maybe here!
         try {
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
 

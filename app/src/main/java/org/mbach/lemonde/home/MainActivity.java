@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             BitmapDrawable bitmapDrawable = ((BitmapDrawable)drawableTmp);
                             if (bitmapDrawable != null) {
                                 Bitmap icon = bitmapDrawable.getBitmap();
-                                canvas.drawBitmap(icon, 48, 48, null);
+                                canvas.drawBitmap(icon, 24, 24, null);
                             }
                         }
                         shortcut.setIcon(Icon.createWithBitmap(result));

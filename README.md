@@ -71,7 +71,7 @@ A smartphone at least on Android 4.0.3 (API 15) ! That should not be a real prob
 
 ## Download
 
-You can get the app directly on GitHub, here is the [v1.7](https://github.com/MBach/LeMondeRssReader/releases/download/v1.7/LeMondeRssReader-1.7.apk)
+You can get the app directly on GitHub, here is the [v1.8](https://github.com/MBach/LeMondeRssReader/releases/download/v1.8/LeMondeRssReader-1.8.apk)
 
 ## Video
 [Overview of the App](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)

@@ -32,6 +32,7 @@ class GraphExtractor {
     private final Context context;
 
     private JSONObject data;
+    private String legend = "";
 
     static int getModelType(Chart chart) {
         if (chart == null) {
@@ -86,6 +87,10 @@ class GraphExtractor {
         }
     }
 
+    void setLegend(String legend) {
+        this.legend = legend;
+    }
+
     /**
      *
      * @return the chart
@@ -133,8 +138,8 @@ class GraphExtractor {
             }
         }
 
-        BarDataSet dataSet = new BarDataSet(values, "TODO");
         List<IBarDataSet> dataSets = new ArrayList<>();
+        BarDataSet dataSet = new BarDataSet(values, this.legend);
         dataSets.add(dataSet);
         BarData barData = new BarData(dataSets);
         barChart.setData(barData);
@@ -160,6 +165,7 @@ class GraphExtractor {
      */
     private BarChart generateHorizontalBarChart() throws JSONException {
         HorizontalBarChart barChart = new HorizontalBarChart(context);
+        barChart.getXAxis().setDrawAxisLine(false);
         List<BarEntry> values = new ArrayList<>();
         JSONArray series = data.getJSONArray("series");
         JSONObject first = series.getJSONObject(0);
@@ -173,8 +179,8 @@ class GraphExtractor {
             }
         }
 
-        BarDataSet dataSet = new BarDataSet(values, "TODO");
         List<IBarDataSet> dataSets = new ArrayList<>();
+        BarDataSet dataSet = new BarDataSet(values, this.legend);
         dataSets.add(dataSet);
         BarData barData = new BarData(dataSets);
         barChart.setData(barData);
@@ -189,7 +195,12 @@ class GraphExtractor {
         for (int i = 0; i < categories.length(); i++) {
             labels.add(categories.getString(i));
         }
+        yAxis.setDrawLabels(true);
         yAxis.setValueFormatter(new XAxisValueFormatter(labels));
+
+        YAxis yAxisR = barChart.getAxisRight();
+        //yAxisR.setDrawGridLines(false);
+        //yAxisR.setDrawAxisLine(false);
         return barChart;
     }
 }

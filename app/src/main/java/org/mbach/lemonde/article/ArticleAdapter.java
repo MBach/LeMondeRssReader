@@ -1,5 +1,6 @@
 package org.mbach.lemonde.article;
 
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
@@ -16,6 +17,9 @@ import android.widget.TextView;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.squareup.picasso.Picasso;
 
 import org.mbach.lemonde.R;
@@ -87,9 +91,9 @@ class ArticleAdapter extends RecyclerView.Adapter {
             case Model.COMMENT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.GRAPH_TYPE_BARS:
-                return new ViewHolderChart<>(new HorizontalBarChart(parent.getContext()));
+                return new ViewHolderHorizontalBarChart(new HorizontalBarChart(parent.getContext()));
             case Model.GRAPH_TYPE_COLUMNS:
-                return new ViewHolderChart<>(new BarChart(parent.getContext()));
+                return new ViewHolderBarChart(new BarChart(parent.getContext()));
         }
     }
 
@@ -102,6 +106,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
         }
         RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         RecyclerView.LayoutParams lp2 = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        int defaultTextColor = ThemeUtils.getStyleableColor(holder.itemView.getContext(), R.styleable.CustomTheme_defaultText);
 
         switch (model.getType()) {
             case Model.TEXT_TYPE:
@@ -138,14 +143,24 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 ((ViewHolderTweet) holder).getLink().setContentDescription(link.getContentDescription());
                 break;
             case Model.GRAPH_TYPE_BARS:
-                Chart chart1 = (Chart) model.getTheContent();
-                ((ViewHolderChart) holder).chart.setData(chart1.getData());
-                ((ViewHolderChart) holder).chart.setLayoutParams(lp2);
+                HorizontalBarChart chart1 = (HorizontalBarChart) model.getTheContent();
+                ViewHolderHorizontalBarChart vh = (ViewHolderHorizontalBarChart) holder;
+                vh.chart.setData(chart1.getData());
+                vh.chart.setLayoutParams(lp2);
+                vh.chart.setDrawGridBackground(false);
+                BarData data = vh.chart.getData();
+                data.setDrawValues(false);
+                vh.chart.getLegend().setTextColor(defaultTextColor);
                 break;
             case Model.GRAPH_TYPE_COLUMNS:
-                Chart chart2 = (Chart) model.getTheContent();
-                ((ViewHolderChart) holder).chart.setData(chart2.getData());
-                ((ViewHolderChart) holder).chart.setLayoutParams(lp2);
+                BarChart chart2 = (BarChart) model.getTheContent();
+                ViewHolderBarChart vh2 = (ViewHolderBarChart) holder;
+                vh2.chart.setData(chart2.getData());
+                vh2.chart.setLayoutParams(lp2);
+                vh2.chart.setDrawGridBackground(false);
+                BarData data2 = vh2.chart.getData();
+                data2.setDrawValues(false);
+                vh2.chart.getLegend().setTextColor(defaultTextColor);
                 break;
         }
     }
@@ -201,17 +216,28 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
     /**
      *
-     * @param <T>
      */
-    public static class ViewHolderChart<T extends Chart> extends RecyclerView.ViewHolder {
+    public static class ViewHolderBarChart extends RecyclerView.ViewHolder {
 
         @NonNull
-        private final T chart;
+        private final BarChart chart;
 
-        ViewHolderChart(@NonNull T chart) {
+        ViewHolderBarChart(@NonNull BarChart chart) {
             super(chart);
             this.chart = chart;
+            this.chart.setDrawGridBackground(false);
             Log.d("ViewHolderChart", "class is : " + chart.toString());
+        }
+    }
+
+    public static class ViewHolderHorizontalBarChart extends RecyclerView.ViewHolder {
+
+        @NonNull
+        private final HorizontalBarChart chart;
+
+        ViewHolderHorizontalBarChart(@NonNull HorizontalBarChart chart) {
+            super(chart);
+            this.chart = chart;
         }
     }
 }

@@ -681,6 +681,10 @@ public class ArticleActivity extends AppCompatActivity {
                     boolean hasScript = !element.select("script").isEmpty();
                     if (hasGraph && hasScript) {
                         GraphExtractor graphExtractor = new GraphExtractor(this, element.select("script").html());
+                        Elements hasLegend = element.select("h2.ca-heading-sub.titre");
+                        if (!hasLegend.isEmpty()) {
+                            graphExtractor.setLegend(hasLegend.first().html());
+                        }
                         Chart graph = graphExtractor.generate();
                         if (graph != null) {
                             p.add(new Model(GraphExtractor.getModelType(graph), graph));

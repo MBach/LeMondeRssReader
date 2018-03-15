@@ -6,12 +6,17 @@ import android.util.Log;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,11 +45,11 @@ class GraphExtractor {
         } else {
             String type = chart.getTag().toString();
             if (HorizontalBarChart.class.getSimpleName().equals(type)) {
-                Log.d(TAG, "HorizontalBarChart");
                 return Model.GRAPH_TYPE_BARS;
             } else if (BarChart.class.getSimpleName().equals(type)) {
-                Log.d(TAG, "BarChart");
                 return Model.GRAPH_TYPE_COLUMNS;
+            } else if (LineChart.class.getSimpleName().equals(type)) {
+                return Model.GRAPH_TYPE_LINE;
             } else {
                 return Model.UNKNOWN_TYPE;
             }
@@ -58,7 +63,6 @@ class GraphExtractor {
      */
     GraphExtractor(Context context, String script) {
         this.context = context;
-        Log.d(TAG, "todo graph");
 
         // Remove formatter
         script = script.replaceAll("formatter:([^`])*\\}", "}");
@@ -79,9 +83,10 @@ class GraphExtractor {
             if (endIndex != -1) {
                 try {
                     String rawChart = script.substring(beginIndex, endIndex + 1) + "}";
+                    Log.d(TAG, rawChart);
                     data = new JSONObject(rawChart);
                 } catch (JSONException e) {
-                    Log.e(TAG, e.getMessage());
+                    //Log.e(TAG, e.getMessage());
                 }
             }
         }
@@ -109,6 +114,9 @@ class GraphExtractor {
                 case "bar":
                     chart = generateHorizontalBarChart();
                     break;
+                case "line":
+                    chart = generateLineChart();
+                    break;
                 default:
                     break;
             }
@@ -118,6 +126,7 @@ class GraphExtractor {
             return null;
         }
     }
+
 
     /**
      *
@@ -130,11 +139,20 @@ class GraphExtractor {
         JSONObject first = series.getJSONObject(0);
         JSONArray dataSeries = first.getJSONArray("data");
         for (int i = 0; i < dataSeries.length(); i++) {
-            JSONArray array = dataSeries.getJSONArray(i);
-            int length = array.length();
-            if (length > 1) {
-                String value = array.getString(1);
-                values.add(new BarEntry(i, Float.valueOf(value)));
+            Object data = dataSeries.get(i);
+            if (data instanceof JSONArray) {
+                JSONArray array = (JSONArray) data;
+                int length = array.length();
+                if (length > 1) {
+                    String value = array.getString(1);
+                    values.add(new BarEntry(i, Float.valueOf(value)));
+                }
+            } else if (data instanceof  JSONObject) {
+                Log.d(TAG, "received data is malformed");
+                JSONObject object = (JSONObject) data;
+                values.add(new BarEntry(i, Float.valueOf(object.getString("y"))));
+            } else {
+                throw new JSONException("Value " + data + " at " + i + " of type " + data.getClass().getName() + " cannot be converted to JSONArray");
             }
         }
 
@@ -171,11 +189,20 @@ class GraphExtractor {
         JSONObject first = series.getJSONObject(0);
         JSONArray dataSeries = first.getJSONArray("data");
         for (int i = 0; i < dataSeries.length(); i++) {
-            JSONArray array = dataSeries.getJSONArray(i);
-            int length = array.length();
-            if (length > 1) {
-                String value = array.getString(1);
-                values.add(new BarEntry(i, Float.valueOf(value)));
+            Object data = dataSeries.get(i);
+            if (data instanceof JSONArray) {
+                JSONArray array = (JSONArray) data;
+                int length = array.length();
+                if (length > 1) {
+                    String value = array.getString(1);
+                    values.add(new BarEntry(i, Float.valueOf(value)));
+                }
+            } else if (data instanceof  JSONObject) {
+                Log.d(TAG, "received data is malformed");
+                JSONObject object = (JSONObject) data;
+                values.add(new BarEntry(i, Float.valueOf(object.getString("y"))));
+            } else {
+                throw new JSONException("Value " + data + " at " + i + " of type " + data.getClass().getName() + " cannot be converted to JSONArray");
             }
         }
 
@@ -197,10 +224,49 @@ class GraphExtractor {
         }
         yAxis.setDrawLabels(true);
         yAxis.setValueFormatter(new XAxisValueFormatter(labels));
-
-        YAxis yAxisR = barChart.getAxisRight();
-        //yAxisR.setDrawGridLines(false);
-        //yAxisR.setDrawAxisLine(false);
         return barChart;
+    }
+
+    /**
+     *
+     * @return the chart
+     */
+    private Chart generateLineChart() throws JSONException {
+        Log.d(TAG, "generateLineChart");
+        LineChart lineChart = new LineChart(context);
+        JSONArray series = data.getJSONArray("series");
+        JSONObject first = series.getJSONObject(0);
+        JSONArray dataSeries = first.getJSONArray("data");
+
+        List<Entry> values = new ArrayList<>();
+
+        for (int i = 0; i < dataSeries.length(); i++) {
+            JSONArray array = dataSeries.getJSONArray(i);
+            int length = array.length();
+            if (length > 1) {
+                String value = array.getString(1);
+                values.add(new Entry(i, Float.valueOf(value)));
+            }
+        }
+
+        ILineDataSet dataSet = new LineDataSet(values, this.legend);
+        List<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(dataSet);
+        LineData lineData = new LineData(dataSets);
+        lineChart.setData(lineData);
+        lineChart.setTag(LineChart.class.getSimpleName());
+
+        YAxis yAxis = lineChart.getAxisLeft();
+        yAxis.setDrawGridLines(false);
+        yAxis.setGranularity(1f);
+        yAxis.setLabelCount(values.size());
+        JSONArray categories = data.getJSONObject("xAxis").getJSONArray("categories");
+        List<String> labels = new ArrayList<>();
+        for (int i = 0; i < categories.length(); i++) {
+            labels.add(categories.getString(i));
+        }
+        yAxis.setDrawLabels(true);
+        yAxis.setValueFormatter(new XAxisValueFormatter(labels));
+        return lineChart;
     }
 }

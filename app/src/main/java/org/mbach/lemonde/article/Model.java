@@ -17,6 +17,7 @@ class Model {
     static final int COMMENT_TYPE = 3;
     static final int GRAPH_TYPE_BARS = 4;
     static final int GRAPH_TYPE_COLUMNS = 5;
+    static final int GRAPH_TYPE_LINE = 6;
 
     private final int id;
     private final int type;

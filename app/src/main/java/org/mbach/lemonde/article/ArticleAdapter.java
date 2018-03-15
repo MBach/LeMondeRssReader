@@ -1,6 +1,5 @@
 package org.mbach.lemonde.article;
 
-import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
@@ -15,11 +14,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.github.mikephil.charting.interfaces.datasets.IDataSet;
+import com.github.mikephil.charting.data.LineData;
 import com.squareup.picasso.Picasso;
 
 import org.mbach.lemonde.R;
@@ -94,6 +92,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 return new ViewHolderHorizontalBarChart(new HorizontalBarChart(parent.getContext()));
             case Model.GRAPH_TYPE_COLUMNS:
                 return new ViewHolderBarChart(new BarChart(parent.getContext()));
+            case Model.GRAPH_TYPE_LINE:
+                return new ViewHolderLineChart(new LineChart(parent.getContext()));
         }
     }
 
@@ -161,6 +161,14 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 BarData data2 = vh2.chart.getData();
                 data2.setDrawValues(false);
                 vh2.chart.getLegend().setTextColor(defaultTextColor);
+                break;
+            case Model.GRAPH_TYPE_LINE:
+                LineChart lineChart = (LineChart) model.getTheContent();
+                ViewHolderLineChart vhl = (ViewHolderLineChart) holder;
+                vhl.chart.setData(lineChart.getData());
+                vhl.chart.setLayoutParams(lp2);
+                LineData data3 = vhl.chart.getData();
+                data3.setDrawValues(false);
                 break;
         }
     }
@@ -236,6 +244,16 @@ class ArticleAdapter extends RecyclerView.Adapter {
         private final HorizontalBarChart chart;
 
         ViewHolderHorizontalBarChart(@NonNull HorizontalBarChart chart) {
+            super(chart);
+            this.chart = chart;
+        }
+    }
+    public static class ViewHolderLineChart extends RecyclerView.ViewHolder {
+
+        @NonNull
+        private final LineChart chart;
+
+        ViewHolderLineChart(@NonNull LineChart chart) {
             super(chart);
             this.chart = chart;
         }

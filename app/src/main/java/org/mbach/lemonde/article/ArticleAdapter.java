@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -22,6 +23,7 @@ import com.squareup.picasso.Picasso;
 
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +88,12 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 return new ViewHolderImage(new ImageView(parent.getContext()));
             case Model.TWEET_TYPE:
                 return new ViewHolderTweet(LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent, false));
+            case Model.FACTS_TYPE:
+                Log.d("onCreateViewHolder", "count = " + parent.getChildCount());
+                for (int i = 0; i < parent.getChildCount(); i++) {
+                    Log.d("onCreateViewHolder", "child = " + parent.getChildAt(i).toString());
+                }
+                return new ViewHolderFacts(new LinearLayout(parent.getContext()));
             case Model.COMMENT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.GRAPH_TYPE_BARS:
@@ -142,6 +150,18 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 ((ViewHolderTweet) holder).getTweet().setText(tweet.getText());
                 ((ViewHolderTweet) holder).getLink().setContentDescription(link.getContentDescription());
                 break;
+            case Model.FACTS_TYPE:
+                CardView factsView = (CardView) model.getTheContent();
+                ViewHolderFacts vhFacts = (ViewHolderFacts) holder;
+                for (int i = 0; i < factsView.getChildCount(); i++) {
+                    TextView fact = (TextView) factsView.getChildAt(i);
+                    TextView copy = new TextView(fact.getContext());
+                    copy.setLayoutParams(lp);
+                    copy.setTextSize(TypedValue.COMPLEX_UNIT_PX, fact.getTextSize());
+                    copy.setText(fact.getText());
+                    vhFacts.layout.addView(copy);
+                }
+                break;
             case Model.GRAPH_TYPE_BARS:
                 HorizontalBarChart chart1 = (HorizontalBarChart) model.getTheContent();
                 ViewHolderHorizontalBarChart vh = (ViewHolderHorizontalBarChart) holder;
@@ -176,7 +196,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    public static class ViewHolderText extends RecyclerView.ViewHolder {
+    static class ViewHolderText extends RecyclerView.ViewHolder {
         @NonNull
         private final TextView text;
 
@@ -189,7 +209,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    public static class ViewHolderImage extends RecyclerView.ViewHolder {
+    static class ViewHolderImage extends RecyclerView.ViewHolder {
         @NonNull
         private final ImageView image;
 
@@ -202,7 +222,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    public static class ViewHolderTweet extends RecyclerView.ViewHolder {
+    static class ViewHolderTweet extends RecyclerView.ViewHolder {
         @NonNull
         private final View view;
 
@@ -221,11 +241,24 @@ class ArticleAdapter extends RecyclerView.Adapter {
         }
     }
 
+    /**
+     *
+     */
+    static class ViewHolderFacts extends RecyclerView.ViewHolder {
+        @NonNull
+        private final LinearLayout layout;
+
+        ViewHolderFacts(@NonNull LinearLayout layout) {
+            super(layout);
+            this.layout = layout;
+            this.layout.setBackgroundColor(ThemeUtils.getStyleableColor(layout.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
+        }
+    }
 
     /**
      *
      */
-    public static class ViewHolderBarChart extends RecyclerView.ViewHolder {
+    static class ViewHolderBarChart extends RecyclerView.ViewHolder {
 
         @NonNull
         private final BarChart chart;
@@ -238,7 +271,10 @@ class ArticleAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public static class ViewHolderHorizontalBarChart extends RecyclerView.ViewHolder {
+    /**
+     *
+     */
+    static class ViewHolderHorizontalBarChart extends RecyclerView.ViewHolder {
 
         @NonNull
         private final HorizontalBarChart chart;
@@ -248,7 +284,11 @@ class ArticleAdapter extends RecyclerView.Adapter {
             this.chart = chart;
         }
     }
-    public static class ViewHolderLineChart extends RecyclerView.ViewHolder {
+
+    /**
+     *
+     */
+    static class ViewHolderLineChart extends RecyclerView.ViewHolder {
 
         @NonNull
         private final LineChart chart;

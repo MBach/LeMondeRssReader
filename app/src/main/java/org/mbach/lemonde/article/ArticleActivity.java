@@ -52,6 +52,7 @@ import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.home.MainActivity;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -291,9 +292,14 @@ public class ArticleActivity extends AppCompatActivity {
                     items = new ArrayList<>();
                     setTagInHeader(R.string.large_article, R.color.primary_dark, Color.WHITE);
                 } else if (articles.isEmpty()) {
-                    // Video
-                    items = extractVideo(doc);
-                    setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);
+                    if (doc.getElementsByClass("live2-container").isEmpty()) {
+                        // Video
+                        items = extractVideo(doc);
+                        setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);
+                    } else {
+                        items = extractLive(doc);
+                        setTagInHeader(R.string.live_article, R.color.accent_live, Color.WHITE);
+                    }
                 } else {
                     // Standard article
                     items = extractStandardArticle(articles);
@@ -332,6 +338,45 @@ public class ArticleActivity extends AppCompatActivity {
             findViewById(R.id.articleLoader).setVisibility(View.GONE);
         }
     };
+
+    private List<Model> extractLive(@NonNull Document doc) {
+        Log.d(TAG, "extractLive");
+        TextView headLine = new TextView(this);
+        TextView description = new TextView(this);
+
+        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
+
+        headLine.setTextColor(defaultText);
+        description.setTextColor(defaultText);
+
+        headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
+        description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+
+        if (!doc.getElementsByClass("title js-live-page-title").isEmpty()) {
+            headLine.setText(doc.getElementsByClass("title js-live-page-title").first().text());
+        }
+        if (!doc.getElementsByClass("description js-live-page-description").isEmpty()) {
+            description.setText(doc.getElementsByClass("description js-live-page-description").first().text());
+        }
+        List<Model> views = new ArrayList<>();
+        views.add(new Model(headLine));
+        views.add(new Model(description));
+
+        // Extract facts, if any
+        Elements factBlock = doc.getElementsByClass("facts-content");
+        if (!factBlock.isEmpty()) {
+            CardView cardView = new CardView(this);
+            Elements facts = factBlock.first().getElementsByTag("ul");
+            for (Element fact : facts) {
+                Log.d(TAG, "fact = " + fact.text());
+                TextView factView = new TextView(this);
+                factView.setText(fact.text());
+                cardView.addView(factView);
+            }
+            views.add(new Model(Model.FACTS_TYPE, cardView));
+        }
+        return views;
+    }
 
     /**
      * This helper method is used to customize the header (in the AppBar) to display a tag or a bubble when the current

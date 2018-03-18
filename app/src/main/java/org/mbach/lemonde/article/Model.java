@@ -14,10 +14,11 @@ class Model {
     static final int TEXT_TYPE = 0;
     static final int IMAGE_TYPE = 1;
     static final int TWEET_TYPE = 2;
-    static final int COMMENT_TYPE = 3;
-    static final int GRAPH_TYPE_BARS = 4;
-    static final int GRAPH_TYPE_COLUMNS = 5;
-    static final int GRAPH_TYPE_LINE = 6;
+    static final int FACTS_TYPE = 3;
+    static final int COMMENT_TYPE = 4;
+    static final int GRAPH_TYPE_BARS = 5;
+    static final int GRAPH_TYPE_COLUMNS = 6;
+    static final int GRAPH_TYPE_LINE = 7;
 
     private final int id;
     private final int type;

@@ -6,6 +6,7 @@
     <color name="primary_light_dark">#e0e0e0</color>
     <color name="accent">#ffc400</color>
     <color name="accent_complementary">#304ffe</color>
+    <color name="accent_live">#D70000</color>
 
     <!-- Default theme is dark -->
     <style name="DarkTheme" parent="Theme.AppCompat.NoActionBar">

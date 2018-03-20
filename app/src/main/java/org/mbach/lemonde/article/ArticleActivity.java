@@ -52,7 +52,6 @@ import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.home.MainActivity;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;

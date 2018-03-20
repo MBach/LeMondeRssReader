@@ -23,7 +23,6 @@ import com.squareup.picasso.Picasso;
 
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;

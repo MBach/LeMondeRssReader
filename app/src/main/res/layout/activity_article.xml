@@ -103,7 +103,8 @@
         android:backgroundTint="?attr/colorAccent"
         android:contentDescription="@string/app_name"
         android:fitsSystemWindows="true"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        tools:targetApi="lollipop" />
 
     <view
         android:id="@+id/fab"

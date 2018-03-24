@@ -55,6 +55,8 @@ import org.mbach.lemonde.home.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ArticleActivity class.
@@ -72,6 +74,7 @@ public class ArticleActivity extends AppCompatActivity {
     private static final String TAG_FAKE = "faux";
     private static final String TAG_MOSTLY_TRUE = "plutot_vrai";
     private static final String TAG_FORGOTTEN = "oubli";
+    private static final String SCRIBBLELIVE_TOKEN = "6Im8rwIM";
     private static RequestQueue REQUEST_QUEUE = null;
 
     private ExtendedFabButton fab;
@@ -292,13 +295,25 @@ public class ArticleActivity extends AppCompatActivity {
                     items = new ArrayList<>();
                     setTagInHeader(R.string.large_article, R.color.primary_dark, Color.WHITE);
                 } else if (articles.isEmpty()) {
-                    if (doc.getElementsByClass("live2-container").isEmpty()) {
+                    Elements liveContainer = doc.getElementsByClass("live2-container");
+                    if (liveContainer.isEmpty()) {
                         // Video
                         items = extractVideo(doc);
                         setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);
                     } else {
-                        items = extractLive(doc);
+                        items = extractLiveFacts(doc);
                         setTagInHeader(R.string.live_article, R.color.accent_live, Color.WHITE);
+                        // We need to extract the EventID for every live using regular expressions
+                        String liveScript = liveContainer.select("script").html();
+                        Pattern p = Pattern.compile("base\\.start\\(provider, '([0-9]+)'\\);");
+                        Matcher m = p.matcher(liveScript);
+                        if (m.find()) {
+                            String eventId = m.group(1);
+                            Log.d(TAG, "eventId = " + eventId);
+                            // The credential seems to be static, so we're assuming it won't change over time
+                            String livePostsURI = "https://apiv1secure.scribblelive.com/event/" + eventId + "/page/last?token=" + SCRIBBLELIVE_TOKEN + "&format=json&pageSize=20";
+                            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, livePostsURI, factsReceived, errorResponse));
+                        }
                     }
                 } else {
                     // Standard article
@@ -339,7 +354,7 @@ public class ArticleActivity extends AppCompatActivity {
         }
     };
 
-    private List<Model> extractLive(@NonNull Document doc) {
+    private List<Model> extractLiveFacts(@NonNull Document doc) {
         TextView headLine = new TextView(this);
         TextView description = new TextView(this);
 
@@ -377,25 +392,6 @@ public class ArticleActivity extends AppCompatActivity {
                 views.add(new Model(Model.FACTS_TYPE, cardView));
             }
         }
-        // Extract events
-        // FIXME: cannot be parsed directly because the source is buggy
-        /*Elements newPostsBlock = doc.getElementsByClass("new-posts");
-        if (atLeastOneChild(newPostsBlock)) {
-            TextView liveEvents = new TextView(this);
-            liveEvents.setText(getString(R.string.live_events));
-            liveEvents.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-            views.add(new Model(liveEvents));
-            Element newPosts = newPostsBlock.first();
-            for (Element post : newPosts.children()) {
-                Log.d(TAG, "post = " + post.text());
-                Elements postDate = post.getElementsByClass("post-date full-time-format");
-                if (atLeastOneChild(postDate)) {
-                    TextView postDateTV = new TextView(this);
-                    postDateTV.setText(postDate.first().text());
-                    views.add(new Model(postDateTV));
-                }
-            }
-        }*/
         return views;
     }
 
@@ -403,9 +399,9 @@ public class ArticleActivity extends AppCompatActivity {
      * This helper method is used to customize the header (in the AppBar) to display a tag or a bubble when the current
      * article comes from an hosted blog, or is restricted to paid members.
      *
-     * @param stringId string to display in the AppBar
+     * @param stringId        string to display in the AppBar
      * @param backgroundColor color of the background
-     * @param textColor color of the text to display
+     * @param textColor       color of the text to display
      */
     private void setTagInHeader(int stringId, int backgroundColor, int textColor) {
         TextView tagArticle = findViewById(R.id.tagArticle);
@@ -477,11 +473,21 @@ public class ArticleActivity extends AppCompatActivity {
                 }
             }
             articleAdapter.insertItems(items);
-            if (autoloadComments) {
-
-            } else {
+            if (!autoloadComments) {
                 fab.showProgress(false);
             }
+        }
+    };
+
+    /**
+     * See @articleReceived field.
+     */
+    private final Response.Listener<String> factsReceived = new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            Log.d(TAG, "todo factsReceived");
+            Log.d(TAG, response);
+
         }
     };
 

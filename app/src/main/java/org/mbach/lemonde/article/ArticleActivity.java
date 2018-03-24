@@ -132,10 +132,10 @@ public class ArticleActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (Constants.BASE_URL2.equals(commentsURI)) {
+                    if (commentsURI != null && Constants.BASE_URL2.equals(commentsURI)) {
                         fab.showProgress(false);
                         Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
-                    } else {
+                    } else if (commentsURI != null) {
                         fab.showProgress(true);
                         REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
                     }
@@ -147,10 +147,11 @@ public class ArticleActivity extends AppCompatActivity {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
                     if (autoloadComments) {
-                        if (Constants.BASE_URL2.equals(commentsURI)) {
+                        Log.d(TAG, "commentsURI = " + commentsURI);
+                        if (commentsURI != null && Constants.BASE_URL2.equals(commentsURI)) {
                             autoLoader.setVisibility(View.INVISIBLE);
                             Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
-                        } else {
+                        } else if (commentsURI != null) {
                             autoLoader.setVisibility(View.VISIBLE);
                             REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
                         }
@@ -339,7 +340,6 @@ public class ArticleActivity extends AppCompatActivity {
     };
 
     private List<Model> extractLive(@NonNull Document doc) {
-        Log.d(TAG, "extractLive");
         TextView headLine = new TextView(this);
         TextView description = new TextView(this);
 
@@ -363,17 +363,39 @@ public class ArticleActivity extends AppCompatActivity {
 
         // Extract facts, if any
         Elements factBlock = doc.getElementsByClass("facts-content");
-        if (!factBlock.isEmpty()) {
-            CardView cardView = new CardView(this);
+        if (atLeastOneChild(factBlock)) {
+            TextView liveFacts = new TextView(this);
+            liveFacts.setText(getString(R.string.live_facts));
+            liveFacts.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+            views.add(new Model(liveFacts));
             Elements facts = factBlock.first().getElementsByTag("ul");
             for (Element fact : facts) {
-                Log.d(TAG, "fact = " + fact.text());
                 TextView factView = new TextView(this);
                 factView.setText(fact.text());
+                CardView cardView = new CardView(this);
                 cardView.addView(factView);
+                views.add(new Model(Model.FACTS_TYPE, cardView));
             }
-            views.add(new Model(Model.FACTS_TYPE, cardView));
         }
+        // Extract events
+        // FIXME: cannot be parsed directly because the source is buggy
+        /*Elements newPostsBlock = doc.getElementsByClass("new-posts");
+        if (atLeastOneChild(newPostsBlock)) {
+            TextView liveEvents = new TextView(this);
+            liveEvents.setText(getString(R.string.live_events));
+            liveEvents.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+            views.add(new Model(liveEvents));
+            Element newPosts = newPostsBlock.first();
+            for (Element post : newPosts.children()) {
+                Log.d(TAG, "post = " + post.text());
+                Elements postDate = post.getElementsByClass("post-date full-time-format");
+                if (atLeastOneChild(postDate)) {
+                    TextView postDateTV = new TextView(this);
+                    postDateTV.setText(postDate.first().text());
+                    views.add(new Model(postDateTV));
+                }
+            }
+        }*/
         return views;
     }
 
@@ -470,6 +492,12 @@ public class ArticleActivity extends AppCompatActivity {
         @Override
         public void onErrorResponse(VolleyError error) {
             Log.e(TAG, "onErrorResponse: " + error.toString());
+            Log.e(TAG, "onErrorResponse: " + error.networkResponse);
+            Log.e(TAG, "onErrorResponse: " + error.getMessage());
+
+            /*for (Header header : error.networkResponse.allHeaders) {
+                Log.e(TAG, "header: " + header);
+            }*/
             findViewById(R.id.articleLoader).setVisibility(View.GONE);
 
             ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);

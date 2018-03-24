@@ -35,7 +35,7 @@ import java.util.List;
  */
 class ArticleAdapter extends RecyclerView.Adapter {
 
-    //private static final String TAG = "ArticleAdapter";
+    private static final String TAG = "ArticleAdapter";
 
     private List<Model> items;
 
@@ -88,11 +88,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
             case Model.TWEET_TYPE:
                 return new ViewHolderTweet(LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent, false));
             case Model.FACTS_TYPE:
-                Log.d("onCreateViewHolder", "count = " + parent.getChildCount());
-                for (int i = 0; i < parent.getChildCount(); i++) {
-                    Log.d("onCreateViewHolder", "child = " + parent.getChildAt(i).toString());
-                }
-                return new ViewHolderFacts(new LinearLayout(parent.getContext()));
+                return new ViewHolderFact(LayoutInflater.from(parent.getContext()).inflate(R.layout.fact_card, parent, false));
             case Model.COMMENT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.GRAPH_TYPE_BARS:
@@ -151,15 +147,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 break;
             case Model.FACTS_TYPE:
                 CardView factsView = (CardView) model.getTheContent();
-                ViewHolderFacts vhFacts = (ViewHolderFacts) holder;
-                for (int i = 0; i < factsView.getChildCount(); i++) {
-                    TextView fact = (TextView) factsView.getChildAt(i);
-                    TextView copy = new TextView(fact.getContext());
-                    copy.setLayoutParams(lp);
-                    copy.setTextSize(TypedValue.COMPLEX_UNIT_PX, fact.getTextSize());
-                    copy.setText(fact.getText());
-                    vhFacts.layout.addView(copy);
-                }
+                TextView fact = (TextView) factsView.getChildAt(0);
+                ((ViewHolderFact) holder).getFact().setText(fact.getText());
                 break;
             case Model.GRAPH_TYPE_BARS:
                 HorizontalBarChart chart1 = (HorizontalBarChart) model.getTheContent();
@@ -243,14 +232,18 @@ class ArticleAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    static class ViewHolderFacts extends RecyclerView.ViewHolder {
+    static class ViewHolderFact extends RecyclerView.ViewHolder {
         @NonNull
-        private final LinearLayout layout;
+        private final View view;
 
-        ViewHolderFacts(@NonNull LinearLayout layout) {
-            super(layout);
-            this.layout = layout;
-            this.layout.setBackgroundColor(ThemeUtils.getStyleableColor(layout.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
+        ViewHolderFact(@NonNull View view) {
+            super(view);
+            this.view = view;
+            this.view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
+        }
+
+        TextView getFact() {
+            return view.findViewById(R.id.fact_text);
         }
     }
 

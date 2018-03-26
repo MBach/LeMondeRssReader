@@ -53,15 +53,11 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 }
             }
 
-            List<Model> nextComments = new ArrayList<>();
-            for (Model model : items) {
-                if (model.getType() == Model.COMMENT_TYPE) {
-                    nextComments.add(model);
-                }
+            List<Model> next = new ArrayList<>(items);
+            if (!previousComments.isEmpty()) {
+                next.removeAll(previousComments);
             }
-
-            nextComments.removeAll(previousComments);
-            this.items.addAll(nextComments);
+            this.items.addAll(next);
         }
         notifyDataSetChanged();
     }
@@ -115,23 +111,21 @@ class ArticleAdapter extends RecyclerView.Adapter {
             case Model.TEXT_TYPE:
             case Model.COMMENT_TYPE:
                 TextView textView = (TextView) model.getTheContent();
-                ((ViewHolderText) holder).text.setText(textView.getText());
-                ((ViewHolderText) holder).text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
-                ((ViewHolderText) holder).text.setTypeface(textView.getTypeface());
-                ((ViewHolderText) holder).text.setTextColor(textView.getCurrentTextColor());
+                ViewHolderText vh = (ViewHolderText) holder;
+                vh.text.setText(textView.getText());
+                vh.text.setTypeface(textView.getTypeface());
+                vh.text.setTextColor(textView.getCurrentTextColor());
+                vh.text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
                 if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                    ((ViewHolderText) holder).text.setBackground(textView.getBackground());
-                }
-                if (textView.getBackground() != null) {
-                    ((ViewHolderText) holder).text.setAllCaps(true);
+                    vh.text.setBackground(textView.getBackground());
                 }
                 // Tag doesn't expand horizontally to the max
-                if (textView.getLayoutParams() != null) {
-                    ((ViewHolderText) holder).text.setLayoutParams(textView.getLayoutParams());
+                if (textView.getLayoutParams() == null) {
+                    vh.text.setLayoutParams(lp);
                 } else {
-                    ((ViewHolderText) holder).text.setLayoutParams(lp);
+                    vh.text.setLayoutParams(textView.getLayoutParams());
                 }
-                ((ViewHolderText) holder).text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize());
+                vh.text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize());
                 break;
             case Model.IMAGE_TYPE:
                 String imageURI = (String) model.getTheContent();
@@ -152,23 +146,23 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 break;
             case Model.GRAPH_TYPE_BARS:
                 HorizontalBarChart chart1 = (HorizontalBarChart) model.getTheContent();
-                ViewHolderHorizontalBarChart vh = (ViewHolderHorizontalBarChart) holder;
-                vh.chart.setData(chart1.getData());
-                vh.chart.setLayoutParams(lp2);
-                vh.chart.setDrawGridBackground(false);
-                BarData data = vh.chart.getData();
+                ViewHolderHorizontalBarChart vhhbc = (ViewHolderHorizontalBarChart) holder;
+                vhhbc.chart.setData(chart1.getData());
+                vhhbc.chart.setLayoutParams(lp2);
+                vhhbc.chart.setDrawGridBackground(false);
+                BarData data = vhhbc.chart.getData();
                 data.setDrawValues(false);
-                vh.chart.getLegend().setTextColor(defaultTextColor);
+                vhhbc.chart.getLegend().setTextColor(defaultTextColor);
                 break;
             case Model.GRAPH_TYPE_COLUMNS:
-                BarChart chart2 = (BarChart) model.getTheContent();
-                ViewHolderBarChart vh2 = (ViewHolderBarChart) holder;
-                vh2.chart.setData(chart2.getData());
-                vh2.chart.setLayoutParams(lp2);
-                vh2.chart.setDrawGridBackground(false);
-                BarData data2 = vh2.chart.getData();
+                BarChart bc = (BarChart) model.getTheContent();
+                ViewHolderBarChart vhbc = (ViewHolderBarChart) holder;
+                vhbc.chart.setData(bc.getData());
+                vhbc.chart.setLayoutParams(lp2);
+                vhbc.chart.setDrawGridBackground(false);
+                BarData data2 = vhbc.chart.getData();
                 data2.setDrawValues(false);
-                vh2.chart.getLegend().setTextColor(defaultTextColor);
+                vhbc.chart.getLegend().setTextColor(defaultTextColor);
                 break;
             case Model.GRAPH_TYPE_LINE:
                 LineChart lineChart = (LineChart) model.getTheContent();

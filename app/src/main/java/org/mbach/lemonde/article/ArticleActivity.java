@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -44,6 +45,9 @@ import com.android.volley.toolbox.Volley;
 import com.github.mikephil.charting.charts.Chart;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -52,9 +56,13 @@ import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.home.MainActivity;
+import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -485,9 +493,59 @@ public class ArticleActivity extends AppCompatActivity {
     private final Response.Listener<String> factsReceived = new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
+            SimpleDateFormat sdf = new SimpleDateFormat("'Le 'dd/MM/yyyy' à 'HH:mm", Locale.FRENCH);
             Log.d(TAG, "todo factsReceived");
             Log.d(TAG, response);
+            try {
+                JSONObject json = new JSONObject(response);
+                JSONArray posts = json.getJSONArray("Posts");
+                List<Model> facts = new ArrayList<>();
 
+                // Subtitle
+                TextView followLive = new TextView(ArticleActivity.this);
+                followLive.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+                followLive.setText(R.string.live_events);
+
+                // Date and post details are extracted from JSON
+                facts.add(new Model(followLive));
+                Pattern p = Pattern.compile("/Date\\(([0-9]+)\\+0000\\)/");
+                for (int i = 0; i < posts.length(); i++) {
+                    // Extract date
+                    JSONObject post = posts.getJSONObject(i);
+                    Matcher m = p.matcher(post.getString("LastModified"));
+                    if (m.find()) {
+                        TextView factHeader = new TextView(ArticleActivity.this);
+                        factHeader.setText(sdf.format(new Date(Long.valueOf(m.group(1)))));
+                        facts.add(new Model(factHeader));
+                    }
+
+                    // Extract tag
+                    if (post.has("Icons")) {
+                        JSONArray icons = post.getJSONArray("Icons");
+                        for (int j = 0; j < icons.length(); j++) {
+                            JSONObject icon = icons.getJSONObject(j);
+                            TextView iconText = new TextView(ArticleActivity.this);
+                            RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                            lp.setMargins(0, 24, 0, 24);
+                            iconText.setLayoutParams(lp);
+                            iconText.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM);
+                            iconText.setBackgroundColor(Color.parseColor(icon.getString("Color")));
+                            iconText.setTextColor(Color.parseColor(icon.getString("TextColor")));
+                            iconText.setText(icon.getString("Name"));
+                            facts.add(new Model(iconText));
+                        }
+                    }
+
+                    // Extract main content
+                    TextView factContent = new TextView(ArticleActivity.this);
+                    factContent.setId(Integer.valueOf(post.getString("Id")));
+                    fromHtml(factContent, post.getString("Content"));
+                    facts.add(new Model(factContent));
+                }
+                articleAdapter.insertItems(facts);
+            } catch (JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
     };
 
@@ -636,7 +694,7 @@ public class ArticleActivity extends AppCompatActivity {
         return views;
     }
 
-    private void fromHtml(TextView textView, String html) {
+    private static void fromHtml(TextView textView, String html) {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             textView.setText(Html.fromHtml(html));
         } else {
@@ -828,6 +886,7 @@ public class ArticleActivity extends AppCompatActivity {
                     Log.d(TAG, cssClass);
                     t.setAllCaps(true);
                     RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    lp.setMargins(0, 24, 0, 24);
                     t.setLayoutParams(lp);
                     t.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM);
                     switch (cssClass) {

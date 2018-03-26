@@ -66,6 +66,6 @@
     <!-- Colors for the custom category "Les Décodeurs" -->
     <color name="tag_green">#00c853</color>
     <color name="tag_red">#f44336</color>
-    <color name="tag_yellow">#ff9800</color>
+    <color name="tag_yellow">#F09600</color>
     <color name="tag_grey">#212121</color>
 </resources>

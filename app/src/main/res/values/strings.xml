@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LeMonde</string>
+    <string name="app_name" translatable="false">LeMonde</string>
 
     <!-- MainActivity: Right menu settings -->
     <string name="action_account">Mon compte</string>

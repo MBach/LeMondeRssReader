@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -56,7 +55,6 @@ import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.home.MainActivity;
-import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -90,7 +88,6 @@ public class ArticleActivity extends AppCompatActivity {
     private String commentsURI;
     private final ArticleAdapter articleAdapter = new ArticleAdapter();
     private boolean autoloadComments;
-    //private MenuItem menuItem;
     private Menu menu;
     private String shareText;
     private String shareLink;
@@ -387,18 +384,24 @@ public class ArticleActivity extends AppCompatActivity {
         // Extract facts, if any
         Elements factBlock = doc.getElementsByClass("facts-content");
         if (atLeastOneChild(factBlock)) {
-            TextView liveFacts = new TextView(this);
-            liveFacts.setText(getString(R.string.live_facts));
-            liveFacts.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-            views.add(new Model(liveFacts));
+            List<Model> factList = new ArrayList<>();
             Elements facts = factBlock.first().getElementsByTag("ul");
             for (Element fact : facts) {
                 TextView factView = new TextView(this);
                 factView.setText(fact.text());
                 CardView cardView = new CardView(this);
                 cardView.addView(factView);
-                views.add(new Model(Model.FACTS_TYPE, cardView));
+                factList.add(new Model(Model.FACTS_TYPE, cardView));
             }
+
+            // Add header only if there's at least one fact
+            if (!factList.isEmpty()) {
+                TextView liveFacts = new TextView(this);
+                liveFacts.setText(getString(R.string.live_facts));
+                liveFacts.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+                views.add(new Model(liveFacts));
+            }
+            views.addAll(factList);
         }
         return views;
     }
@@ -494,8 +497,6 @@ public class ArticleActivity extends AppCompatActivity {
         @Override
         public void onResponse(String response) {
             SimpleDateFormat sdf = new SimpleDateFormat("'Le 'dd/MM/yyyy' à 'HH:mm", Locale.FRENCH);
-            Log.d(TAG, "todo factsReceived");
-            Log.d(TAG, response);
             try {
                 JSONObject json = new JSONObject(response);
                 JSONArray posts = json.getJSONArray("Posts");
@@ -508,14 +509,19 @@ public class ArticleActivity extends AppCompatActivity {
 
                 // Date and post details are extracted from JSON
                 facts.add(new Model(followLive));
-                Pattern p = Pattern.compile("/Date\\(([0-9]+)\\+0000\\)/");
+                Pattern datePattern = Pattern.compile("/Date\\(([0-9]+)\\+0000\\)/");
+                Pattern quotePattern = Pattern.compile("(.*)<blockquote>(.*)</blockquote>", Pattern.DOTALL);
                 for (int i = 0; i < posts.length(); i++) {
                     // Extract date
                     JSONObject post = posts.getJSONObject(i);
-                    Matcher m = p.matcher(post.getString("LastModified"));
-                    if (m.find()) {
+                    Matcher dateMatcher = datePattern.matcher(post.getString("LastModified"));
+                    if (dateMatcher.find()) {
+                        RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        lp.setMargins(0, 24, 0, 0);
+
                         TextView factHeader = new TextView(ArticleActivity.this);
-                        factHeader.setText(sdf.format(new Date(Long.valueOf(m.group(1)))));
+                        factHeader.setText(sdf.format(new Date(Long.valueOf(dateMatcher.group(1)))));
+                        factHeader.setLayoutParams(lp);
                         facts.add(new Model(factHeader));
                     }
 
@@ -539,8 +545,27 @@ public class ArticleActivity extends AppCompatActivity {
                     // Extract main content
                     TextView factContent = new TextView(ArticleActivity.this);
                     factContent.setId(Integer.valueOf(post.getString("Id")));
-                    fromHtml(factContent, post.getString("Content"));
-                    facts.add(new Model(factContent));
+                    String content = post.getString("Content");
+                    Matcher quoteMatcher = quotePattern.matcher(content);
+                    if (quoteMatcher.find()) {
+                        //Log.d(TAG, "content is a quote >" + content);
+                        //fromHtml(factContent, content);
+                        String firstGroup = quoteMatcher.group(1);
+                        if (!firstGroup.isEmpty()) {
+                            TextView textViewG1 = new TextView(ArticleActivity.this);
+                            textViewG1.setText(Jsoup.parse(firstGroup).text());
+                            facts.add(new Model(textViewG1));
+                        }
+                        String secondGroup = quoteMatcher.group(2);
+                        TextView textViewQuote = new TextView(ArticleActivity.this);
+                        textViewQuote.setText(Jsoup.parse(secondGroup).text());
+                        textViewQuote.setTypeface(null, Typeface.ITALIC);
+                        textViewQuote.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, 0, 0);
+                        facts.add(new Model(textViewQuote));
+                    } else {
+                        fromHtml(factContent, content);
+                        facts.add(new Model(factContent));
+                    }
                 }
                 articleAdapter.insertItems(facts);
             } catch (JSONException e) {

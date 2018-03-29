@@ -113,7 +113,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 ViewHolderText vh = (ViewHolderText) holder;
                 vh.text.setText(textView.getText());
                 vh.text.setTypeface(textView.getTypeface());
-                vh.text.setTextColor(textView.getCurrentTextColor());
+                vh.text.setTextColor(defaultTextColor);
                 vh.text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
                 if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
                     vh.text.setBackground(textView.getBackground());

@@ -44,9 +44,6 @@ import com.android.volley.toolbox.Volley;
 import com.github.mikephil.charting.charts.Chart;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -56,13 +53,8 @@ import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.home.MainActivity;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * ArticleActivity class.
@@ -80,8 +72,7 @@ public class ArticleActivity extends AppCompatActivity {
     private static final String TAG_FAKE = "faux";
     private static final String TAG_MOSTLY_TRUE = "plutot_vrai";
     private static final String TAG_FORGOTTEN = "oubli";
-    private static final String SCRIBBLELIVE_TOKEN = "6Im8rwIM";
-    private static RequestQueue REQUEST_QUEUE = null;
+    static RequestQueue REQUEST_QUEUE = null;
 
     private ExtendedFabButton fab;
     private ProgressBar autoLoader;
@@ -306,19 +297,10 @@ public class ArticleActivity extends AppCompatActivity {
                         items = extractVideo(doc);
                         setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);
                     } else {
-                        items = extractLiveFacts(doc);
                         setTagInHeader(R.string.live_article, R.color.accent_live, Color.WHITE);
-                        // We need to extract the EventID for every live using regular expressions
-                        String liveScript = liveContainer.select("script").html();
-                        Pattern p = Pattern.compile("base\\.start\\(provider, '([0-9]+)'\\);");
-                        Matcher m = p.matcher(liveScript);
-                        if (m.find()) {
-                            String eventId = m.group(1);
-                            Log.d(TAG, "eventId = " + eventId);
-                            // The credential seems to be static, so we're assuming it won't change over time
-                            String livePostsURI = "https://apiv1secure.scribblelive.com/event/" + eventId + "/page/last?token=" + SCRIBBLELIVE_TOKEN + "&format=json&pageSize=20";
-                            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, livePostsURI, factsReceived, errorResponse));
-                        }
+                        LiveFeedParser liveFeedParser = new LiveFeedParser(getApplicationContext(), articleAdapter, doc);
+                        items = liveFeedParser.extractLiveFacts();
+                        liveFeedParser.fetchPosts(liveContainer.select("script").html());
                     }
                 } else {
                     // Standard article
@@ -359,53 +341,6 @@ public class ArticleActivity extends AppCompatActivity {
         }
     };
 
-    private List<Model> extractLiveFacts(@NonNull Document doc) {
-        TextView headLine = new TextView(this);
-        TextView description = new TextView(this);
-
-        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
-
-        headLine.setTextColor(defaultText);
-        description.setTextColor(defaultText);
-
-        headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
-        description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-
-        if (!doc.getElementsByClass("title js-live-page-title").isEmpty()) {
-            headLine.setText(doc.getElementsByClass("title js-live-page-title").first().text());
-        }
-        if (!doc.getElementsByClass("description js-live-page-description").isEmpty()) {
-            description.setText(doc.getElementsByClass("description js-live-page-description").first().text());
-        }
-        List<Model> views = new ArrayList<>();
-        views.add(new Model(headLine));
-        views.add(new Model(description));
-
-        // Extract facts, if any
-        Elements factBlock = doc.getElementsByClass("facts-content");
-        if (atLeastOneChild(factBlock)) {
-            List<Model> factList = new ArrayList<>();
-            Elements facts = factBlock.first().getElementsByTag("ul");
-            for (Element fact : facts) {
-                TextView factView = new TextView(this);
-                factView.setText(fact.text());
-                CardView cardView = new CardView(this);
-                cardView.addView(factView);
-                factList.add(new Model(Model.FACTS_TYPE, cardView));
-            }
-
-            // Add header only if there's at least one fact
-            if (!factList.isEmpty()) {
-                TextView liveFacts = new TextView(this);
-                liveFacts.setText(getString(R.string.live_facts));
-                liveFacts.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-                views.add(new Model(liveFacts));
-            }
-            views.addAll(factList);
-        }
-        return views;
-    }
-
     /**
      * This helper method is used to customize the header (in the AppBar) to display a tag or a bubble when the current
      * article comes from an hosted blog, or is restricted to paid members.
@@ -429,7 +364,6 @@ public class ArticleActivity extends AppCompatActivity {
         @Override
         public void onResponse(String response) {
             Document commentDoc = Jsoup.parse(response);
-            int defaultText = ThemeUtils.getStyleableColor(ArticleActivity.this, R.styleable.CustomTheme_defaultText);
 
             List<Model> items = new ArrayList<>();
             // Extract header
@@ -438,7 +372,6 @@ public class ArticleActivity extends AppCompatActivity {
                 TextView commentHeader = new TextView(ArticleActivity.this);
                 commentHeader.setText(String.format("Commentaires %s", header.text()));
                 commentHeader.setTypeface(null, Typeface.BOLD);
-                commentHeader.setTextColor(defaultText);
                 commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
                 items.add(new Model(commentHeader, 0));
             }
@@ -453,13 +386,11 @@ public class ArticleActivity extends AppCompatActivity {
                     TextView author = new TextView(ArticleActivity.this);
                     author.setTypeface(null, Typeface.BOLD);
                     author.setText(refs.text());
-                    author.setTextColor(defaultText);
 
                     Elements commentComment = refs.next();
                     if (atLeastOneChild(commentComment)) {
                         TextView content = new TextView(ArticleActivity.this);
                         content.setText(commentComment.first().text());
-                        content.setTextColor(defaultText);
                         if (comment.hasClass("reponse")) {
                             author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
                             content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
@@ -486,90 +417,6 @@ public class ArticleActivity extends AppCompatActivity {
             articleAdapter.insertItems(items);
             if (!autoloadComments) {
                 fab.showProgress(false);
-            }
-        }
-    };
-
-    /**
-     * See @articleReceived field.
-     */
-    private final Response.Listener<String> factsReceived = new Response.Listener<String>() {
-        @Override
-        public void onResponse(String response) {
-            SimpleDateFormat sdf = new SimpleDateFormat("'Le 'dd/MM/yyyy' à 'HH:mm", Locale.FRENCH);
-            try {
-                JSONObject json = new JSONObject(response);
-                JSONArray posts = json.getJSONArray("Posts");
-                List<Model> facts = new ArrayList<>();
-
-                // Subtitle
-                TextView followLive = new TextView(ArticleActivity.this);
-                followLive.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-                followLive.setText(R.string.live_events);
-
-                // Date and post details are extracted from JSON
-                facts.add(new Model(followLive));
-                Pattern datePattern = Pattern.compile("/Date\\(([0-9]+)\\+0000\\)/");
-                Pattern quotePattern = Pattern.compile("(.*)<blockquote>(.*)</blockquote>", Pattern.DOTALL);
-                for (int i = 0; i < posts.length(); i++) {
-                    // Extract date
-                    JSONObject post = posts.getJSONObject(i);
-                    Matcher dateMatcher = datePattern.matcher(post.getString("LastModified"));
-                    if (dateMatcher.find()) {
-                        RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        lp.setMargins(0, 24, 0, 0);
-
-                        TextView factHeader = new TextView(ArticleActivity.this);
-                        factHeader.setText(sdf.format(new Date(Long.valueOf(dateMatcher.group(1)))));
-                        factHeader.setLayoutParams(lp);
-                        facts.add(new Model(factHeader));
-                    }
-
-                    // Extract tag
-                    if (post.has("Icons")) {
-                        JSONArray icons = post.getJSONArray("Icons");
-                        for (int j = 0; j < icons.length(); j++) {
-                            JSONObject icon = icons.getJSONObject(j);
-                            TextView iconText = new TextView(ArticleActivity.this);
-                            RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                            lp.setMargins(0, 24, 0, 24);
-                            iconText.setLayoutParams(lp);
-                            iconText.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM);
-                            iconText.setBackgroundColor(Color.parseColor(icon.getString("Color")));
-                            iconText.setTextColor(Color.parseColor(icon.getString("TextColor")));
-                            iconText.setText(icon.getString("Name"));
-                            facts.add(new Model(iconText));
-                        }
-                    }
-
-                    // Extract main content
-                    TextView factContent = new TextView(ArticleActivity.this);
-                    factContent.setId(Integer.valueOf(post.getString("Id")));
-                    String content = post.getString("Content");
-                    Matcher quoteMatcher = quotePattern.matcher(content);
-                    if (quoteMatcher.find()) {
-                        //Log.d(TAG, "content is a quote >" + content);
-                        //fromHtml(factContent, content);
-                        String firstGroup = quoteMatcher.group(1);
-                        if (!firstGroup.isEmpty()) {
-                            TextView textViewG1 = new TextView(ArticleActivity.this);
-                            textViewG1.setText(Jsoup.parse(firstGroup).text());
-                            facts.add(new Model(textViewG1));
-                        }
-                        String secondGroup = quoteMatcher.group(2);
-                        TextView textViewQuote = new TextView(ArticleActivity.this);
-                        textViewQuote.setText(Jsoup.parse(secondGroup).text());
-                        textViewQuote.setTypeface(null, Typeface.ITALIC);
-                        textViewQuote.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, 0, 0);
-                        facts.add(new Model(textViewQuote));
-                    } else {
-                        fromHtml(factContent, content);
-                        facts.add(new Model(factContent));
-                    }
-                }
-                articleAdapter.insertItems(facts);
-            } catch (JSONException e) {
-                Log.e(TAG, e.getMessage());
             }
         }
     };
@@ -615,7 +462,7 @@ public class ArticleActivity extends AppCompatActivity {
      * @param elements nodes to check
      * @return true if elements can be safely called with first()
      */
-    private boolean atLeastOneChild(Elements elements) {
+    public static boolean atLeastOneChild(Elements elements) {
         return elements != null && !elements.isEmpty();
     }
 
@@ -634,14 +481,6 @@ public class ArticleActivity extends AppCompatActivity {
         TextView authors = new TextView(this);
         TextView dates = new TextView(this);
         TextView description = new TextView(this);
-
-        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
-        int authorDateText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_authorDateText);
-
-        headLine.setTextColor(defaultText);
-        description.setTextColor(defaultText);
-        authors.setTextColor(authorDateText);
-        dates.setTextColor(authorDateText);
 
         headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
         authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
@@ -682,14 +521,6 @@ public class ArticleActivity extends AppCompatActivity {
         TextView dates = new TextView(this);
         TextView content = new TextView(this);
 
-        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
-        int authorDateText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_authorDateText);
-
-        headLine.setTextColor(defaultText);
-        content.setTextColor(defaultText);
-        authors.setTextColor(authorDateText);
-        dates.setTextColor(authorDateText);
-
         headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
         authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
         dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
@@ -719,7 +550,7 @@ public class ArticleActivity extends AppCompatActivity {
         return views;
     }
 
-    private static void fromHtml(TextView textView, String html) {
+    static void fromHtml(TextView textView, String html) {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             textView.setText(Html.fromHtml(html));
         } else {
@@ -738,12 +569,6 @@ public class ArticleActivity extends AppCompatActivity {
         Log.d(TAG, "extractBlog");
         TextView headLine = new TextView(this);
         TextView dates = new TextView(this);
-
-        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
-        int authorDateText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_authorDateText);
-
-        headLine.setTextColor(defaultText);
-        dates.setTextColor(authorDateText);
 
         headLine.setTextSize(getResources().getDimension(R.dimen.article_headline));
         dates.setTextSize(getResources().getDimension(R.dimen.article_authors));
@@ -776,7 +601,6 @@ public class ArticleActivity extends AppCompatActivity {
                 TextView textView = new TextView(this);
                 textView.setText(child.text());
                 textView.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-                textView.setTextColor(defaultText);
                 textView.setTextSize(getResources().getDimension(R.dimen.article_body));
                 views.add(new Model(textView));
             }
@@ -816,7 +640,7 @@ public class ArticleActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
 
-        int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
+        //int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
 
         List<Model> p = new ArrayList<>();
         Elements articleBody = article.select("[itemprop='articleBody']");
@@ -886,7 +710,6 @@ public class ArticleActivity extends AppCompatActivity {
 
                 TextView t = new TextView(this);
                 fromHtml(t, element.html());
-                t.setTextColor(defaultText);
 
                 boolean hasIntertitre = element.is("h2.intertitre");
                 if (!hasIntertitre) {

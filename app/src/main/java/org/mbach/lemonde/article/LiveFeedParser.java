@@ -1,13 +1,16 @@
 package org.mbach.lemonde.article;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -21,6 +24,7 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
@@ -184,16 +188,34 @@ class LiveFeedParser {
                         textViewQuote.setPadding(Constants.PADDING_LEFT_RIGHT_TAG, Constants.PADDING_BOTTOM, 0, 0);
                         facts.add(new Model(textViewQuote));
                     } else if (HTML.equals(post.getString("Type"))) {
-                        Elements root = Jsoup.parse(content).children();
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
                         // Iterate over a small document
-                        for (int j = 0; j < root.size(); j++) {
-                            Element element = root.get(j);
+                        for (Element element : Jsoup.parse(content).body().children()) {
+                            // Clean tweets
+
+                            // Check if there are pictures in the live feed
                             Elements figures = element.getElementsByTag("figure");
                             Elements images = element.getElementsByTag("img");
                             if (figures.isEmpty() && images.isEmpty()) {
-                                TextView t = new TextView(context);
-                                ArticleActivity.fromHtml(t, element.html());
-                                facts.add(new Model(t));
+                                if (displayTweets && !element.getElementsByClass("twitter-tweet").isEmpty()) {
+                                    TextView t = new TextView(context);
+                                    //ArticleActivity.fromHtml(t, element.html());
+                                    Button link = new Button(context);
+                                    Elements links = element.select("a[href]");
+                                    if (ArticleActivity.atLeastOneChild(links)) {
+                                        link.setContentDescription(links.first().attr("href"));
+                                    }
+                                    CardView cardView = new CardView(context);
+                                    cardView.addView(t);
+                                    cardView.addView(link);
+                                    facts.add(new Model(Model.TWEET_TYPE, cardView));
+                                } else if (!element.text().replace("\u00a0", "").replace("\n", "").isEmpty()) {
+                                    //Log.d(TAG, "text = '" + element.text().trim() + "'");
+                                    TextView t = new TextView(context);
+                                    ArticleActivity.fromHtml(t, element.html());
+                                    facts.add(new Model(t));
+                                }
                             } else {
                                 if (images.isEmpty()) {
                                     Element figure = figures.first();
@@ -219,6 +241,9 @@ class LiveFeedParser {
         }
     };
 
+    /**
+     *
+     */
     private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {

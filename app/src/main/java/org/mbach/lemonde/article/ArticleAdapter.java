@@ -135,7 +135,13 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 CardView cardView = (CardView) model.getTheContent();
                 TextView tweet = (TextView) cardView.getChildAt(0);
                 Button link = (Button) cardView.getChildAt(1);
-                ((ViewHolderTweet) holder).getTweet().setText(tweet.getText());
+                if (tweet.getText().length() == 0) {
+                    View v = ((ViewHolderTweet) holder).view;
+                    v.setPadding(v.getPaddingLeft(), v.getPaddingBottom(), v.getPaddingRight(), v.getPaddingBottom());
+                    ((ViewHolderTweet) holder).getTweet().setVisibility(View.GONE);
+                } else {
+                    ((ViewHolderTweet) holder).getTweet().setText(tweet.getText());
+                }
                 ((ViewHolderTweet) holder).getLink().setContentDescription(link.getContentDescription());
                 break;
             case Model.FACTS_TYPE:

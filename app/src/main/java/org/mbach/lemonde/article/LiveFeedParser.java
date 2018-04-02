@@ -24,7 +24,6 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;

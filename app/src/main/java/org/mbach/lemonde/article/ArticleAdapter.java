@@ -34,7 +34,7 @@ import java.util.List;
  */
 class ArticleAdapter extends RecyclerView.Adapter {
 
-    private static final String TAG = "ArticleAdapter";
+    //private static final String TAG = "ArticleAdapter";
 
     private List<Model> items;
 

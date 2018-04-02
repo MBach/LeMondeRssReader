@@ -57,7 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ArticleActivity class.
+ * ArticleActivity class fetch an article from an URI, and parse the HTML response.
  *
  * @author Matthieu BACHELIER
  * @since 2017-05
@@ -115,9 +115,17 @@ public class ArticleActivity extends AppCompatActivity {
 
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                TextView tagArticle = findViewById(R.id.tagArticle);
-                if (tagArticle.isShown()) {
-                    collapsingToolbar.setCollapsedTitleTextColor(getResources().getColor(R.color.primary_dark));
+                if (menu == null) {
+                    return;
+                }
+                MenuItem menuItem = menu.findItem(R.id.action_share);
+                // XXX: convert to independent unit
+                // TODO? Animate setVisible
+                Log.d(TAG, "verticalOffset = " + verticalOffset);
+                if (verticalOffset == -552) {
+                    menuItem.setVisible(true);
+                } else {
+                    menuItem.setVisible(false);
                 }
             }
         });
@@ -172,6 +180,7 @@ public class ArticleActivity extends AppCompatActivity {
         final Intent intent = getIntent();
         final String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
+            Log.d(TAG, "action = " + action);
             shareLink = intent.getDataString();
         } else if (getIntent().getExtras() != null) {
             collapsingToolbar.setTitle(getIntent().getExtras().getString(Constants.EXTRA_NEWS_CATEGORY));
@@ -297,10 +306,10 @@ public class ArticleActivity extends AppCompatActivity {
                         items = extractVideo(doc);
                         setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);
                     } else {
-                        setTagInHeader(R.string.live_article, R.color.accent_live, Color.WHITE);
                         LiveFeedParser liveFeedParser = new LiveFeedParser(getApplicationContext(), articleAdapter, doc);
                         items = liveFeedParser.extractLiveFacts();
                         liveFeedParser.fetchPosts(liveContainer.select("script").html());
+                        setTagInHeader(R.string.live_article, R.color.accent_live, Color.WHITE);
                     }
                 } else {
                     // Standard article
@@ -318,6 +327,7 @@ public class ArticleActivity extends AppCompatActivity {
 
                         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
                         collapsingToolbar.setContentScrimResource(R.color.accent);
+                        collapsingToolbar.setCollapsedTitleTextColor(getResources().getColor(R.color.primary_dark));
                         setTagInHeader(R.string.paid_article, R.color.accent, Color.BLACK);
 
                         if (getSupportActionBar() != null) {
@@ -566,7 +576,6 @@ public class ArticleActivity extends AppCompatActivity {
      */
     @NonNull
     private List<Model> extractBlogArticle(@NonNull Element content) {
-        Log.d(TAG, "extractBlog");
         TextView headLine = new TextView(this);
         TextView dates = new TextView(this);
 
@@ -574,30 +583,21 @@ public class ArticleActivity extends AppCompatActivity {
         dates.setTextSize(getResources().getDimension(R.dimen.article_authors));
 
         Elements elements = content.select(".entry-title");
-        Log.d(TAG, content.html());
         if (atLeastOneChild(elements)) {
-            Log.d(TAG, "extractBlog headLine ! " + elements.first().text());
             headLine.setText(elements.first().text());
         }
 
         elements = content.select(".entry-date");
         if (atLeastOneChild(elements)) {
-            Log.d(TAG, "extractBlog dates ! " + elements.first().text());
             dates.setText(elements.first().text());
         }
         List<Model> views = new ArrayList<>();
         views.add(new Model(headLine));
         views.add(new Model(dates));
-        Log.d(TAG, "extractBlog headLine: " + headLine.getText());
-        Log.d(TAG, "extractBlog dates: " + dates.getText());
 
         elements = content.select(".entry-content");
         if (atLeastOneChild(elements)) {
-            Element element = elements.first();
-            Log.d(TAG, "extractBlog content: " + element.children().size());
-
-            for (int i = 0; i < element.children().size(); i++) {
-                Element child = element.children().get(i);
+            for (Element child : elements.first().children()) {
                 TextView textView = new TextView(this);
                 textView.setText(child.text());
                 textView.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
@@ -605,7 +605,6 @@ public class ArticleActivity extends AppCompatActivity {
                 views.add(new Model(textView));
             }
         }
-        Log.d(TAG, "extractBlog: " + views.size());
         return views;
     }
 
@@ -639,8 +638,6 @@ public class ArticleActivity extends AppCompatActivity {
     private List<Model> extractParagraphs(@NonNull Element article) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
-
-        //int defaultText = ThemeUtils.getStyleableColor(this, R.styleable.CustomTheme_defaultText);
 
         List<Model> p = new ArrayList<>();
         Elements articleBody = article.select("[itemprop='articleBody']");

@@ -11,6 +11,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -30,6 +31,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -79,9 +81,11 @@ public class ArticleActivity extends AppCompatActivity {
     private String commentsURI;
     private final ArticleAdapter articleAdapter = new ArticleAdapter();
     private boolean autoloadComments;
-    private Menu menu;
+    private String shareSubject;
     private String shareText;
     private String shareLink;
+    private MenuItem menuItem;
+    private final AlphaAnimation animationFadeIn = new AlphaAnimation(0, 1);
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent motionEvent) {
@@ -115,15 +119,19 @@ public class ArticleActivity extends AppCompatActivity {
 
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                if (menu == null) {
+                if (menuItem == null) {
                     return;
                 }
-                MenuItem menuItem = menu.findItem(R.id.action_share);
+                //MenuItem menuItem = menu.findItem(R.id.action_share);
                 // XXX: convert to independent unit
-                // TODO? Animate setVisible
                 Log.d(TAG, "verticalOffset = " + verticalOffset);
-                if (verticalOffset == -552) {
+                View share = findViewById(R.id.action_share);
+
+                if (Math.abs(verticalOffset) - appBarLayout.getTotalScrollRange() == 0) {
                     menuItem.setVisible(true);
+                    if (share != null) {
+                        share.startAnimation(animationFadeIn);
+                    }
                 } else {
                     menuItem.setVisible(false);
                 }
@@ -228,14 +236,20 @@ public class ArticleActivity extends AppCompatActivity {
         boolean shareContent = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
         if (shareContent) {
             getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
-            this.menu = menu;
-            MenuItem menuItem = menu.findItem(R.id.action_share);
+            menuItem = menu.findItem(R.id.action_share);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    animationFadeIn.setDuration(1000);
+                    menuItem.setVisible(true);
+                }
+            }, 1);
             menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem menuItem) {
-                    Log.d(TAG, "MENU ?");
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND);
+                    shareIntent.putExtra(Intent.EXTRA_SUBJECT, shareSubject);
                     shareIntent.putExtra(Intent.EXTRA_TEXT, shareText + " " + shareLink);
                     shareIntent.setType("text/plain");
                     startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.share_article)));
@@ -316,15 +330,9 @@ public class ArticleActivity extends AppCompatActivity {
                     items = extractStandardArticle(articles);
                     // Full article is restricted to paid members
                     if (doc.getElementById("teaser_article") != null) {
-                        if (menu != null) {
-                            MenuItem menuItem = menu.findItem(R.id.action_share);
-                            if (menuItem != null) {
-                                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_share_black));
-                            }
-                        } else {
-                            Log.e(TAG, "menu should not be null at this point!");
+                        if (menuItem != null) {
+                            menuItem.setIcon(getResources().getDrawable(R.drawable.ic_share_black));
                         }
-
                         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
                         collapsingToolbar.setContentScrimResource(R.color.accent);
                         collapsingToolbar.setCollapsedTitleTextColor(getResources().getColor(R.color.primary_dark));
@@ -498,11 +506,12 @@ public class ArticleActivity extends AppCompatActivity {
         description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
 
         Element article = articles.first();
-        headLine.setText(extractAttr(article, ATTR_HEADLINE));
         authors.setText(extractAttr(article, ATTR_AUTHOR));
         dates.setText(extractDates(article));
+        shareSubject = extractAttr(article, ATTR_HEADLINE);
         shareText = extractAttr(article, ATTR_DESCRIPTION);
         description.setText(shareText);
+        headLine.setText(shareSubject);
 
         List<Model> views = new ArrayList<>();
         views.add(new Model(headLine));

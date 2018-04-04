@@ -139,11 +139,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     AppCompatImageView rssImage = view.findViewById(R.id.rss_image);
                     intent.putExtras(extras);
 
-                    String transitionName = "transition_open_article";
-                    if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this,
                                 rssImage,
-                                transitionName);
+                                getString(R.string.transition_open_article));
                         ActivityCompat.startActivity(MainActivity.this, intent, options.toBundle());
                     } else {
                         startActivity(intent);

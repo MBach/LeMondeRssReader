@@ -53,6 +53,7 @@ import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
+import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.home.MainActivity;
 
 import java.util.ArrayList;
@@ -99,7 +100,7 @@ public class ArticleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemeUtils.applyTheme(this, getTheme());
+        //ThemeUtils.applyTheme(this, getTheme());
         setContentView(R.layout.activity_article);
         setTitle("");
 
@@ -124,7 +125,7 @@ public class ArticleActivity extends AppCompatActivity {
                 }
                 //MenuItem menuItem = menu.findItem(R.id.action_share);
                 // XXX: convert to independent unit
-                Log.d(TAG, "verticalOffset = " + verticalOffset);
+                //Log.d(TAG, "verticalOffset = " + verticalOffset);
                 View share = findViewById(R.id.action_share);
 
                 if (Math.abs(verticalOffset) - appBarLayout.getTotalScrollRange() == 0) {
@@ -272,6 +273,15 @@ public class ArticleActivity extends AppCompatActivity {
         startActivity(new Intent(Intent.ACTION_VIEW, uri));
     }
 
+    public void goToAccount(View view) {
+        startActivity(new Intent(this, LoginActivity.class));
+    }
+
+    public void register(View view) {
+        Uri uri = Uri.parse("https://abo.lemonde.fr");
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+    }
+
     /**
      * This listener is a callback which can parse and extract the HTML page that has been received after
      * an asynchronous call to the web. Jsoup library is used to parse the response and not to make the call.
@@ -342,6 +352,10 @@ public class ArticleActivity extends AppCompatActivity {
                             final Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp);
                             getSupportActionBar().setHomeAsUpIndicator(upArrow);
                         }
+
+                        // Add a button before comments where the user can connect
+                        CardView connectButton = new CardView(ArticleActivity.this);
+                        items.add(new Model(Model.BUTTON_TYPE, connectButton));
                     }
                     // After parsing the article, start a new request for comments
                     Element react = doc.getElementById("liste_reactions");

@@ -35,6 +35,8 @@
     <string name="share_article">Partager cet article</string>
     <string name="live_facts">Les faits</string>
     <string name="live_events">Suivez le live de l’événement</string>
+    <string name="register">S’abonner</string>
+    <string name="restricted_content">L’accès à la totalité de l’article est protégé</string>
 
     <!-- Bubble tag of article -->
     <string name="paid_article">Article Abonnés</string>

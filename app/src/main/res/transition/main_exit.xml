@@ -1,0 +1,5 @@
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    android:transitionOrdering="together">
+    <explode xmlns:android="http://schemas.android.com/apk/res/android"/>
+    <fade/>
+</transitionSet>

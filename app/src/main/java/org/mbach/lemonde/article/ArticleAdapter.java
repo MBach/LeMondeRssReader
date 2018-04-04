@@ -92,6 +92,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 return new ViewHolderBarChart(new BarChart(parent.getContext()));
             case Model.GRAPH_TYPE_LINE:
                 return new ViewHolderLineChart(new LineChart(parent.getContext()));
+            case Model.BUTTON_TYPE:
+                return new ViewHolderRestrictedContent(LayoutInflater.from(parent.getContext()).inflate(R.layout.connect_card, parent, false));
         }
     }
 
@@ -287,6 +289,20 @@ class ArticleAdapter extends RecyclerView.Adapter {
         ViewHolderLineChart(@NonNull LineChart chart) {
             super(chart);
             this.chart = chart;
+        }
+    }
+
+    /**
+     *
+     */
+    static class ViewHolderRestrictedContent extends RecyclerView.ViewHolder {
+        @NonNull
+        private final View view;
+
+        ViewHolderRestrictedContent(@NonNull View view) {
+            super(view);
+            this.view = view;
+            this.view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
         }
     }
 }

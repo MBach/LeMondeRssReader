@@ -58,6 +58,8 @@ import org.mbach.lemonde.home.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ArticleActivity class fetch an article from an URI, and parse the HTML response.
@@ -578,11 +580,44 @@ public class ArticleActivity extends AppCompatActivity {
         views.add(new Model(authors));
         views.add(new Model(dates));
         views.add(new Model(content));
-
-
+        Elements scripts = doc.getElementsByTag("script");
+        for (Element script : scripts) {
+            if (script.html().contains("lmd/module/video/player")) {
+                Pattern p = Pattern.compile("url: '//(.+)',", Pattern.DOTALL);
+                Matcher m = p.matcher(script.html());
+                if (m.find()) {
+                    String iFrame = m.group(1);
+                    Log.d(TAG, "iFrame = " + iFrame);
+                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, "https://" + iFrame, videoFrameReceived, errorResponse));
+                }
+            }
+        }
         return views;
     }
 
+    /**
+     * Extract Video URI.
+     */
+    private final Response.Listener<String> videoFrameReceived = new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            Pattern p = Pattern.compile("\"mp4_720\":\"(https:.*\\.mp4\\?mdtk=.*)\",\"mp4_480\":.*", Pattern.DOTALL);
+            Matcher m = p.matcher(response);
+            if (m.find()) {
+                String videoURI = m.group(1);
+                videoURI = videoURI.replace("\\","");
+                Log.d(TAG, "videoURI = " + videoURI);
+            } else {
+                Log.d(TAG, "not found >> " + response);
+            }
+        }
+    };
+
+    /**
+     *
+     * @param textView
+     * @param html
+     */
     static void fromHtml(TextView textView, String html) {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             textView.setText(Html.fromHtml(html));

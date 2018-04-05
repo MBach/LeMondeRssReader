@@ -62,6 +62,7 @@
     <color name="cat_color_pixels">#06B586</color>
     <color name="cat_color_campus">#FF6E17</color>
     <color name="cat_color_decoders">#1F0D67</color>
+    <color name="cat_color_videos">#212121</color>
 
     <!-- Colors for the custom category "Les Décodeurs" -->
     <color name="tag_green">#00c853</color>

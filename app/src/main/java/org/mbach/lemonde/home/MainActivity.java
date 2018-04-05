@@ -209,6 +209,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rssCats.append(R.id.cat_pixels, Constants.CAT_PIXELS);
         rssCats.append(R.id.cat_campus, Constants.CAT_CAMPUS);
         rssCats.append(R.id.cat_decoders, Constants.CAT_DECODERS);
+        rssCats.append(R.id.cat_videos, Constants.CAT_VIDEOS);
 
         colorCats.append(R.id.cat_news, R.color.cat_color_news);
         colorCats.append(R.id.cat_international, R.color.cat_color_international);
@@ -223,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         colorCats.append(R.id.cat_pixels, R.color.cat_color_pixels);
         colorCats.append(R.id.cat_campus, R.color.cat_color_campus);
         colorCats.append(R.id.cat_decoders, R.color.cat_color_decoders);
+        colorCats.append(R.id.cat_videos, R.color.cat_color_videos);
     }
 
     /**

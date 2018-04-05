@@ -22,6 +22,7 @@
     <string name="category_pixels">Pixels</string>
     <string name="category_campus">Campus</string>
     <string name="category_decoders">Les décodeurs</string>
+    <string name="category_videos">Vidéos</string>
 
     <!-- Drawer header -->
     <string name="drawer_header_img_content_desc">Image par défaut</string>

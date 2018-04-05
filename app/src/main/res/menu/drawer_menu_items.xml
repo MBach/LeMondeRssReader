@@ -45,6 +45,9 @@
         <item
             android:id="@+id/cat_decoders"
             android:title="@string/category_decoders" />
+        <item
+            android:id="@+id/cat_videos"
+            android:title="@string/category_videos" />
     </group>
 
 </menu>

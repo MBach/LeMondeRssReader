@@ -52,7 +52,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
-import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.home.MainActivity;
 
@@ -370,7 +369,7 @@ public class ArticleActivity extends AppCompatActivity {
                     }
                 }
             }
-            articleAdapter.insertItems(items);
+            articleAdapter.addItems(items);
             findViewById(R.id.articleLoader).setVisibility(View.GONE);
         }
     };
@@ -448,7 +447,7 @@ public class ArticleActivity extends AppCompatActivity {
                     commentsURI = Constants.BASE_URL2 + next.first().attr("href");
                 }
             }
-            articleAdapter.insertItems(items);
+            articleAdapter.addItems(items);
             if (!autoloadComments) {
                 fab.showProgress(false);
             }
@@ -601,11 +600,13 @@ public class ArticleActivity extends AppCompatActivity {
     private final Response.Listener<String> videoFrameReceived = new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
-            Pattern p = Pattern.compile("\"mp4_720\":\"(https:.*\\.mp4\\?mdtk=.*)\",\"mp4_480\":.*", Pattern.DOTALL);
+            Pattern p = Pattern.compile("\"mp4_720\":\"(https:.*\\.mp4)\\?mdtk=.*\",\"mp4_480\":.*", Pattern.DOTALL);
             Matcher m = p.matcher(response);
             if (m.find()) {
                 String videoURI = m.group(1);
                 videoURI = videoURI.replace("\\","");
+                Model model = new Model(Model.VIDEO_TYPE, Uri.parse(videoURI));
+                articleAdapter.addItem(model);
                 Log.d(TAG, "videoURI = " + videoURI);
             } else {
                 Log.d(TAG, "not found >> " + response);

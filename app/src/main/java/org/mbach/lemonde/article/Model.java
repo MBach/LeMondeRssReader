@@ -20,6 +20,7 @@ class Model {
     static final int GRAPH_TYPE_COLUMNS = 6;
     static final int GRAPH_TYPE_LINE = 7;
     static final int BUTTON_TYPE = 8;
+    static final int VIDEO_TYPE = 9;
 
     private final int id;
     private final int type;

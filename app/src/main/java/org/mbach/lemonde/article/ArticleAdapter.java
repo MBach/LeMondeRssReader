@@ -1,5 +1,6 @@
 package org.mbach.lemonde.article;
 
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
@@ -7,11 +8,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
@@ -39,9 +43,11 @@ class ArticleAdapter extends RecyclerView.Adapter {
     private List<Model> items;
 
     /**
+     * Add items to render.
+     *
      * @param items list of items (incl. comments) to display
      */
-    void insertItems(List<Model> items) {
+    void addItems(List<Model> items) {
         if (this.items == null) {
             this.items = items;
         } else {
@@ -59,6 +65,18 @@ class ArticleAdapter extends RecyclerView.Adapter {
             this.items.addAll(next);
         }
         notifyDataSetChanged();
+    }
+
+    /**
+     * Add a single item to render.
+     *
+     * @param item item to add
+     */
+    void addItem(Model item) {
+        if (this.items == null) {
+            this.items = new ArrayList<>();
+        }
+        this.items.add(item);
     }
 
     @Override
@@ -94,6 +112,9 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 return new ViewHolderLineChart(new LineChart(parent.getContext()));
             case Model.BUTTON_TYPE:
                 return new ViewHolderRestrictedContent(LayoutInflater.from(parent.getContext()).inflate(R.layout.connect_card, parent, false));
+            case Model.VIDEO_TYPE:
+                //return new ViewHolderVideo(new VideoView(parent.getContext()));
+                return new ViewHolderVideo(LayoutInflater.from(parent.getContext()).inflate(R.layout.video_view, parent, false));
         }
     }
 
@@ -178,6 +199,14 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 vhl.chart.setLayoutParams(lp2);
                 LineData data3 = vhl.chart.getData();
                 data3.setDrawValues(false);
+                break;
+            case Model.VIDEO_TYPE:
+                Uri videoURI = (Uri) model.getTheContent();
+                ViewHolderVideo viewHolderVideo = (ViewHolderVideo) holder;
+                //viewHolderVideo.getVideoView().get
+                //viewHolderVideo.getVideoView().setVideoURI(videoURI);
+                //viewHolderVideo.getController().show();
+                //viewHolderVideo.getVideoView().start();
                 break;
         }
     }
@@ -303,6 +332,33 @@ class ArticleAdapter extends RecyclerView.Adapter {
             super(view);
             this.view = view;
             this.view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
+        }
+    }
+
+    /**
+     *
+     */
+    static class ViewHolderVideo extends RecyclerView.ViewHolder {
+        @NonNull
+        private final TextureView videoView;
+
+        @NonNull
+        private final MediaController controller;
+
+        ViewHolderVideo(@NonNull View view) {
+            super(view);
+            view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
+            this.videoView = view.findViewById(R.id.textureView);
+            this.controller = new MediaController(view.getContext());
+            //this.videoView.setMediaController(this.controller);
+        }
+
+        TextureView getVideoView() {
+            return videoView;
+        }
+
+        MediaController getController() {
+            return controller;
         }
     }
 }

@@ -233,7 +233,7 @@ class LiveFeedParser {
                         facts.add(new Model(factContent));
                     }
                 }
-                articleAdapter.insertItems(facts);
+                articleAdapter.addItems(facts);
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
             }

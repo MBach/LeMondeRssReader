@@ -149,7 +149,7 @@ public class ArticleActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (commentsURI != null && Constants.BASE_URL2.equals(commentsURI)) {
+                    if (Constants.BASE_URL2.equals(commentsURI)) {
                         fab.showProgress(false);
                         Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
                     } else if (commentsURI != null) {
@@ -165,7 +165,7 @@ public class ArticleActivity extends AppCompatActivity {
                 if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
                     if (autoloadComments) {
                         Log.d(TAG, "commentsURI = " + commentsURI);
-                        if (commentsURI != null && Constants.BASE_URL2.equals(commentsURI)) {
+                        if (Constants.BASE_URL2.equals(commentsURI)) {
                             autoLoader.setVisibility(View.INVISIBLE);
                             Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
                         } else if (commentsURI != null) {
@@ -274,11 +274,11 @@ public class ArticleActivity extends AppCompatActivity {
         startActivity(new Intent(Intent.ACTION_VIEW, uri));
     }
 
-    public void goToAccount(View view) {
+    public void goToAccount(@SuppressWarnings("unused") View view) {
         startActivity(new Intent(this, LoginActivity.class));
     }
 
-    public void register(View view) {
+    public void register(@SuppressWarnings("unused") View view) {
         Uri uri = Uri.parse("https://abo.lemonde.fr");
         startActivity(new Intent(Intent.ACTION_VIEW, uri));
     }
@@ -615,9 +615,10 @@ public class ArticleActivity extends AppCompatActivity {
     };
 
     /**
+     * Static fromHtml to deal with older SDK.
      *
-     * @param textView
-     * @param html
+     * @param textView the textView to fill
+     * @param html raw string
      */
     static void fromHtml(TextView textView, String html) {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
@@ -679,7 +680,7 @@ public class ArticleActivity extends AppCompatActivity {
 
     @NonNull
     private String extractDates(@NonNull Element article) {
-        StringBuilder builder = new StringBuilder("");
+        StringBuilder builder = new StringBuilder();
         Elements datePublished = article.select("[itemprop='datePublished']");
         if (!datePublished.isEmpty()) {
             builder.append("Publié le ")

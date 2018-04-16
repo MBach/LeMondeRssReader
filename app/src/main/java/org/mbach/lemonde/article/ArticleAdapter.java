@@ -359,6 +359,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
             return view.findViewById(R.id.videoView);
         }
 
+        @NonNull
         MediaController getController() {
             return controller;
         }

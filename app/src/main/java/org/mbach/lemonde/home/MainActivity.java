@@ -157,11 +157,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onEnterAnimationComplete() {
-        super.onEnterAnimationComplete();
-    }
-
-    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         selectedMenuItem = menuItem;
         setTitle(menuItem.getTitle());

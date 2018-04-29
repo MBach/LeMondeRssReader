@@ -26,7 +26,7 @@ public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItem
     private final List<RssItem> items;
     private OnItemClickListener onItemClickListener;
 
-    RecyclerRssItemAdapter(List<RssItem> items) {
+    RecyclerRssItemAdapter(@NonNull List<RssItem> items) {
         this.items = items;
     }
 

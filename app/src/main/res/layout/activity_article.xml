@@ -1,5 +1,4 @@
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinatorArticle"
@@ -129,7 +128,6 @@
         android:layout_gravity="bottom|center"
         android:visibility="invisible"
         android:indeterminate="true"
-        android:layout_marginBottom="@dimen/fab_margin"
-        />
+        android:layout_marginBottom="@dimen/fab_margin" />
 
 </android.support.design.widget.CoordinatorLayout>

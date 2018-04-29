@@ -19,7 +19,9 @@
         tools:replace="android:allowBackup">
 
         <!-- Main page: RSS feed, drawer -->
-        <activity android:name=".home.MainActivity" android:label="LeMonde.fr">
+        <activity
+            android:name=".home.MainActivity"
+            android:label="LeMonde.fr">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -34,18 +36,24 @@
         <!-- Article to display when one has clicked on an item previously loaded from the RSS feed -->
         <activity
             android:name=".article.ArticleActivity"
-            android:parentActivityName=".home.MainActivity" tools:targetApi="JELLY_BEAN">
+            android:parentActivityName=".home.MainActivity"
+            tools:targetApi="JELLY_BEAN">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http"
+
+                <data
+                    android:scheme="http"
                     android:host="lemonde.fr"
                     android:pathPrefix="/" />
-                <data android:scheme="http"
+                <data
+                    android:scheme="http"
                     android:host="*.blog.lemonde.fr"
                     android:pathPrefix="/" />
-                <data android:scheme="http"
+                <data
+                    android:scheme="http"
                     android:host="www.lemonde.fr"
                     android:pathPrefix="/" />
             </intent-filter>
@@ -55,7 +63,8 @@
         <activity
             android:name=".settings.SettingsActivity"
             android:label="@string/action_settings"
-            android:parentActivityName=".home.MainActivity" tools:targetApi="JELLY_BEAN" />
+            android:parentActivityName=".home.MainActivity"
+            tools:targetApi="JELLY_BEAN" />
 
         <!-- Account page -->
         <activity

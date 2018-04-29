@@ -2,6 +2,8 @@ package org.mbach.lemonde.home;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * RssItem class.
@@ -16,7 +18,7 @@ class RssItem implements Parcelable {
     private String enclosure = null;
 
     public static final Parcelable.Creator<RssItem> CREATOR = new Parcelable.Creator<RssItem>() {
-        public RssItem createFromParcel(Parcel in) {
+        public RssItem createFromParcel(@NonNull Parcel in) {
             return new RssItem(in);
         }
 
@@ -35,6 +37,7 @@ class RssItem implements Parcelable {
 
     }
 
+    @Nullable
     String getLink() {
         return link;
     }
@@ -43,6 +46,7 @@ class RssItem implements Parcelable {
         this.link = link;
     }
 
+    @Nullable
     public String getTitle() {
         return title;
     }
@@ -51,6 +55,7 @@ class RssItem implements Parcelable {
         this.title = title;
     }
 
+    @Nullable
     String getEnclosure() {
         return enclosure;
     }
@@ -65,7 +70,7 @@ class RssItem implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(link);
         dest.writeString(title);
         dest.writeString(enclosure);

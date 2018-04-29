@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -46,13 +47,14 @@ class LiveFeedParser {
     private final Document document;
     private final ArticleAdapter articleAdapter;
 
-    LiveFeedParser(Context context, ArticleAdapter articleAdapter, Document document) {
+    LiveFeedParser(@NonNull Context context, @NonNull ArticleAdapter articleAdapter, @NonNull Document document) {
         this.context = context;
         this.articleAdapter = articleAdapter;
         this.document = document;
     }
 
-    public List<Model> extractLiveFacts() {
+    @NonNull
+    List<Model> extractLiveFacts() {
         TextView headLine = new TextView(context);
         TextView description = new TextView(context);
 
@@ -104,7 +106,7 @@ class LiveFeedParser {
      *
      * @param liveScript script to parse
      */
-    public void fetchPosts(String liveScript) {
+    void fetchPosts(@NonNull String liveScript) {
         // We need to extract the EventID for every live using regular expressions
         Pattern p = Pattern.compile("base\\.start\\(provider, '([0-9]+)'\\);");
         Matcher m = p.matcher(liveScript);

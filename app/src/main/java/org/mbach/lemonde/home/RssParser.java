@@ -28,7 +28,7 @@ class RssParser {
     private static final String TAG_ITEM = "item";
 
     @NonNull
-    ArrayList<RssItem> parse(String stream) {
+    ArrayList<RssItem> parse(@NonNull String stream) {
         ArrayList<RssItem> items = null;
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -87,7 +87,7 @@ class RssParser {
                         break;
                 }
             }
-        } catch (XmlPullParserException | IOException e ) {
+        } catch (@NonNull XmlPullParserException | IOException e) {
             Log.e(TAG, "The stream cannot be parsed! Is it really well-formed? " + e.getMessage());
         }
         return items;

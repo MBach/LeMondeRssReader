@@ -3,6 +3,7 @@ package org.mbach.lemonde.home;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 
 /**
  * StatisticSQLiteOpenHelper class.
@@ -27,12 +28,12 @@ class StatisticSQLiteOpenHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+    public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(CREATE_DATABASE);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+    public void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL(String.format("DROP TABLE %s;", TABLE_STATS));
         onCreate(sqLiteDatabase);
     }

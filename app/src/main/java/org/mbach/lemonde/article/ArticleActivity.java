@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
@@ -85,6 +86,7 @@ public class ArticleActivity extends AppCompatActivity {
     private boolean autoloadComments;
     private String shareSubject;
     private String shareText;
+    @Nullable
     private String shareLink;
     private MenuItem menuItem;
     private final AlphaAnimation animationFadeIn = new AlphaAnimation(0, 1);
@@ -120,7 +122,7 @@ public class ArticleActivity extends AppCompatActivity {
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
 
             @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+            public void onOffsetChanged(@NonNull AppBarLayout appBarLayout, int verticalOffset) {
                 if (menuItem == null) {
                     return;
                 }
@@ -161,7 +163,7 @@ public class ArticleActivity extends AppCompatActivity {
         }
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
                     if (autoloadComments) {
                         Log.d(TAG, "commentsURI = " + commentsURI);
@@ -233,7 +235,7 @@ public class ArticleActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean shareContent = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
         if (shareContent) {
@@ -262,7 +264,7 @@ public class ArticleActivity extends AppCompatActivity {
         return true;
     }
 
-    public void openTweet(View view) {
+    public void openTweet(@NonNull View view) {
         Button button = view.findViewById(R.id.tweet_button);
         String link = button.getContentDescription().toString();
         Uri uri;
@@ -288,6 +290,7 @@ public class ArticleActivity extends AppCompatActivity {
      * an asynchronous call to the web. Jsoup library is used to parse the response and not to make the call.
      * Otherwise, a NetworkOnMainThreadException will be fired by the system.
      */
+    @Nullable
     private final Response.Listener<String> articleReceived = new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
@@ -457,6 +460,7 @@ public class ArticleActivity extends AppCompatActivity {
     /**
      * See @articleReceived field.
      */
+    @Nullable
     private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
@@ -495,7 +499,7 @@ public class ArticleActivity extends AppCompatActivity {
      * @param elements nodes to check
      * @return true if elements can be safely called with first()
      */
-    public static boolean atLeastOneChild(Elements elements) {
+    public static boolean atLeastOneChild(@Nullable Elements elements) {
         return elements != null && !elements.isEmpty();
     }
 
@@ -599,12 +603,12 @@ public class ArticleActivity extends AppCompatActivity {
      */
     private final Response.Listener<String> videoFrameReceived = new Response.Listener<String>() {
         @Override
-        public void onResponse(String response) {
+        public void onResponse(@NonNull String response) {
             Pattern p = Pattern.compile("\"mp4_720\":\"(https:.*\\.mp4)\\?mdtk=.*\",\"mp4_480\":.*", Pattern.DOTALL);
             Matcher m = p.matcher(response);
             if (m.find()) {
                 String videoURI = m.group(1);
-                videoURI = videoURI.replace("\\","");
+                videoURI = videoURI.replace("\\", "");
                 Model model = new Model(Model.VIDEO_TYPE, Uri.parse(videoURI));
                 articleAdapter.addItem(model);
                 Log.d(TAG, "videoURI = " + videoURI);
@@ -618,9 +622,9 @@ public class ArticleActivity extends AppCompatActivity {
      * Static fromHtml to deal with older SDK.
      *
      * @param textView the textView to fill
-     * @param html raw string
+     * @param html     raw string
      */
-    static void fromHtml(TextView textView, String html) {
+    static void fromHtml(@NonNull TextView textView, String html) {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             textView.setText(Html.fromHtml(html));
         } else {

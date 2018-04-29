@@ -46,7 +46,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
      *
      * @param items list of items (incl. comments) to display
      */
-    void addItems(List<Model> items) {
+    void addItems(@NonNull List<Model> items) {
         if (this.items == null) {
             this.items = items;
         } else {

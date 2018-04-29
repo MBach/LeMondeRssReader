@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 
 /**
  * ThemeUtils class.
@@ -18,7 +19,7 @@ public final class ThemeUtils {
         return sharedPreferences.getBoolean("mainTheme", true);
     }
 
-    public static void applyTheme(Context context, Resources.Theme theme) {
+    public static void applyTheme(Context context, @NonNull Resources.Theme theme) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         boolean isDark = sharedPreferences.getBoolean("mainTheme", true);
         if (isDark) {
@@ -28,7 +29,7 @@ public final class ThemeUtils {
         }
     }
 
-    public static int getStyleableColor(Context context, int resourceId) {
+    public static int getStyleableColor(@NonNull Context context, int resourceId) {
         int theme;
         if (ThemeUtils.isDarkTheme(context)) {
             theme = R.style.DarkTheme;

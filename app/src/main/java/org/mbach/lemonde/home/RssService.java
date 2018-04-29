@@ -3,6 +3,8 @@ package org.mbach.lemonde.home;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -41,7 +43,7 @@ public class RssService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(@NonNull Intent intent) {
         if (REQUEST_QUEUE == null) {
             REQUEST_QUEUE = Volley.newRequestQueue(this);
         }
@@ -60,7 +62,7 @@ public class RssService extends IntentService {
                 Intent result = new Intent();
                 result.putParcelableArrayListExtra(PARCELABLE_EXTRAS, rssItems);
                 reply.send(RssService.this, FETCH_SUCCESS, result);
-            } catch (PendingIntent.CanceledException | UnsupportedEncodingException e) {
+            } catch (@NonNull PendingIntent.CanceledException | UnsupportedEncodingException e) {
                 Log.e(TAG, "onHandleIntent error", e);
             }
         }

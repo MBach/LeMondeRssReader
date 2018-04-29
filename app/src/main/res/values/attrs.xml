@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="CustomTheme" >
+    <declare-styleable name="CustomTheme">
         <attr name="defaultText" />
         <attr name="authorDateText" />
         <attr name="articleHeaderGradient" />

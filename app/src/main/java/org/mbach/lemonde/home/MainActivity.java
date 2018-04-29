@@ -41,11 +41,11 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.mbach.lemonde.Constants;
+import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
-import org.mbach.lemonde.settings.SettingsActivity;
-import org.mbach.lemonde.R;
 import org.mbach.lemonde.article.ArticleActivity;
+import org.mbach.lemonde.settings.SettingsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,13 +123,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @NonNull Intent data) {
         if (requestCode == GET_LATEST_RSS_FEED && resultCode == RssService.FETCH_SUCCESS) {
             ArrayList<RssItem> rssItems = data.getParcelableArrayListExtra(RssService.PARCELABLE_EXTRAS);
             RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter(rssItems);
             adapter.setOnItemClickListener(new RecyclerRssItemAdapter.OnItemClickListener() {
                 @Override
-                public void onItemClick(View view, @NonNull RssItem rssItem) {
+                public void onItemClick(@NonNull View view, @NonNull RssItem rssItem) {
                     Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
                     Bundle extras = new Bundle();
 
@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         // Check if an icon exists for this category
                         if (iconCats.get(entry) > 0) {
                             Drawable drawableTmp = getDrawable(iconCats.get(entry));
-                            BitmapDrawable bitmapDrawable = ((BitmapDrawable)drawableTmp);
+                            BitmapDrawable bitmapDrawable = ((BitmapDrawable) drawableTmp);
                             if (bitmapDrawable != null) {
                                 Bitmap icon = bitmapDrawable.getBitmap();
                                 canvas.drawBitmap(icon, 24, 24, null);
@@ -322,11 +322,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         //if (isConnected) {
-            PendingIntent pendingResult = createPendingResult(GET_LATEST_RSS_FEED, new Intent(), 0);
-            Intent intent = new Intent(getApplicationContext(), RssService.class);
-            intent.putExtra(RssService.CATEGORY, category);
-            intent.putExtra(RssService.PENDING_RESULT, pendingResult);
-            startService(intent);
+        PendingIntent pendingResult = createPendingResult(GET_LATEST_RSS_FEED, new Intent(), 0);
+        Intent intent = new Intent(getApplicationContext(), RssService.class);
+        intent.putExtra(RssService.CATEGORY, category);
+        intent.putExtra(RssService.PENDING_RESULT, pendingResult);
+        startService(intent);
         //} else {
         if (!isConnected) {
             Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(
-                this,  drawerLayout, toolbar,
+                this, drawerLayout, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close
         );
         drawerLayout.addDrawerListener(actionBarDrawerToggle);

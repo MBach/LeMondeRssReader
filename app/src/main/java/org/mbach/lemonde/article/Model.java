@@ -1,5 +1,7 @@
 package org.mbach.lemonde.article;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.TextView;
 
 /**
@@ -26,19 +28,19 @@ class Model {
     private final int type;
     private final Object theContent;
 
-    Model(TextView textView) {
+    Model(@NonNull TextView textView) {
         this.type = TEXT_TYPE;
         this.id = 0;
         theContent = textView;
     }
 
-    Model(int type, Object view) {
+    Model(int type, @NonNull Object view) {
         this.type = type;
         this.id = 0;
         theContent = view;
     }
 
-    Model(TextView textView, int id) {
+    Model(@NonNull TextView textView, int id) {
         this.type = COMMENT_TYPE;
         this.id = id;
         theContent = textView;
@@ -48,12 +50,13 @@ class Model {
         return type;
     }
 
+    @NonNull
     Object getTheContent() {
         return theContent;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

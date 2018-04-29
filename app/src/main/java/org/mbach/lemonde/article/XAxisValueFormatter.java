@@ -1,5 +1,6 @@
 package org.mbach.lemonde.article;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.github.mikephil.charting.components.AxisBase;
@@ -17,12 +18,14 @@ class XAxisValueFormatter implements IAxisValueFormatter {
 
     private static final String TAG = "XAxisVF";
 
+    @NonNull
     private final List<String> labels;
 
-    XAxisValueFormatter(List<String> labels) {
+    XAxisValueFormatter(@NonNull List<String> labels) {
         this.labels = labels;
     }
 
+    @NonNull
     @Override
     public String getFormattedValue(float value, AxisBase axis) {
         Log.d(TAG, "value: " + value);

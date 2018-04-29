@@ -1,6 +1,8 @@
 package org.mbach.lemonde.article;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -39,7 +41,7 @@ class GraphExtractor {
     private JSONObject data;
     private String legend = "";
 
-    static int getModelType(Chart chart) {
+    static int getModelType(@Nullable Chart chart) {
         if (chart == null) {
             return Model.UNKNOWN_TYPE;
         } else {
@@ -57,11 +59,10 @@ class GraphExtractor {
     }
 
     /**
-     *
      * @param context the context from the Activity
-     * @param script raw data extracted with JSoup from a script tag in the HTML page
+     * @param script  raw data extracted with JSoup from a script tag in the HTML page
      */
-    GraphExtractor(Context context, String script) {
+    GraphExtractor(@NonNull Context context, String script) {
         this.context = context;
 
         // Remove formatter
@@ -92,14 +93,14 @@ class GraphExtractor {
         }
     }
 
-    void setLegend(String legend) {
+    void setLegend(@NonNull String legend) {
         this.legend = legend;
     }
 
     /**
-     *
      * @return the chart
      */
+    @Nullable
     Chart generate() {
         if (data == null) {
             return null;
@@ -129,9 +130,9 @@ class GraphExtractor {
 
 
     /**
-     *
      * @return the chart
      */
+    @NonNull
     private BarChart generateBarChart() throws JSONException {
         List<BarEntry> values = new ArrayList<>();
         BarChart barChart = new BarChart(context);
@@ -147,7 +148,7 @@ class GraphExtractor {
                     String value = array.getString(1);
                     values.add(new BarEntry(i, Float.valueOf(value)));
                 }
-            } else if (data instanceof  JSONObject) {
+            } else if (data instanceof JSONObject) {
                 Log.d(TAG, "received data is malformed");
                 JSONObject object = (JSONObject) data;
                 values.add(new BarEntry(i, Float.valueOf(object.getString("y"))));
@@ -178,9 +179,9 @@ class GraphExtractor {
     }
 
     /**
-     *
      * @return the chart
      */
+    @NonNull
     private BarChart generateHorizontalBarChart() throws JSONException {
         HorizontalBarChart barChart = new HorizontalBarChart(context);
         barChart.getXAxis().setDrawAxisLine(false);
@@ -197,7 +198,7 @@ class GraphExtractor {
                     String value = array.getString(1);
                     values.add(new BarEntry(i, Float.valueOf(value)));
                 }
-            } else if (data instanceof  JSONObject) {
+            } else if (data instanceof JSONObject) {
                 Log.d(TAG, "received data is malformed");
                 JSONObject object = (JSONObject) data;
                 values.add(new BarEntry(i, Float.valueOf(object.getString("y"))));
@@ -228,9 +229,9 @@ class GraphExtractor {
     }
 
     /**
-     *
      * @return the chart
      */
+    @NonNull
     private Chart generateLineChart() throws JSONException {
         Log.d(TAG, "generateLineChart");
         LineChart lineChart = new LineChart(context);

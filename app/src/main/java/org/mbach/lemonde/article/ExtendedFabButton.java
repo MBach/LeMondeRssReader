@@ -62,7 +62,8 @@ public class ExtendedFabButton extends FabButton {
             }
 
             // Animate FAB expanding
-            anim.setDuration(FAB_ANIM_DURATION);anim.setInterpolator(getInterpolator());
+            anim.setDuration(FAB_ANIM_DURATION);
+            anim.setInterpolator(getInterpolator());
             startAnimation(anim);
         }
         setVisibility(View.VISIBLE);

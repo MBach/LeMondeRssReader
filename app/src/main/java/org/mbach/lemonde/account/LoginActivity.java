@@ -2,11 +2,10 @@ package org.mbach.lemonde.account;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -93,7 +92,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop () {
+    protected void onStop() {
         super.onStop();
         requestQueue.cancelAll(TAG);
     }
@@ -154,14 +153,15 @@ public class LoginActivity extends AppCompatActivity {
                             showProgress(false);
                         }
                     }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            showProgress(false);
-                            Snackbar.make(findViewById(R.id.login), getString(R.string.snackbar_error_when_auth), Snackbar.LENGTH_LONG).show();
-                        }
-                    }){
                 @Override
-                protected Map<String, String> getParams(){
+                public void onErrorResponse(VolleyError error) {
+                    showProgress(false);
+                    Snackbar.make(findViewById(R.id.login), getString(R.string.snackbar_error_when_auth), Snackbar.LENGTH_LONG).show();
+                }
+            }) {
+                @NonNull
+                @Override
+                protected Map<String, String> getParams() {
                     Map<String, String> params = new HashMap<>();
                     params.put("connection[mail]", email);
                     params.put("connection[password]", password);
@@ -171,11 +171,12 @@ public class LoginActivity extends AppCompatActivity {
                     return params;
                 }
 
+                @NonNull
                 @Override
                 public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<>();
                     params.put("Referer", Constants.LOGIN_URI);
-                    params.put("Content-Type","application/x-www-form-urlencoded");
+                    params.put("Content-Type", "application/x-www-form-urlencoded");
                     return params;
                 }
             };
@@ -183,7 +184,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isEmailValid(String email) {
+    private boolean isEmailValid(@NonNull String email) {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 

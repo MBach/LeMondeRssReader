@@ -43,12 +43,14 @@ public class RssService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(@NonNull Intent intent) {
+    protected void onHandleIntent(@Nullable Intent intent) {
         if (REQUEST_QUEUE == null) {
             REQUEST_QUEUE = Volley.newRequestQueue(this);
         }
-        reply = intent.getParcelableExtra(PENDING_RESULT);
-        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, Constants.BASE_URL + intent.getStringExtra(CATEGORY), onFeedReceived, onErrorResponse));
+        if (intent != null) {
+            reply = intent.getParcelableExtra(PENDING_RESULT);
+            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, Constants.BASE_URL + intent.getStringExtra(CATEGORY), onFeedReceived, onErrorResponse));
+        }
     }
 
     /**

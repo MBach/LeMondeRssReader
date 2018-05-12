@@ -1,6 +1,6 @@
 ## Introduction
 
-This App for Android 4.0.3 Ice Cream Sandwich and later (Android O) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping). It renders the items in the feed directly in native Android components, such as [TextView](https://developer.android.com/reference/android/widget/TextView.html), [ImageView](https://developer.android.com/reference/android/widget/ImageView.html)
+This App for Android 4.0.3 Ice Cream Sandwich and later (Android P) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping). It renders the items in the feed directly in native Android components, such as [TextView](https://developer.android.com/reference/android/widget/TextView.html), [ImageView](https://developer.android.com/reference/android/widget/ImageView.html)
 
 This App was also built to be as fastest and simple as possible. Material design guidelines were applied so you'll find:
 * A navigation drawer with a header (see this [tutorial](https://developer.android.com/training/implementing-navigation/nav-drawer.html))
@@ -71,7 +71,7 @@ A smartphone at least on Android 4.0.3 (API 15) ! That should not be a real prob
 
 ## Download
 
-You can get the app directly on GitHub, here is the [v1.8](https://github.com/MBach/LeMondeRssReader/releases/download/v1.8/LeMondeRssReader-1.8.apk)
+You can get the app directly on GitHub, here is the [v1.9](https://github.com/MBach/LeMondeRssReader/releases/download/v1.9/LeMondeRssReader-1.9.apk)
 
 ## Video
 [Overview of the App](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)

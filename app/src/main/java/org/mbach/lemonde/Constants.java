@@ -10,8 +10,8 @@ public final class Constants {
 
     private static final String RSS_FULL = "/rss_full.xml";
 
-    public static final String BASE_URL = "http://www.lemonde.fr/";
-    public static final String BASE_URL2 = "http://www.lemonde.fr";
+    public static final String BASE_URL = "https://www.lemonde.fr/";
+    public static final String BASE_URL2 = "https://www.lemonde.fr";
     public static final String LOGIN_URI = "https://secure.lemonde.fr/sfuser/connexion";
 
     public static final String CAT_NEWS = "rss/une.xml";

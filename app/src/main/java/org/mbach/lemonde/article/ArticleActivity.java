@@ -52,7 +52,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
+import org.mbach.lemonde.LeMondeDB;
 import org.mbach.lemonde.R;
+import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.home.MainActivity;
 
@@ -88,8 +90,11 @@ public class ArticleActivity extends AppCompatActivity {
     private String shareText;
     @Nullable
     private String shareLink;
-    private MenuItem menuItem;
+    private MenuItem shareItem;
+    private MenuItem toggleFavItem;
     private final AlphaAnimation animationFadeIn = new AlphaAnimation(0, 1);
+    private int articleId = 0;
+    private boolean isRestricted = false;
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent motionEvent) {
@@ -103,7 +108,6 @@ public class ArticleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //ThemeUtils.applyTheme(this, getTheme());
         setContentView(R.layout.activity_article);
         setTitle("");
 
@@ -123,21 +127,20 @@ public class ArticleActivity extends AppCompatActivity {
 
             @Override
             public void onOffsetChanged(@NonNull AppBarLayout appBarLayout, int verticalOffset) {
-                if (menuItem == null) {
+                if (shareItem == null) {
                     return;
                 }
-                //MenuItem menuItem = menu.findItem(R.id.action_share);
                 // XXX: convert to independent unit
                 //Log.d(TAG, "verticalOffset = " + verticalOffset);
                 View share = findViewById(R.id.action_share);
 
                 if (Math.abs(verticalOffset) - appBarLayout.getTotalScrollRange() == 0) {
-                    menuItem.setVisible(true);
+                    shareItem.setVisible(true);
                     if (share != null) {
                         share.startAnimation(animationFadeIn);
                     }
                 } else {
-                    menuItem.setVisible(false);
+                    shareItem.setVisible(false);
                 }
             }
         });
@@ -166,7 +169,6 @@ public class ArticleActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
                     if (autoloadComments) {
-                        Log.d(TAG, "commentsURI = " + commentsURI);
                         if (Constants.BASE_URL2.equals(commentsURI)) {
                             autoLoader.setVisibility(View.INVISIBLE);
                             Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
@@ -192,14 +194,17 @@ public class ArticleActivity extends AppCompatActivity {
         final Intent intent = getIntent();
         final String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
-            Log.d(TAG, "action = " + action);
             shareLink = intent.getDataString();
-        } else if (getIntent().getExtras() != null) {
-            collapsingToolbar.setTitle(getIntent().getExtras().getString(Constants.EXTRA_NEWS_CATEGORY));
+        } else if (intent.getExtras() != null) {
+            collapsingToolbar.setTitle(intent.getExtras().getString(Constants.EXTRA_NEWS_CATEGORY));
             Picasso.with(this)
-                    .load(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE))
+                    .load(intent.getExtras().getString(Constants.EXTRA_RSS_IMAGE))
                     .into((ImageView) findViewById(R.id.imageArticle));
-            shareLink = getIntent().getExtras().getString(Constants.EXTRA_RSS_LINK);
+            shareLink = intent.getExtras().getString(Constants.EXTRA_RSS_LINK);
+            int articleId = intent.getExtras().getInt(Constants.EXTRA_RSS_ARTICLE_ID);
+            if (articleId > 0) {
+                this.articleId = articleId;
+            }
         }
 
         // Start async job
@@ -236,19 +241,19 @@ public class ArticleActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean shareContent = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
         if (shareContent) {
             getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
-            menuItem = menu.findItem(R.id.action_share);
+            shareItem = menu.findItem(R.id.action_share);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     animationFadeIn.setDuration(1000);
-                    menuItem.setVisible(true);
+                    shareItem.setVisible(true);
                 }
             }, 1);
-            menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            shareItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem menuItem) {
                     Intent shareIntent = new Intent();
@@ -257,6 +262,25 @@ public class ArticleActivity extends AppCompatActivity {
                     shareIntent.putExtra(Intent.EXTRA_TEXT, shareText + " " + shareLink);
                     shareIntent.setType("text/plain");
                     startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.share_article)));
+                    return false;
+                }
+            });
+            toggleFavItem = menu.findItem(R.id.action_toggle_fav);
+            toggleFavItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    final LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
+                    boolean hasArticle = leMondeDB.hasArticle(articleId);
+                    if (hasArticle && leMondeDB.deleteArticle(articleId)) {
+                        Log.d(TAG, "article deleted");
+                        hasArticle = false;
+                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_removed), Snackbar.LENGTH_SHORT).show();
+                    } else if (leMondeDB.saveArticle(articleId)) {
+                        Log.d(TAG, "article saved");
+                        hasArticle = true;
+                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_added), Snackbar.LENGTH_SHORT).show();
+                    }
+                    toggleFavIcon(hasArticle);
                     return false;
                 }
             });
@@ -319,7 +343,6 @@ public class ArticleActivity extends AppCompatActivity {
             } else {
                 Elements category = doc.select("div.tt_rubrique_ombrelle");
                 if (atLeastOneChild(category)) {
-                    Log.d(TAG, "Cat: " + category.text());
                     setTitle(category.text());
                 }
                 Elements articles = doc.getElementsByTag("article");
@@ -342,10 +365,15 @@ public class ArticleActivity extends AppCompatActivity {
                 } else {
                     // Standard article
                     items = extractStandardArticle(articles);
+                    LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
                     // Full article is restricted to paid members
-                    if (doc.getElementById("teaser_article") != null) {
-                        if (menuItem != null) {
-                            menuItem.setIcon(getResources().getDrawable(R.drawable.ic_share_black));
+                    isRestricted = doc.getElementById("teaser_article") != null;
+                    Log.d(TAG, "isRestricted " + isRestricted);
+                    boolean hasArticle = leMondeDB.hasArticle(articleId);
+                    toggleFavIcon(hasArticle);
+                    if (isRestricted) {
+                        if (shareItem != null) {
+                            shareItem.setIcon(getResources().getDrawable(R.drawable.ic_share_black));
                         }
                         CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
                         collapsingToolbar.setContentScrimResource(R.color.accent);
@@ -376,6 +404,32 @@ public class ArticleActivity extends AppCompatActivity {
             findViewById(R.id.articleLoader).setVisibility(View.GONE);
         }
     };
+
+    private void toggleFavIcon(boolean hasArticle) {
+        if (isRestricted && toggleFavItem != null) {
+            if (hasArticle) {
+                toggleFavItem.setIcon(getResources().getDrawable(R.drawable.star_full_black));
+            } else {
+                toggleFavItem.setIcon(getResources().getDrawable(R.drawable.star_border_black));
+            }
+        } else if (toggleFavItem != null) {
+            if (hasArticle) {
+                if (ThemeUtils.isDarkTheme(ArticleActivity.this)) {
+                    toggleFavItem.setIcon(getResources().getDrawable(R.drawable.star_full_light));
+                } else {
+                    toggleFavItem.setIcon(getResources().getDrawable(R.drawable.star_full_black));
+                }
+            } else {
+                if (ThemeUtils.isDarkTheme(ArticleActivity.this)) {
+                    toggleFavItem.setIcon(getResources().getDrawable(R.drawable.star_border_light));
+                } else {
+                    toggleFavItem.setIcon(getResources().getDrawable(R.drawable.star_border_black));
+                }
+            }
+        } else {
+            Log.d(TAG, "toggleFavItem is null :(");
+        }
+    }
 
     /**
      * This helper method is used to customize the header (in the AppBar) to display a tag or a bubble when the current
@@ -464,13 +518,6 @@ public class ArticleActivity extends AppCompatActivity {
     private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.e(TAG, "onErrorResponse: " + error.toString());
-            Log.e(TAG, "onErrorResponse: " + error.networkResponse);
-            Log.e(TAG, "onErrorResponse: " + error.getMessage());
-
-            /*for (Header header : error.networkResponse.allHeaders) {
-                Log.e(TAG, "header: " + header);
-            }*/
             findViewById(R.id.articleLoader).setVisibility(View.GONE);
 
             ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -570,9 +617,6 @@ public class ArticleActivity extends AppCompatActivity {
         dates.setText(extractDates(video));
         Elements els = video.select("div.grid_12.alpha");
         if (atLeastOneChild(els)) {
-            for (Element e : els) {
-                Log.d(TAG, e.html());
-            }
             els.select("h2").remove();
             els.select("span.txt_gris_soutenu").remove();
             els.select("#recos_videos_outbrain").remove();
@@ -590,7 +634,6 @@ public class ArticleActivity extends AppCompatActivity {
                 Matcher m = p.matcher(script.html());
                 if (m.find()) {
                     String iFrame = m.group(1);
-                    Log.d(TAG, "iFrame = " + iFrame);
                     REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, "https://" + iFrame, videoFrameReceived, errorResponse));
                 }
             }
@@ -792,7 +835,6 @@ public class ArticleActivity extends AppCompatActivity {
 
                 if (element.is("h2.tag") && element.children().size() > 0) {
                     String cssClass = element.child(0).attr("class");
-                    Log.d(TAG, cssClass);
                     t.setAllCaps(true);
                     RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     lp.setMargins(0, 24, 0, 24);

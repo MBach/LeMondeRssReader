@@ -10,6 +10,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * RssParser class.
@@ -26,6 +28,8 @@ class RssParser {
     private static final String TAG_ENCLOSURE = "enclosure";
     private static final String TAG_RSS = "rss";
     private static final String TAG_ITEM = "item";
+    private static final String TAG_GUID = "guid";
+    private static Pattern ARTICLE_ID_PATTERN = Pattern.compile("/(\\d{6,10})/");
 
     @NonNull
     ArrayList<RssItem> parse(@NonNull String stream) {
@@ -72,12 +76,19 @@ class RssParser {
                         text = parser.getText();
                         break;
                     case XmlPullParser.END_TAG:
-                        if (tagName.equalsIgnoreCase("item")) {
+                        if (tagName.equalsIgnoreCase(TAG_ITEM)) {
                             items.add(item);
                         } else if (tagName.equalsIgnoreCase(TAG_LINK)) {
                             item.setLink(text);
                         } else if (tagName.equalsIgnoreCase(TAG_TITLE)) {
                             item.setTitle(text);
+                        } else if (tagName.equalsIgnoreCase(TAG_GUID) && text != null) {
+                            Matcher matcher = ARTICLE_ID_PATTERN.matcher(text);
+                            if (matcher.find()) {
+                                item.setArticleId(Integer.valueOf(matcher.group(1)));
+                            } else {
+                                item.setArticleId(0);
+                            }
                         } else if (tagName.equalsIgnoreCase(TAG_ENCLOSURE)) {
                             text = parser.getAttributeValue(null, "url");
                             item.setEnclosure(text);

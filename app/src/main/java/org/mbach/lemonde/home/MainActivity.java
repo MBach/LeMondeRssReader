@@ -41,6 +41,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.mbach.lemonde.Constants;
+import org.mbach.lemonde.LeMondeDB;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
@@ -133,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
                     Bundle extras = new Bundle();
 
+                    extras.putInt(Constants.EXTRA_RSS_ARTICLE_ID, rssItem.getArticleId());
                     extras.putString(Constants.EXTRA_RSS_LINK, rssItem.getLink());
                     extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
 
@@ -168,8 +170,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Save the category that has been selected by one, in order to create dynamic shortcuts.
             // It's based on how often this category is selected: the most selected in placed at the bottom on a long touch event
             // The 4th most selected is placed at the top
-            StatisticDB statisticDB = new StatisticDB(this);
-            statisticDB.saveSelectedEntry(menuItem.getItemId());
+            LeMondeDB leMondeDB = new LeMondeDB(this);
+            leMondeDB.saveSelectedEntry(menuItem.getItemId());
         }
         return true;
     }
@@ -263,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // A colored icon will be generated for every dynamic shortcut
         Drawable drawable = getDrawable(R.drawable.circle);
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-        for (Integer entry : new StatisticDB(this).getSavedEntries()) {
+        for (Integer entry : new LeMondeDB(this).getSavedEntries()) {
             for (int i = 0; i < menu.size(); i++) {
                 MenuItem menuItem = menu.getItem(i);
                 if (menuItem.getItemId() == entry) {

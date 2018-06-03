@@ -49,6 +49,10 @@
     <string name="large_article">Grands Formats</string>
     <string name="image_from_article">Image de l’article</string>
 
+    <!-- Favorites -->
+    <string name="favorites_title_activity">Favoris</string>
+    <string name="favorites_none_found">Aucun favori sauvegardé</string>
+
     <!-- Strings related to errors -->
     <string name="error_no_connection">Aucune connexion Internet</string>
     <string name="error_no_connection_retry">Réessayer</string>
@@ -65,7 +69,7 @@
     <string name="preference_article_comments">Commentaires automatiques</string>
     <string name="preference_article_autoload_comments">Récupérer les commentaires suivants lorsque l’on arrive en bas de page</string>
 
-    <string name="title_activity_login">Connexion</string>
+    <string name="login_activity_title">Connexion</string>
 
     <!-- Strings related to login -->
     <string name="snackbar_not_implemented">Non implémenté</string>

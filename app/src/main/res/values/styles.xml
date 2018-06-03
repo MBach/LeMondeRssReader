@@ -22,6 +22,7 @@
         <item name="selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="deleteFavoriteIcon">@drawable/baseline_delete_white_24</item>
     </style>
 
     <item name="fab_interpolator" type="interpolator">@android:interpolator/decelerate_cubic</item>
@@ -41,6 +42,7 @@
         <item name="selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="deleteFavoriteIcon">@drawable/baseline_delete_dark_24</item>
     </style>
 
     <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">

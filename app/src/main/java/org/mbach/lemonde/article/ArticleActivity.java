@@ -57,6 +57,7 @@ import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.home.MainActivity;
+import org.mbach.lemonde.home.RssItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -246,6 +247,7 @@ public class ArticleActivity extends AppCompatActivity {
         if (shareContent) {
             getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
             shareItem = menu.findItem(R.id.action_share);
+            /// FIXME
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -272,13 +274,22 @@ public class ArticleActivity extends AppCompatActivity {
                     final LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
                     boolean hasArticle = leMondeDB.hasArticle(articleId);
                     if (hasArticle && leMondeDB.deleteArticle(articleId)) {
-                        Log.d(TAG, "article deleted");
                         hasArticle = false;
                         Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_removed), Snackbar.LENGTH_SHORT).show();
-                    } else if (leMondeDB.saveArticle(articleId)) {
-                        Log.d(TAG, "article saved");
-                        hasArticle = true;
-                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_added), Snackbar.LENGTH_SHORT).show();
+                    } else {
+                        RssItem favorite = new RssItem(RssItem.ARTICLE_TYPE);
+                        favorite.setArticleId(articleId);
+                        if (getIntent().getExtras() != null) {
+                            favorite.setTitle(getIntent().getExtras().getString(Constants.EXTRA_RSS_TITLE));
+                            favorite.setPubDate(getIntent().getExtras().getLong(Constants.EXTRA_RSS_DATE));
+                            favorite.setEnclosure(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE));
+                        }
+                        favorite.setLink(shareLink);
+                        favorite.setCategory(getTitle().toString());
+                        if (leMondeDB.saveArticle(favorite)) {
+                            hasArticle = true;
+                            Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_added), Snackbar.LENGTH_SHORT).show();
+                        }
                     }
                     toggleFavIcon(hasArticle);
                     return false;
@@ -368,7 +379,7 @@ public class ArticleActivity extends AppCompatActivity {
                     LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
                     // Full article is restricted to paid members
                     isRestricted = doc.getElementById("teaser_article") != null;
-                    Log.d(TAG, "isRestricted " + isRestricted);
+                    Log.d(TAG, "articleId " + articleId);
                     boolean hasArticle = leMondeDB.hasArticle(articleId);
                     toggleFavIcon(hasArticle);
                     if (isRestricted) {

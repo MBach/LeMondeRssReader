@@ -38,7 +38,7 @@
             android:onClick="goToAccount"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
-            android:text="@string/title_activity_login"
+            android:text="@string/login_activity_title"
             android:textSize="12sp"
             android:typeface="normal" />
 

@@ -46,6 +46,7 @@ import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.article.ArticleActivity;
+import org.mbach.lemonde.favorites.FavoritesActivity;
 import org.mbach.lemonde.settings.SettingsActivity;
 
 import java.util.ArrayList;
@@ -137,6 +138,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     extras.putInt(Constants.EXTRA_RSS_ARTICLE_ID, rssItem.getArticleId());
                     extras.putString(Constants.EXTRA_RSS_LINK, rssItem.getLink());
                     extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getEnclosure());
+                    extras.putString(Constants.EXTRA_RSS_TITLE, rssItem.getTitle());
+                    extras.putLong(Constants.EXTRA_RSS_DATE, rssItem.getPubDate());
 
                     AppCompatImageView rssImage = view.findViewById(R.id.rss_image);
                     intent.putExtras(extras);
@@ -163,15 +166,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         selectedMenuItem = menuItem;
         setTitle(menuItem.getTitle());
         String category = rssCats.get(menuItem.getItemId());
-        getFeedFromCategory(category);
-        drawerLayout.closeDrawers();
-
-        if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
-            // Save the category that has been selected by one, in order to create dynamic shortcuts.
-            // It's based on how often this category is selected: the most selected in placed at the bottom on a long touch event
-            // The 4th most selected is placed at the top
-            LeMondeDB leMondeDB = new LeMondeDB(this);
-            leMondeDB.saveSelectedEntry(menuItem.getItemId());
+        // Favorites
+        if (category == null) {
+            drawerLayout.closeDrawers();
+            startActivity(new Intent(getApplicationContext(), FavoritesActivity.class));
+        } else {
+            getFeedFromCategory(category);
+            drawerLayout.closeDrawers();
+            if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+                // Save the category that has been selected by one, in order to create dynamic shortcuts.
+                // It's based on how often this category is selected: the most selected in placed at the bottom on a long touch event
+                // The 4th most selected is placed at the top
+                LeMondeDB leMondeDB = new LeMondeDB(this);
+                leMondeDB.saveSelectedEntry(menuItem.getItemId());
+            }
         }
         return true;
     }

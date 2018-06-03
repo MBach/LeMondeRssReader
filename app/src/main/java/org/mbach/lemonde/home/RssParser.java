@@ -9,7 +9,10 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +32,9 @@ class RssParser {
     private static final String TAG_RSS = "rss";
     private static final String TAG_ITEM = "item";
     private static final String TAG_GUID = "guid";
+    private static final String TAG_PUBDATE = "pubDate";
     private static Pattern ARTICLE_ID_PATTERN = Pattern.compile("/(\\d{6,10})/");
+    private static SimpleDateFormat SDF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z");
 
     @NonNull
     ArrayList<RssItem> parse(@NonNull String stream) {
@@ -60,7 +65,7 @@ class RssParser {
     @NonNull
     private ArrayList<RssItem> readFeed(@NonNull XmlPullParser parser) {
         ArrayList<RssItem> items = new ArrayList<>();
-        RssItem item = new RssItem();
+        RssItem item = new RssItem(RssItem.ARTICLE_TYPE);
         String text = null;
         try {
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
@@ -69,7 +74,7 @@ class RssParser {
                 switch (parser.getEventType()) {
                     case XmlPullParser.START_TAG:
                         if (tagName.equalsIgnoreCase(TAG_ITEM)) {
-                            item = new RssItem();
+                            item = new RssItem(RssItem.ARTICLE_TYPE);
                         }
                         break;
                     case XmlPullParser.TEXT:
@@ -82,6 +87,19 @@ class RssParser {
                             item.setLink(text);
                         } else if (tagName.equalsIgnoreCase(TAG_TITLE)) {
                             item.setTitle(text);
+                        } else if (tagName.equalsIgnoreCase(TAG_PUBDATE)) {
+                            try {
+                                // Cut-off time info (used for grouping favorites)
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(SDF.parse(text));
+                                cal.set(Calendar.HOUR_OF_DAY, 0);
+                                cal.set(Calendar.MINUTE, 0);
+                                cal.set(Calendar.SECOND, 0);
+                                cal.set(Calendar.MILLISECOND, 0);
+                                item.setPubDate(cal.getTimeInMillis());
+                            } catch (ParseException e) {
+                                Log.d(TAG, "cannot parse date: " + text);
+                            }
                         } else if (tagName.equalsIgnoreCase(TAG_GUID) && text != null) {
                             Matcher matcher = ARTICLE_ID_PATTERN.matcher(text);
                             if (matcher.find()) {

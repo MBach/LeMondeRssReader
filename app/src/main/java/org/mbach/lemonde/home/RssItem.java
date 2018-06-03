@@ -11,12 +11,18 @@ import android.support.annotation.Nullable;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-class RssItem implements Parcelable {
+public class RssItem implements Parcelable {
+
+    public static final int ARTICLE_TYPE = 0;
+    public static final int DATE_GROUP_TYPE = 1;
 
     private String link = null;
     private String title = null;
     private Integer articleId = null;
     private String enclosure = null;
+    private String category = null;
+    private long pubDate;
+    private int type;
 
     public static final Parcelable.Creator<RssItem> CREATOR = new Parcelable.Creator<RssItem>() {
         public RssItem createFromParcel(@NonNull Parcel in) {
@@ -33,18 +39,20 @@ class RssItem implements Parcelable {
         title = in.readString();
         articleId = in.readInt();
         enclosure = in.readString();
+        pubDate = in.readLong();
+        type = ARTICLE_TYPE;
     }
 
-    RssItem() {
-
+    public RssItem(int type) {
+        this.type = type;
     }
 
     @Nullable
-    String getLink() {
+    public String getLink() {
         return link;
     }
 
-    void setLink(String link) {
+    public void setLink(String link) {
         this.link = link;
     }
 
@@ -58,20 +66,46 @@ class RssItem implements Parcelable {
     }
 
     @Nullable
-    String getEnclosure() {
+    public String getEnclosure() {
         return enclosure;
     }
 
-    void setEnclosure(String enclosure) {
+    public void setEnclosure(String enclosure) {
         this.enclosure = enclosure;
     }
 
-    void setArticleId(int articleId) {
+    @Nullable
+    public int getArticleId() {
+        return this.articleId;
+    }
+
+    public void setArticleId(int articleId) {
         this.articleId = articleId;
     }
 
-    int getArticleId() {
-        return this.articleId;
+    @Nullable
+    public long getPubDate() {
+        return pubDate;
+    }
+
+    public void setPubDate(long pubDate) {
+        this.pubDate = pubDate;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     @Override
@@ -85,5 +119,6 @@ class RssItem implements Parcelable {
         dest.writeString(title);
         dest.writeInt(articleId);
         dest.writeString(enclosure);
+        dest.writeLong(pubDate);
     }
 }

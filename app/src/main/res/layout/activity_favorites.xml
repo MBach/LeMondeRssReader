@@ -1,0 +1,50 @@
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintFavorites"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayoutFav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        app:expanded="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbarFavorites"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/favoritesActivityRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayoutFav" />
+
+    <ImageView
+        android:id="@+id/noFavorites"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/star_bar_white"
+        android:contentDescription="@string/app_name"
+        android:fitsSystemWindows="true"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/favoritesActivityRecyclerView"
+        app:layout_constraintEnd_toEndOf="@+id/favoritesActivityRecyclerView"
+        app:layout_constraintStart_toStartOf="@+id/favoritesActivityRecyclerView"
+        app:layout_constraintTop_toTopOf="@+id/favoritesActivityRecyclerView"
+        tools:targetApi="lollipop" />
+
+</android.support.constraint.ConstraintLayout>

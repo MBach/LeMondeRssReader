@@ -59,6 +59,13 @@
             </intent-filter>
         </activity>
 
+        <!-- Manage user's favorites -->
+        <activity
+            android:name=".favorites.FavoritesActivity"
+            android:parentActivityName=".home.MainActivity"
+            tools:targetApi="JELLY_BEAN">
+        </activity>
+
         <!-- Settings page -->
         <activity
             android:name=".settings.SettingsActivity"
@@ -69,7 +76,7 @@
         <!-- Account page -->
         <activity
             android:name=".account.LoginActivity"
-            android:label="@string/title_activity_login" />
+            android:label="@string/login_activity_title" />
     </application>
 
 </manifest>

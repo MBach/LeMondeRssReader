@@ -13,16 +13,16 @@ import android.support.annotation.NonNull;
  */
 class LeMondeSQLiteOpenHelper extends SQLiteOpenHelper {
 
+    private static final int DB_VERSION = 1;
+    private static final String DB_NAME = "lemonde.db";
+
     /**
      * Constructor.
      *
      * @param context the context
-     * @param name name of db
-     * @param factory the factory
-     * @param version version to use
      */
-    LeMondeSQLiteOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
+    LeMondeSQLiteOpenHelper(Context context) {
+        super(context, DB_NAME, null, DB_VERSION);
     }
 
     @Override

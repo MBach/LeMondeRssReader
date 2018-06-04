@@ -8,10 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.LeMondeDB;
@@ -26,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 public class FavoritesActivity extends AppCompatActivity {
-    private static final String TAG = "FavoritesActivity";
     private final FavoritesAdapter favoritesAdapter = new FavoritesAdapter();
     private List<RssItem> favorites;
 
@@ -34,8 +31,6 @@ public class FavoritesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeUtils.applyTheme(getBaseContext(), getTheme());
-        setTitle(R.string.favorites_title_activity);
-
         setContentView(R.layout.activity_favorites);
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -50,6 +45,25 @@ public class FavoritesActivity extends AppCompatActivity {
         loadFavorites();
     }
 
+    @Override
+    public void onRestart()
+    {
+        super.onRestart();
+        loadFavorites();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+        }
+        return true;
+    }
+
+    /**
+     * Load favorites from DB.
+     */
     private void loadFavorites() {
         LeMondeDB leMondeDB = new LeMondeDB(this);
         this.favorites = leMondeDB.getFavorites();
@@ -61,7 +75,6 @@ public class FavoritesActivity extends AppCompatActivity {
             Set<Long> dates = new HashSet<>();
             long d;
             for (RssItem f : favorites) {
-                Log.d("Fav", "id " + f);
                 d = f.getPubDate();
                 // Add an extra item for grouping favorites by date
                 if (!dates.contains(d)) {
@@ -74,15 +87,6 @@ public class FavoritesActivity extends AppCompatActivity {
             }
         }
         favoritesAdapter.addItems(items);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            onBackPressed();
-        }
-        return true;
     }
 
     /**
@@ -123,12 +127,10 @@ public class FavoritesActivity extends AppCompatActivity {
         for (RssItem favorite : this.favorites) {
             if (favorite.getArticleId() == p.getId()) {
                 id = favorite.getArticleId();
-                Log.d("Fav", "id = " + id);
                 break;
             }
         }
         if (id == 0) {
-            Log.d("Fav", "id = " + id);
             return;
         }
         LeMondeDB leMondeDB = new LeMondeDB(this);
@@ -138,5 +140,3 @@ public class FavoritesActivity extends AppCompatActivity {
         }
     }
 }
-
-

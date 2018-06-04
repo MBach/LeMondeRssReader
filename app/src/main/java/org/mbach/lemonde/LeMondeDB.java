@@ -21,10 +21,8 @@ import java.util.List;
  */
 public class LeMondeDB {
     private SQLiteDatabase sqLiteDatabase;
-    private static final int DB_VERSION = 1;
     private final LeMondeSQLiteOpenHelper statisticSQLiteOpenHelper;
 
-    private static final String DB_NAME = "lemonde.db";
 
     /**
      * StatEntry inner class.
@@ -60,11 +58,12 @@ public class LeMondeDB {
     }
 
     /**
+     * Constructor.
      *
      * @param context the context
      */
     public LeMondeDB(Context context) {
-        statisticSQLiteOpenHelper = new LeMondeSQLiteOpenHelper(context, DB_NAME, null, DB_VERSION);
+        statisticSQLiteOpenHelper = new LeMondeSQLiteOpenHelper(context);
     }
 
     private void open() {
@@ -78,6 +77,7 @@ public class LeMondeDB {
     // STATISTICS ON MENU
 
     /**
+     * Update statistics when one has selected an entry in the menu.
      *
      * @param categoryId category to save
      */
@@ -107,6 +107,7 @@ public class LeMondeDB {
 
 
     /**
+     * Get the list of entries, ordered by frequency.
      *
      * @return list of integers
      */

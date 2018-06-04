@@ -40,20 +40,18 @@
             tools:targetApi="JELLY_BEAN">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="lemonde.fr"
                     android:pathPrefix="/" />
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="*.blog.lemonde.fr"
                     android:pathPrefix="/" />
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="www.lemonde.fr"
                     android:pathPrefix="/" />
             </intent-filter>
@@ -62,6 +60,7 @@
         <!-- Manage user's favorites -->
         <activity
             android:name=".favorites.FavoritesActivity"
+            android:label="@string/favorites_title_activity"
             android:parentActivityName=".home.MainActivity"
             tools:targetApi="JELLY_BEAN">
         </activity>

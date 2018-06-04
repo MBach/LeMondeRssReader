@@ -163,14 +163,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        selectedMenuItem = menuItem;
-        setTitle(menuItem.getTitle());
         String category = rssCats.get(menuItem.getItemId());
         // Favorites
         if (category == null) {
             drawerLayout.closeDrawers();
             startActivity(new Intent(getApplicationContext(), FavoritesActivity.class));
+            return false;
         } else {
+            selectedMenuItem = menuItem;
+            setTitle(menuItem.getTitle());
             getFeedFromCategory(category);
             drawerLayout.closeDrawers();
             if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
@@ -180,8 +181,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 LeMondeDB leMondeDB = new LeMondeDB(this);
                 leMondeDB.saveSelectedEntry(menuItem.getItemId());
             }
+            return true;
         }
-        return true;
     }
 
     @Override

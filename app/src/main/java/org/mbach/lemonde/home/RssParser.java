@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,8 +34,8 @@ class RssParser {
     private static final String TAG_ITEM = "item";
     private static final String TAG_GUID = "guid";
     private static final String TAG_PUBDATE = "pubDate";
-    private static Pattern ARTICLE_ID_PATTERN = Pattern.compile("/(\\d{6,10})/");
-    private static SimpleDateFormat SDF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z");
+    private static final Pattern ARTICLE_ID_PATTERN = Pattern.compile("/(\\d{6,10})/");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.UK);
 
     @NonNull
     ArrayList<RssItem> parse(@NonNull String stream) {

@@ -22,7 +22,7 @@ public class RssItem implements Parcelable {
     private String enclosure = null;
     private String category = null;
     private long pubDate;
-    private int type;
+    private final int type;
 
     public static final Parcelable.Creator<RssItem> CREATOR = new Parcelable.Creator<RssItem>() {
         public RssItem createFromParcel(@NonNull Parcel in) {
@@ -74,7 +74,6 @@ public class RssItem implements Parcelable {
         this.enclosure = enclosure;
     }
 
-    @Nullable
     public int getArticleId() {
         return this.articleId;
     }
@@ -83,7 +82,6 @@ public class RssItem implements Parcelable {
         this.articleId = articleId;
     }
 
-    @Nullable
     public long getPubDate() {
         return pubDate;
     }
@@ -102,10 +100,6 @@ public class RssItem implements Parcelable {
 
     public int getType() {
         return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 
     @Override

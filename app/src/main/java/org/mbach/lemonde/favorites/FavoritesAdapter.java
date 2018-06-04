@@ -118,9 +118,9 @@ class FavoritesAdapter extends RecyclerView.Adapter {
             this.view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
         }
 
-        int getId() {
+        /*int getId() {
             return view.getId();
-        }
+        }*/
 
         void setId(int id) {
             view.setId(id);

@@ -38,13 +38,22 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * LiveFeedParser class.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2018-04
+ */
 class LiveFeedParser {
     private static final String TAG = "LiveFeedParser";
     private static final String SCRIBBLELIVE_TOKEN = "6Im8rwIM";
     private static final String HTML = "HTML";
 
+    @NonNull
     private final Context context;
+    @NonNull
     private final Document document;
+    @NonNull
     private final ArticleAdapter articleAdapter;
 
     LiveFeedParser(@NonNull Context context, @NonNull ArticleAdapter articleAdapter, @NonNull Document document) {
@@ -54,7 +63,7 @@ class LiveFeedParser {
     }
 
     @NonNull
-    List<Model> extractLiveFacts() {
+    ArrayList<Model> extractLiveFacts() {
         TextView headLine = new TextView(context);
         TextView description = new TextView(context);
 
@@ -72,7 +81,7 @@ class LiveFeedParser {
         if (!document.getElementsByClass("description js-live-page-description").isEmpty()) {
             description.setText(document.getElementsByClass("description js-live-page-description").first().text());
         }
-        List<Model> views = new ArrayList<>();
+        ArrayList<Model> views = new ArrayList<>();
         views.add(new Model(headLine));
         views.add(new Model(description));
 
@@ -128,7 +137,7 @@ class LiveFeedParser {
             try {
                 JSONObject json = new JSONObject(response);
                 JSONArray posts = json.getJSONArray("Posts");
-                List<Model> facts = new ArrayList<>();
+                ArrayList<Model> facts = new ArrayList<>();
 
                 // Subtitle
                 TextView followLive = new TextView(context);

@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -73,6 +74,9 @@ import java.util.regex.Pattern;
 public class ArticleActivity extends AppCompatActivity {
 
     private static final String TAG = "ArticleActivity";
+    private static final String STATE_RECYCLER_VIEW_POS = "STATE_RECYCLER_VIEW_POS";
+    private static final String STATE_RECYCLER_VIEW = "STATE_RECYCLER_VIEW";
+    private static final String STATE_ADAPTER_ITEM = "STATE_ADAPTER_ITEM";
     private static final String ATTR_HEADLINE = "Headline";
     private static final String ATTR_DESCRIPTION = "description";
     private static final String ATTR_AUTHOR = "author";
@@ -80,22 +84,25 @@ public class ArticleActivity extends AppCompatActivity {
     private static final String TAG_FAKE = "faux";
     private static final String TAG_MOSTLY_TRUE = "plutot_vrai";
     private static final String TAG_FORGOTTEN = "oubli";
+
+    @Nullable
     static RequestQueue REQUEST_QUEUE = null;
 
-    private ExtendedFabButton fab;
-    private ProgressBar autoLoader;
-    private String commentsURI;
     private final ArticleAdapter articleAdapter = new ArticleAdapter();
-    private boolean autoloadComments;
-    private String shareSubject;
-    private String shareText;
-    @Nullable
-    private String shareLink;
+    private final AlphaAnimation animationFadeIn = new AlphaAnimation(0, 1);
+    private RecyclerView recyclerView;
+    private ProgressBar autoLoader;
+    private ExtendedFabButton fab;
     private MenuItem shareItem;
     private MenuItem toggleFavItem;
-    private final AlphaAnimation animationFadeIn = new AlphaAnimation(0, 1);
-    private int articleId = 0;
+    @Nullable
+    private String shareLink;
+    private String commentsURI;
+    private String shareSubject;
+    private String shareText;
+    private boolean autoloadComments;
     private boolean isRestricted = false;
+    private int articleId = 0;
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent motionEvent) {
@@ -113,7 +120,7 @@ public class ArticleActivity extends AppCompatActivity {
         setTitle("");
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        RecyclerView recyclerView = findViewById(R.id.articleActivityRecyclerView);
+        recyclerView = findViewById(R.id.articleActivityRecyclerView);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(articleAdapter);
         Toolbar toolbar = findViewById(R.id.toolbarArticle);
@@ -145,6 +152,10 @@ public class ArticleActivity extends AppCompatActivity {
                 }
             }
         });
+
+        if (REQUEST_QUEUE == null) {
+            REQUEST_QUEUE = Volley.newRequestQueue(this);
+        }
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         autoloadComments = sharedPreferences.getBoolean("autoloadComments", true);
@@ -209,35 +220,49 @@ public class ArticleActivity extends AppCompatActivity {
         }
 
         // Start async job
-        if (REQUEST_QUEUE == null) {
-            REQUEST_QUEUE = Volley.newRequestQueue(this);
+        int lastFirstVisiblePosition = getIntent().getIntExtra(STATE_RECYCLER_VIEW_POS, -1);
+        // If we have stored the position, it means we also have stored state and items from the recycler view
+        if (lastFirstVisiblePosition >= 0) {
+            Parcelable parcelable = getIntent().getParcelableExtra(STATE_RECYCLER_VIEW);
+            recyclerView.getLayoutManager().onRestoreInstanceState(parcelable);
+            ArrayList<Model> items = getIntent().getParcelableArrayListExtra(STATE_ADAPTER_ITEM);
+            articleAdapter.addItems(items);
+            recyclerView.getLayoutManager().scrollToPosition(lastFirstVisiblePosition);
+        } else {
+            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
         }
-        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
     }
 
     @Override
     public void onResume() {
+        super.onResume();
         // Do not display the loader once again after resuming this activity
         if (articleAdapter.getItemCount() > 0) {
             findViewById(R.id.articleLoader).setVisibility(View.GONE);
         }
-        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Save position, state, and items before rotating the device
+        int lastFirstVisiblePosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+        Parcelable parcelable = recyclerView.getLayoutManager().onSaveInstanceState();
+        getIntent().putExtra(STATE_RECYCLER_VIEW, parcelable);
+        getIntent().putExtra(STATE_RECYCLER_VIEW_POS, lastFirstVisiblePosition);
+        getIntent().putParcelableArrayListExtra(STATE_ADAPTER_ITEM, articleAdapter.getItems());
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                } else {
-                    onBackPressed();
-                }
-                return true;
-            default:
-                return true;
+        if (android.R.id.home == item.getItemId()) {
+            if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            } else {
+                onBackPressed();
+            }
         }
+        return true;
     }
 
     @Override
@@ -346,7 +371,7 @@ public class ArticleActivity extends AppCompatActivity {
             }
 
             // Article is from a hosted blog
-            List<Model> items;
+            ArrayList<Model> items;
             Element content = doc.getElementById("content");
             if (content != null) {
                 items = extractBlogArticle(content);
@@ -466,7 +491,7 @@ public class ArticleActivity extends AppCompatActivity {
         public void onResponse(String response) {
             Document commentDoc = Jsoup.parse(response);
 
-            List<Model> items = new ArrayList<>();
+            ArrayList<Model> items = new ArrayList<>();
             // Extract header
             Elements header = commentDoc.select("[itemprop='InteractionCount']");
             if (atLeastOneChild(header)) {
@@ -571,7 +596,7 @@ public class ArticleActivity extends AppCompatActivity {
      * @return a list of formatted content that can be nicely displayed in the recycler view.
      */
     @NonNull
-    private List<Model> extractStandardArticle(@NonNull Elements articles) {
+    private ArrayList<Model> extractStandardArticle(@NonNull Elements articles) {
         TextView headLine = new TextView(this);
         TextView authors = new TextView(this);
         TextView dates = new TextView(this);
@@ -590,7 +615,7 @@ public class ArticleActivity extends AppCompatActivity {
         description.setText(shareText);
         headLine.setText(shareSubject);
 
-        List<Model> views = new ArrayList<>();
+        ArrayList<Model> views = new ArrayList<>();
         views.add(new Model(headLine));
         views.add(new Model(authors));
         views.add(new Model(dates));
@@ -606,7 +631,7 @@ public class ArticleActivity extends AppCompatActivity {
      * @return a list of formatted content that can be nicely displayed in the recycler view.
      */
     @NonNull
-    private List<Model> extractVideo(@NonNull Document doc) {
+    private ArrayList<Model> extractVideo(@NonNull Document doc) {
         Elements elements = doc.select("section.video");
         if (elements.isEmpty()) {
             return new ArrayList<>();
@@ -633,7 +658,7 @@ public class ArticleActivity extends AppCompatActivity {
             els.select("#recos_videos_outbrain").remove();
             fromHtml(content, els.html());
         }
-        List<Model> views = new ArrayList<>();
+        ArrayList<Model> views = new ArrayList<>();
         views.add(new Model(headLine));
         views.add(new Model(authors));
         views.add(new Model(dates));
@@ -693,7 +718,7 @@ public class ArticleActivity extends AppCompatActivity {
      * @return a list of formatted content that can be nicely displayed in the recycler view.
      */
     @NonNull
-    private List<Model> extractBlogArticle(@NonNull Element content) {
+    private ArrayList<Model> extractBlogArticle(@NonNull Element content) {
         TextView headLine = new TextView(this);
         TextView dates = new TextView(this);
 
@@ -709,7 +734,7 @@ public class ArticleActivity extends AppCompatActivity {
         if (atLeastOneChild(elements)) {
             dates.setText(elements.first().text());
         }
-        List<Model> views = new ArrayList<>();
+        ArrayList<Model> views = new ArrayList<>();
         views.add(new Model(headLine));
         views.add(new Model(dates));
 

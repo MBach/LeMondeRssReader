@@ -28,6 +28,7 @@ import java.util.ArrayList;
 public class RssService extends IntentService {
 
     private static final String TAG = "RssService";
+    @Nullable
     private static RequestQueue REQUEST_QUEUE = null;
 
     public static final int FETCH_SUCCESS = 0;

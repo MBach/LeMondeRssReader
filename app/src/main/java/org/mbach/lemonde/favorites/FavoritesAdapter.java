@@ -92,6 +92,7 @@ class FavoritesAdapter extends RecyclerView.Adapter {
             this.text.setPadding(16, 48, 16, 16);
         }
 
+        @NonNull
         TextView getDate() {
             return this.text;
         }

@@ -1,5 +1,7 @@
 package org.mbach.lemonde.article;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.TextView;
@@ -10,7 +12,7 @@ import android.widget.TextView;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-class Model {
+class Model implements Parcelable {
 
     static final int UNKNOWN_TYPE = -1;
     static final int TEXT_TYPE = 0;
@@ -26,7 +28,24 @@ class Model {
 
     private final int id;
     private final int type;
+    @NonNull
     private final Object theContent;
+
+    public static final Parcelable.Creator<Model> CREATOR = new Parcelable.Creator<Model>() {
+        public Model createFromParcel(@NonNull Parcel in) {
+            return new Model(in);
+        }
+
+        public Model[] newArray(int size) {
+            return new Model[size];
+        }
+    };
+
+    private Model(Parcel in) {
+        id = in.readInt();
+        type = in.readInt();
+        theContent = in.readValue(TextView.class.getClassLoader());
+    }
 
     Model(@NonNull TextView textView) {
         this.type = TEXT_TYPE;
@@ -70,5 +89,15 @@ class Model {
         int result = id;
         result = 31 * result + type;
         return result;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
     }
 }

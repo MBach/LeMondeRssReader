@@ -39,14 +39,14 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
     private static final String TAG = "ArticleAdapter";
 
-    private List<Model> items;
+    private ArrayList<Model> items;
 
     /**
      * Add items to render.
      *
      * @param items list of items (incl. comments) to display
      */
-    void addItems(@NonNull List<Model> items) {
+    void addItems(@NonNull ArrayList<Model> items) {
         if (this.items == null) {
             this.items = items;
         } else {
@@ -209,6 +209,10 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 Log.d(TAG, "pos = " + viewHolderVideo.getVideoView().getCurrentPosition());
                 break;
         }
+    }
+
+    ArrayList<Model> getItems() {
+        return items;
     }
 
     /**

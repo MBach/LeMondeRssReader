@@ -23,6 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * FavoritesActivity class is a place to manage your favorites.
+ *
+ * @author Matthieu BACHELIER
+ * @since 2018-06
+ */
 public class FavoritesActivity extends AppCompatActivity {
     private final FavoritesAdapter favoritesAdapter = new FavoritesAdapter();
     private List<RssItem> favorites;

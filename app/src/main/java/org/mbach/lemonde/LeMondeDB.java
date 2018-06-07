@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class LeMondeDB {
     private SQLiteDatabase sqLiteDatabase;
+    @NonNull
     private final LeMondeSQLiteOpenHelper statisticSQLiteOpenHelper;
 
 
@@ -161,7 +162,7 @@ public class LeMondeDB {
      * @param favorite article to save
      * @return true if successfully saved
      */
-    public boolean saveArticle(RssItem favorite) {
+    public boolean saveArticle(@NonNull RssItem favorite) {
         if (favorite.getArticleId() <= 0) {
             return false;
         }
@@ -201,6 +202,7 @@ public class LeMondeDB {
      *
      * @return list of favorites
      */
+    @NonNull
     public List<RssItem> getFavorites() {
         open();
         Cursor entries = sqLiteDatabase.query(FavEntry.TABLE,

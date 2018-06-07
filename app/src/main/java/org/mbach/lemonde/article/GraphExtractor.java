@@ -36,9 +36,12 @@ import java.util.List;
 class GraphExtractor {
     private static final String TAG = "GraphExtractor";
 
+    @NonNull
     private final Context context;
 
     private JSONObject data;
+
+    @NonNull
     private String legend = "";
 
     static int getModelType(@Nullable Chart chart) {

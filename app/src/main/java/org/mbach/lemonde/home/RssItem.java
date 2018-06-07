@@ -16,10 +16,15 @@ public class RssItem implements Parcelable {
     public static final int ARTICLE_TYPE = 0;
     public static final int DATE_GROUP_TYPE = 1;
 
+    @Nullable
     private String link = null;
+    @Nullable
     private String title = null;
+    @Nullable
     private Integer articleId = null;
+    @Nullable
     private String enclosure = null;
+    @Nullable
     private String category = null;
     private long pubDate;
     private final int type;
@@ -90,6 +95,7 @@ public class RssItem implements Parcelable {
         this.pubDate = pubDate;
     }
 
+    @Nullable
     public String getCategory() {
         return category;
     }

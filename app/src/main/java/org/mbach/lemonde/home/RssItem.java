@@ -57,7 +57,7 @@ public class RssItem implements Parcelable {
         return link;
     }
 
-    public void setLink(String link) {
+    public void setLink(@Nullable String link) {
         this.link = link;
     }
 
@@ -66,7 +66,7 @@ public class RssItem implements Parcelable {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(@Nullable String title) {
         this.title = title;
     }
 
@@ -75,12 +75,12 @@ public class RssItem implements Parcelable {
         return enclosure;
     }
 
-    public void setEnclosure(String enclosure) {
+    public void setEnclosure(@Nullable String enclosure) {
         this.enclosure = enclosure;
     }
 
     public int getArticleId() {
-        return this.articleId;
+        return articleId;
     }
 
     public void setArticleId(int articleId) {
@@ -100,7 +100,7 @@ public class RssItem implements Parcelable {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(@Nullable String category) {
         this.category = category;
     }
 

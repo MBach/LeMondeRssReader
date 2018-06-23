@@ -3,7 +3,6 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/cat_favorites"
             android:icon="@drawable/ic_star_rate_18px"
             android:title="@string/category_fav" />
         <item

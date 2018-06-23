@@ -66,8 +66,6 @@
     <string name="preference_app_dark_theme">Thème sombre</string>
     <string name="preference_share_icons">Icône de partage</string>
     <string name="preference_share_description">Activer le partage d’un article (email, réseaux sociaux, etc.)</string>
-    <string name="preference_article_comments">Commentaires automatiques</string>
-    <string name="preference_article_autoload_comments">Récupérer les commentaires suivants lorsque l’on arrive en bas de page</string>
 
     <string name="login_activity_title">Connexion</string>
 

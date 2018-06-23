@@ -92,7 +92,6 @@ public class ArticleActivity extends AppCompatActivity {
     private final AlphaAnimation animationFadeIn = new AlphaAnimation(0, 1);
     private RecyclerView recyclerView;
     private ProgressBar autoLoader;
-    private ExtendedFabButton fab;
     private MenuItem shareItem;
     private MenuItem toggleFavItem;
     @Nullable
@@ -100,7 +99,6 @@ public class ArticleActivity extends AppCompatActivity {
     private String commentsURI;
     private String shareSubject;
     private String shareText;
-    private boolean autoloadComments;
     private boolean isRestricted = false;
     private int articleId = 0;
 
@@ -157,46 +155,20 @@ public class ArticleActivity extends AppCompatActivity {
             REQUEST_QUEUE = Volley.newRequestQueue(this);
         }
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        autoloadComments = sharedPreferences.getBoolean("autoloadComments", true);
-        if (autoloadComments) {
-            autoLoader = findViewById(R.id.autoLoader);
-        } else {
-            fab = findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (Constants.BASE_URL2.equals(commentsURI)) {
-                        fab.showProgress(false);
-                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
-                    } else if (commentsURI != null) {
-                        fab.showProgress(true);
-                        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
-                    }
-                }
-            });
-        }
+        autoLoader = findViewById(R.id.autoLoader);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
-                    if (autoloadComments) {
-                        if (Constants.BASE_URL2.equals(commentsURI)) {
-                            autoLoader.setVisibility(View.INVISIBLE);
-                            Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
-                        } else if (commentsURI != null) {
-                            autoLoader.setVisibility(View.VISIBLE);
-                            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
-                        }
-                    } else {
-                        fab.show();
+                    if (Constants.BASE_URL2.equals(commentsURI)) {
+                        autoLoader.setVisibility(View.INVISIBLE);
+                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
+                    } else if (commentsURI != null) {
+                        autoLoader.setVisibility(View.VISIBLE);
+                        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
                     }
                 } else {
-                    if (autoloadComments) {
-                        autoLoader.setVisibility(View.INVISIBLE);
-                    } else {
-                        fab.hide();
-                    }
+                    autoLoader.setVisibility(View.INVISIBLE);
                 }
                 super.onScrolled(recyclerView, dx, dy);
             }
@@ -541,9 +513,6 @@ public class ArticleActivity extends AppCompatActivity {
                 }
             }
             articleAdapter.addItems(items);
-            if (!autoloadComments) {
-                fab.showProgress(false);
-            }
         }
     };
 

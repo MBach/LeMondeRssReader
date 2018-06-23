@@ -12,9 +12,7 @@ This App was also built to be as fastest and simple as possible. Material design
 
 ### Comments
 
-Comments are loaded in the same view (ArticleActivity) and new comments are fetched using a custom [FloatingActionButton](https://developer.android.com/reference/android/support/design/widget/FloatingActionButton.html): the [FabButton](https://github.com/ckurtm/FabButton) which holds a circular progress bar when button is triggered
-
-Every comment page can be fetched by clicking this button until all comments are displayed: the URL is computed internally and the user has nothing to do
+Comments are loaded automatically in the same view when one has reached the bottom of the article.
 
 ### Dynamic theme
 

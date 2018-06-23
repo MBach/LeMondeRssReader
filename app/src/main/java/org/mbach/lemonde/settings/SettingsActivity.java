@@ -3,9 +3,10 @@ package org.mbach.lemonde.settings;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
@@ -17,7 +18,7 @@ import org.mbach.lemonde.ThemeUtils;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     private static boolean themeHasChanged;
 
@@ -34,9 +35,14 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ThemeUtils.applyTheme(getBaseContext(), getTheme());
         super.onCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new GeneralPreferenceFragment()).commit();
+        ThemeUtils.applyTheme(getBaseContext(), getTheme());
+        setContentView(R.layout.activity_settings);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getFragmentManager().beginTransaction().replace(R.id.pref_content, new GeneralPreferenceFragment()).commit();
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(prefChangeListener);
     }
 
@@ -46,11 +52,6 @@ public class SettingsActivity extends PreferenceActivity {
         setResult(themeHasChanged ? Constants.THEME_CHANGED : 0, intent);
         themeHasChanged = false;
         finish();
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return GeneralPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     public static class GeneralPreferenceFragment extends PreferenceFragment {

@@ -21,7 +21,6 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <android.support.constraint.ConstraintLayout
-                android:id="@+id/constraintLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -104,21 +103,6 @@
         android:fitsSystemWindows="true"
         android:visibility="invisible"
         tools:targetApi="lollipop" />
-
-    <view
-        android:id="@+id/fab"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        class="org.mbach.lemonde.article.ExtendedFabButton"
-        android:layout_gravity="bottom|center"
-        android:color="?attr/colorAccent"
-        android:src="@drawable/ic_comment_black_24dp"
-        android:visibility="invisible"
-        android:indeterminate="true"
-        android:layout_marginBottom="@dimen/fab_margin"
-        app:fbb_autoStart="false"
-        app:fbb_progressColor="@color/accent_complementary"
-        app:fbb_progressWidthRatio="0.1" />
 
     <ProgressBar
         android:id="@+id/autoLoader"

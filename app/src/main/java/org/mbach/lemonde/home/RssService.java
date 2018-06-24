@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,7 +16,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.mbach.lemonde.Constants;
-import org.mbach.lemonde.R;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -82,7 +80,6 @@ public class RssService extends IntentService {
         @Override
         public void onErrorResponse(VolleyError error) {
             if (error instanceof TimeoutError) {
-                //Toast.makeText(getBaseContext(), getString(R.string.error_timeout), Toast.LENGTH_LONG).show();
                 try {
                     reply.send(FETCH_TIMEOUT);
                 } catch (@NonNull PendingIntent.CanceledException e) {

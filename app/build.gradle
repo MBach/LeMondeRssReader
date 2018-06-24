@@ -6,8 +6,8 @@ android {
         applicationId "org.mbach.lemonde"
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 12
-        versionName '1.12'
+        versionCode 13
+        versionName '1.13'
         vectorDrawables.useSupportLibrary = true
     }
 }

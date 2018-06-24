@@ -84,7 +84,7 @@ Or you can get the app directly on GitHub, here is the [v1.11](https://github.co
 
 ![Tweet](https://mbach.github.io/LeMondeRssReader/screenshots/tweet.jpg)
 
-![Article](https://mbach.github.io/LeMondeRssReader/screenshots/fab_and_chart.png)
+![Restricted content](https://mbach.github.io/LeMondeRssReader/screenshots/restricted_article.jpg)
 
 ![Favorites](https://mbach.github.io/LeMondeRssReader/screenshots/favorites.jpg)
 

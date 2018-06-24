@@ -39,6 +39,7 @@ import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.LeMondeDB;
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final SparseArray<String> rssCats = new SparseArray<>();
     private final SparseIntArray colorCats = new SparseIntArray();
     private MenuItem selectedMenuItem;
+    private Snackbar snackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                ProgressBar progressBar = findViewById(R.id.scanProgressBar);
+                progressBar.setIndeterminate(true);
+                progressBar.setVisibility(View.VISIBLE);
                 String category = selectedMenuItem == null ? Constants.CAT_NEWS : rssCats.get(selectedMenuItem.getItemId());
                 getFeedFromCategory(category);
             }
@@ -155,6 +160,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
             mainActivityRecyclerView.setAdapter(adapter);
+            ProgressBar progressBar = findViewById(R.id.scanProgressBar);
+            progressBar.setIndeterminate(false);
+            progressBar.setVisibility(View.GONE);
+            if (snackbar != null) {
+                snackbar.dismiss();
+            }
+        } else if (requestCode == GET_LATEST_RSS_FEED && resultCode == RssService.FETCH_TIMEOUT) {
+            snackbar = Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_timeout), Snackbar.LENGTH_INDEFINITE)
+                    .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ProgressBar progressBar = findViewById(R.id.scanProgressBar);
+                            progressBar.setIndeterminate(true);
+                            progressBar.setVisibility(View.VISIBLE);
+                            String category = selectedMenuItem == null ? Constants.CAT_NEWS : rssCats.get(selectedMenuItem.getItemId());
+                            getFeedFromCategory(category);
+                        }
+                    });
+            snackbar.show();
+            ProgressBar progressBar = findViewById(R.id.scanProgressBar);
+            progressBar.setIndeterminate(false);
+            progressBar.setVisibility(View.GONE);
         } else if (requestCode == FROM_SETTINGS_ACTIVITY && resultCode == Constants.THEME_CHANGED) {
             recreate();
         }
@@ -167,9 +194,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Favorites
         if (category == null) {
             drawerLayout.closeDrawers();
-            startActivity(new Intent(getApplicationContext(), FavoritesActivity.class));
+            startActivityForResult(new Intent(getApplicationContext(), FavoritesActivity.class), GET_LATEST_RSS_FEED);
             return false;
         } else {
+            ProgressBar progressBar = findViewById(R.id.scanProgressBar);
+            progressBar.setIndeterminate(true);
+            progressBar.setVisibility(View.VISIBLE);
             selectedMenuItem = menuItem;
             setTitle(menuItem.getTitle());
             getFeedFromCategory(category);
@@ -332,21 +362,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-        //if (isConnected) {
         PendingIntent pendingResult = createPendingResult(GET_LATEST_RSS_FEED, new Intent(), 0);
         Intent intent = new Intent(getApplicationContext(), RssService.class);
         intent.putExtra(RssService.CATEGORY, category);
         intent.putExtra(RssService.PENDING_RESULT, pendingResult);
         startService(intent);
-        //} else {
         if (!isConnected) {
-            Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
+            snackbar = Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
                     .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            ProgressBar progressBar = findViewById(R.id.scanProgressBar);
+                            progressBar.setIndeterminate(true);
+                            progressBar.setVisibility(View.VISIBLE);
                             getFeedFromCategory(category);
                         }
-                    }).show();
+                    });
+            snackbar.show();
         }
         swipeRefreshLayout.setRefreshing(false);
     }

@@ -114,6 +114,7 @@ public class ArticleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeUtils.applyTheme(getBaseContext(), getTheme());
         setContentView(R.layout.activity_article);
         setTitle("");
 

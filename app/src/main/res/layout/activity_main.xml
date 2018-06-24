@@ -17,7 +17,7 @@
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
+            app:elevation="8dp"
             app:expanded="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -30,6 +30,20 @@
                 android:background="?attr/colorPrimary" />
 
         </android.support.design.widget.AppBarLayout>
+
+        <ProgressBar
+            android:id="@+id/scanProgressBar"
+            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="52dp"
+            android:indeterminate="true"
+            android:padding="0dp"
+            app:elevation="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/swipeRefreshLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/appBarLayout" />
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefreshLayout"
@@ -51,6 +65,7 @@
 
     </android.support.constraint.ConstraintLayout>
 
-    <include layout="@layout/navigation_view" />
+    <include layout="@layout/navigation_view"
+        tools:visibility="gone" />
 
 </android.support.v4.widget.DrawerLayout>

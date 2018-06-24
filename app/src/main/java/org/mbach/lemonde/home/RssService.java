@@ -6,15 +6,18 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.mbach.lemonde.Constants;
+import org.mbach.lemonde.R;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -32,6 +35,7 @@ public class RssService extends IntentService {
     private static RequestQueue REQUEST_QUEUE = null;
 
     public static final int FETCH_SUCCESS = 0;
+    public static final int FETCH_TIMEOUT = 1;
     public static final String CATEGORY = "CATEGORY";
     public static final String PENDING_RESULT = "RSS_SERVICE_PENDING_RESULT";
     public static final String PARCELABLE_EXTRAS = "PARCELABLE_EXTRAS";
@@ -44,7 +48,7 @@ public class RssService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    protected void onHandleIntent(@Nullable final Intent intent) {
         if (REQUEST_QUEUE == null) {
             REQUEST_QUEUE = Volley.newRequestQueue(this);
         }
@@ -77,7 +81,16 @@ public class RssService extends IntentService {
     private final Response.ErrorListener onErrorResponse = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.e(TAG, error.toString());
+            if (error instanceof TimeoutError) {
+                //Toast.makeText(getBaseContext(), getString(R.string.error_timeout), Toast.LENGTH_LONG).show();
+                try {
+                    reply.send(FETCH_TIMEOUT);
+                } catch (@NonNull PendingIntent.CanceledException e) {
+                    Log.e(TAG, "onHandleIntent error", e);
+                }
+            } else {
+                Log.e(TAG, error.toString());
+            }
         }
     };
 }

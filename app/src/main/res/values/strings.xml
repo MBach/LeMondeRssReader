@@ -56,6 +56,7 @@
     <!-- Strings related to errors -->
     <string name="error_no_connection">Aucune connexion Internet</string>
     <string name="error_no_connection_retry">Réessayer</string>
+    <string name="error_timeout">Connexion limitée : impossible de récupérer le flux</string>
 
     <!-- Strings related to Settings -->
     <string name="preference_article_layout">Mise en page</string>

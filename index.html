@@ -28,7 +28,7 @@
 <ul>
     <li>A navigation drawer with a header (see this <a href="https://developer.android.com/training/implementing-navigation/nav-drawer.html" target="_blank">tutorial</a>)</li>
     <li>A <a href="https://developer.android.com/reference/android/support/v4/widget/SwipeRefreshLayout.htmlSwipeRefreshLayout" target="_blank">SwipeRefreshLayout</a> layout to simply refresh the RSS feed</li>
-    <li>A collapsing toolbar layout when you're consulting an article from the feed: expanded toolbar with header image is fading to simple toolbar</li>
+    <li>A collapsing toolbar layout when you're reading an article from the feed: expanded toolbar with header image is fading to simple toolbar</li>
     <li>Settings activity lets you customize the article you're currently reading, by excluding unnecessary content (like tweets), to leverage written content instead</li>
     <li>ArticleActivity is using a <a href="https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html">RecyclerView</a> where items are layout vertically. It has a complex <a href="https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Adapter.html">RecyclerView.Adapter</a> which holds at least more than one <a href="https://developer.android.com/reference/android/support/v7/widget/RecyclerView.ViewHolder.html">ViewHolder</a></li>
 	<li>For Android 7.1 (API 25): <a href="https://developer.android.com/guide/topics/ui/shortcuts.html#dynamic">dynamic App Shortcuts</a> to quickly open the category that you're reading the most!</li>
@@ -37,8 +37,7 @@
 
 <h3 id="comments">Comments</h3>
 
-<p>Comments are loaded in the same view (ArticleActivity) and new comments are fetched using a custom <a href="https://developer.android.com/reference/android/support/design/widget/FloatingActionButton.html">FloatingActionButton</a>: the <a href="https://github.com/ckurtm/FabButton">FabButton</a> which holds a circular progress bar when button is triggered</p>
-<p>Every comment page can be fetched by clicking this button until all comments are displayed: the URL is computed internally and the user has nothing to do</p>
+<p>Comments are loaded automatically in the same view when one has reached the bottom of the article.</p>
 
 <h3 id="comments">Dynamic App Shortcuts</h3>
 
@@ -62,10 +61,9 @@
 
 <h2 id="requirements">Requirements</h2>
 
-<ol>
-  <li>A smartphone at least on Android KitKat (4.4)</li>
-  <li>And with root capabilities</li>
-</ol>
+<ul>
+  <li>A smartphone at least on Android Ice Cream Sandwich (4.0.3)</li>
+</ul>
 
 <h2 id="videos">Videos</h2>
 <p>
@@ -81,7 +79,7 @@
 
 <p><img src="/LeMondeRssReader/screenshots/tweet.jpg" alt="Tweet" /></p>
 
-<p><img src="/LeMondeRssReader/screenshots/fab_and_chart.png" alt="FAB and chart" /></p>
+<p><img src="/LeMondeRssReader/screenshots/restricted_article.jpg" alt="Restricted article" /></p>
 
 <p><img src="/LeMondeRssReader/screenshots/favorites.jpg" alt="Favorites" /></p>
 
@@ -94,7 +92,7 @@
 <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a>
 </p>
 <p>
-Or you can get the app directly on GitHub <a href="https://github.com/MBach/LeMondeRssReader/releases/download/v1.11/LeMondeRssReader-1.11.apk">v1.11</a>
+Or you can get the app directly on GitHub <a href="https://github.com/MBach/LeMondeRssReader/releases/download/v1.12/LeMondeRssReader-1.12.apk">v1.12</a>
 </p>
 
 <h2 id="support-or-contact">Support or Contact</h2>

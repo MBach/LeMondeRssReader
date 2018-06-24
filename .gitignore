@@ -6,4 +6,4 @@
 /build
 /captures
 .externalNativeBuild
-/app/release/*.apk
+/app/release

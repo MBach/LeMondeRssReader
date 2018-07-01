@@ -63,7 +63,7 @@ public class RssService extends IntentService {
         @Override
         public void onResponse(String response) {
             try {
-                ArrayList<RssItem> rssItems = parser.parse(new String(response.getBytes("ISO-8859-1")));
+                ArrayList<RssItem> rssItems = parser.parse(new String(response.getBytes("UTF-8")));
                 Intent result = new Intent();
                 result.putParcelableArrayListExtra(PARCELABLE_EXTRAS, rssItems);
                 reply.send(RssService.this, FETCH_SUCCESS, result);

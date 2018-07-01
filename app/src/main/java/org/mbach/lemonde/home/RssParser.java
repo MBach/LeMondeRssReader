@@ -7,8 +7,9 @@ import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,7 +44,8 @@ class RssParser {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(new StringReader(stream));
+            InputStream s = new ByteArrayInputStream(stream.getBytes("ISO-8859-1"));
+            parser.setInput(s, "UTF-8");
             parser.nextTag();
             parser.require(XmlPullParser.START_TAG, null, TAG_RSS);
             items = readFeed(parser);

@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Favorites
         if (category == null) {
             drawerLayout.closeDrawers();
-            startActivityForResult(new Intent(getApplicationContext(), FavoritesActivity.class), GET_LATEST_RSS_FEED);
+            startActivity(new Intent(getApplicationContext(), FavoritesActivity.class));
             return false;
         } else {
             ProgressBar progressBar = findViewById(R.id.scanProgressBar);

@@ -497,7 +497,7 @@ public class ArticleActivity extends AppCompatActivity {
                             author.setPadding(0, 0, 0, 12);
                             content.setPadding(0, 0, 0, 16);
                         }
-                        Integer commentId = Integer.valueOf(comment.attr("data-reaction_id"));
+                        int commentId = Integer.valueOf(comment.attr("data-reaction_id"));
                         items.add(new Model(author, commentId));
                         items.add(new Model(content, commentId));
                     }

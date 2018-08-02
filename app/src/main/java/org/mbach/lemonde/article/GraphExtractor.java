@@ -82,16 +82,14 @@ class GraphExtractor {
 
         String beginExpr = "new Highcharts.Chart({";
         int beginIndex = script.indexOf(beginExpr) + beginExpr.length() - 1;
-        if (beginIndex != -1) {
-            int endIndex = script.indexOf("});", beginIndex);
-            if (endIndex != -1) {
-                try {
-                    String rawChart = script.substring(beginIndex, endIndex + 1) + "}";
-                    Log.d(TAG, rawChart);
-                    data = new JSONObject(rawChart);
-                } catch (JSONException e) {
-                    //Log.e(TAG, e.getMessage());
-                }
+        int endIndex = script.indexOf("});", beginIndex);
+        if (endIndex != -1) {
+            try {
+                String rawChart = script.substring(beginIndex, endIndex + 1) + "}";
+                Log.d(TAG, rawChart);
+                data = new JSONObject(rawChart);
+            } catch (JSONException e) {
+                //Log.e(TAG, e.getMessage());
             }
         }
     }

@@ -160,7 +160,7 @@ public class ArticleActivity extends AppCompatActivity {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
+                if (recyclerView.getLayoutManager() != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
                     if (Constants.BASE_URL2.equals(commentsURI)) {
                         autoLoader.setVisibility(View.INVISIBLE);
                         Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
@@ -197,7 +197,9 @@ public class ArticleActivity extends AppCompatActivity {
         // If we have stored the position, it means we also have stored state and items from the recycler view
         if (lastFirstVisiblePosition >= 0) {
             Parcelable parcelable = getIntent().getParcelableExtra(STATE_RECYCLER_VIEW);
-            recyclerView.getLayoutManager().onRestoreInstanceState(parcelable);
+            if (recyclerView.getLayoutManager() != null) {
+                recyclerView.getLayoutManager().onRestoreInstanceState(parcelable);
+            }
             ArrayList<Model> items = getIntent().getParcelableArrayListExtra(STATE_ADAPTER_ITEM);
             articleAdapter.addItems(items);
             recyclerView.getLayoutManager().scrollToPosition(lastFirstVisiblePosition);
@@ -219,11 +221,13 @@ public class ArticleActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         // Save position, state, and items before rotating the device
-        int lastFirstVisiblePosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
-        Parcelable parcelable = recyclerView.getLayoutManager().onSaveInstanceState();
-        getIntent().putExtra(STATE_RECYCLER_VIEW, parcelable);
-        getIntent().putExtra(STATE_RECYCLER_VIEW_POS, lastFirstVisiblePosition);
-        getIntent().putParcelableArrayListExtra(STATE_ADAPTER_ITEM, articleAdapter.getItems());
+        if (recyclerView.getLayoutManager() != null) {
+            int lastFirstVisiblePosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+            Parcelable parcelable = recyclerView.getLayoutManager().onSaveInstanceState();
+            getIntent().putExtra(STATE_RECYCLER_VIEW, parcelable);
+            getIntent().putExtra(STATE_RECYCLER_VIEW_POS, lastFirstVisiblePosition);
+            getIntent().putParcelableArrayListExtra(STATE_ADAPTER_ITEM, articleAdapter.getItems());
+        }
     }
 
     @Override

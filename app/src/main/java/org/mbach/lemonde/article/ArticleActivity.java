@@ -313,6 +313,16 @@ public class ArticleActivity extends AppCompatActivity {
         startActivity(new Intent(Intent.ACTION_VIEW, uri));
     }
 
+    public void openSource(@NonNull View view) {
+        Button button = view.findViewById(R.id.graphSource);
+        String link = button.getContentDescription().toString();
+        Uri uri;
+        if (!link.isEmpty()) {
+            uri = Uri.parse(link);
+            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+        }
+    }
+
     public void goToAccount(@SuppressWarnings("unused") View view) {
         startActivity(new Intent(this, LoginActivity.class));
     }
@@ -780,13 +790,26 @@ public class ArticleActivity extends AppCompatActivity {
                     boolean hasScript = !element.select("script").isEmpty();
                     if (hasGraph && hasScript) {
                         GraphExtractor graphExtractor = new GraphExtractor(this, element.select("script").html());
-                        Elements hasLegend = element.select("h2.ca-heading-sub.titre");
-                        if (!hasLegend.isEmpty()) {
-                            graphExtractor.setLegend(hasLegend.first().html());
-                        }
-                        Chart graph = graphExtractor.generate();
+                        Chart graph = graphExtractor.generateChart();
+                        GraphModel graphModel = new GraphModel(GraphExtractor.getModelType(graph), graph);
                         if (graph != null) {
-                            p.add(new Model(GraphExtractor.getModelType(graph), graph));
+                            Elements hasGraphTitle = element.select("h2.ca-heading-sub.titre");
+                            if (atLeastOneChild(hasGraphTitle)) {
+                               graphModel.setTitle(hasGraphTitle.first().text());
+                            }
+                            Elements hasGraphSubtitle = element.select("div.subtitle");
+                            if (atLeastOneChild(hasGraphSubtitle)) {
+                                graphModel.setSubtitle(hasGraphSubtitle.first().text());
+                            }
+                            Elements hasGraphSource = element.select("div.credits a");
+                            if (atLeastOneChild(hasGraphSource)) {
+                                /// TODO multiple sources
+                                graphModel.setSource(hasGraphSource.first().attr("href"));
+                                /*for (Element source : hasGraphSource) {
+                                    graphModel.setSource(source.attr("href"));
+                                }*/
+                            }
+                            p.add(graphModel);
                         }
                     }
                     continue;

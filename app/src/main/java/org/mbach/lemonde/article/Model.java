@@ -20,11 +20,8 @@ class Model implements Parcelable {
     static final int TWEET_TYPE = 2;
     static final int FACTS_TYPE = 3;
     static final int COMMENT_TYPE = 4;
-    static final int GRAPH_TYPE_BARS = 5;
-    static final int GRAPH_TYPE_COLUMNS = 6;
-    static final int GRAPH_TYPE_LINE = 7;
-    static final int BUTTON_TYPE = 8;
-    static final int VIDEO_TYPE = 9;
+    static final int BUTTON_TYPE = 5;
+    static final int VIDEO_TYPE = 6;
 
     private final int id;
     private final int type;

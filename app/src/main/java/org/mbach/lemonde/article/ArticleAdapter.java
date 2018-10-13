@@ -17,10 +17,11 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.squareup.picasso.Picasso;
 
 import org.mbach.lemonde.R;
@@ -56,7 +57,6 @@ class ArticleAdapter extends RecyclerView.Adapter {
                     previousComments.add(model);
                 }
             }
-
             List<Model> next = new ArrayList<>(items);
             if (!previousComments.isEmpty()) {
                 next.removeAll(previousComments);
@@ -103,17 +103,14 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 return new ViewHolderTweet(LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent, false));
             case Model.FACTS_TYPE:
                 return new ViewHolderFact(LayoutInflater.from(parent.getContext()).inflate(R.layout.fact_card, parent, false));
-            case Model.GRAPH_TYPE_BARS:
-                return new ViewHolderHorizontalBarChart(new HorizontalBarChart(parent.getContext()));
-            case Model.GRAPH_TYPE_COLUMNS:
-                return new ViewHolderBarChart(new BarChart(parent.getContext()));
-            case Model.GRAPH_TYPE_LINE:
-                return new ViewHolderLineChart(new LineChart(parent.getContext()));
             case Model.BUTTON_TYPE:
                 return new ViewHolderRestrictedContent(LayoutInflater.from(parent.getContext()).inflate(R.layout.connect_card, parent, false));
             case Model.VIDEO_TYPE:
-                //return new ViewHolderVideo(new VideoView(parent.getContext()));
                 return new ViewHolderVideo(LayoutInflater.from(parent.getContext()).inflate(R.layout.video_view, parent, false));
+            case GraphModel.GRAPH_TYPE_BARS:
+            case GraphModel.GRAPH_TYPE_COLUMNS:
+            case GraphModel.GRAPH_TYPE_LINE:
+                return new ViewHolderChart(LayoutInflater.from(parent.getContext()).inflate(R.layout.graph_card, parent, false));
         }
     }
 
@@ -124,90 +121,91 @@ class ArticleAdapter extends RecyclerView.Adapter {
         if (model == null) {
             return;
         }
-        RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        RecyclerView.LayoutParams lp2 = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        int defaultTextColor = ThemeUtils.getStyleableColor(holder.itemView.getContext(), R.styleable.CustomTheme_defaultText);
-
-        switch (model.getType()) {
-            case Model.TEXT_TYPE:
-            case Model.COMMENT_TYPE:
-                TextView textView = (TextView) model.getTheContent();
-                ViewHolderText vh = (ViewHolderText) holder;
-                vh.text.setText(textView.getText());
-                vh.text.setTypeface(textView.getTypeface());
-                vh.text.setTextColor(defaultTextColor);
-                vh.text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
-                if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                    vh.text.setBackground(textView.getBackground());
-                }
-                // Tag doesn't expand horizontally to the max
-                if (textView.getLayoutParams() == null) {
-                    vh.text.setLayoutParams(lp);
-                } else {
-                    vh.text.setLayoutParams(textView.getLayoutParams());
-                }
-                vh.text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize());
-                break;
-            case Model.IMAGE_TYPE:
-                String imageURI = (String) model.getTheContent();
-                ((ViewHolderImage) holder).image.setLayoutParams(lp);
-                Picasso.with(((ViewHolderImage) holder).image.getContext()).load(imageURI).into(((ViewHolderImage) holder).image);
-                break;
-            case Model.TWEET_TYPE:
-                CardView cardView = (CardView) model.getTheContent();
-                TextView tweet = (TextView) cardView.getChildAt(0);
-                Button link = (Button) cardView.getChildAt(1);
-                if (tweet.getText().length() == 0) {
-                    View v = ((ViewHolderTweet) holder).view;
-                    v.setPadding(v.getPaddingLeft(), v.getPaddingBottom(), v.getPaddingRight(), v.getPaddingBottom());
-                    ((ViewHolderTweet) holder).getTweet().setVisibility(View.GONE);
-                } else {
-                    ((ViewHolderTweet) holder).getTweet().setText(tweet.getText());
-                }
-                ((ViewHolderTweet) holder).getLink().setContentDescription(link.getContentDescription());
-                break;
-            case Model.FACTS_TYPE:
-                CardView factsView = (CardView) model.getTheContent();
-                TextView fact = (TextView) factsView.getChildAt(0);
-                ((ViewHolderFact) holder).getFact().setText(fact.getText());
-                break;
-            case Model.GRAPH_TYPE_BARS:
-                HorizontalBarChart chart1 = (HorizontalBarChart) model.getTheContent();
-                ViewHolderHorizontalBarChart vhhbc = (ViewHolderHorizontalBarChart) holder;
-                vhhbc.chart.setData(chart1.getData());
-                vhhbc.chart.setLayoutParams(lp2);
-                vhhbc.chart.setDrawGridBackground(false);
-                BarData data = vhhbc.chart.getData();
-                data.setDrawValues(false);
-                vhhbc.chart.getLegend().setTextColor(defaultTextColor);
-                break;
-            case Model.GRAPH_TYPE_COLUMNS:
-                BarChart bc = (BarChart) model.getTheContent();
-                ViewHolderBarChart vhbc = (ViewHolderBarChart) holder;
-                vhbc.chart.setData(bc.getData());
-                vhbc.chart.setLayoutParams(lp2);
-                vhbc.chart.setDrawGridBackground(false);
-                BarData data2 = vhbc.chart.getData();
-                data2.setDrawValues(false);
-                vhbc.chart.getLegend().setTextColor(defaultTextColor);
-                break;
-            case Model.GRAPH_TYPE_LINE:
-                LineChart lineChart = (LineChart) model.getTheContent();
-                ViewHolderLineChart vhl = (ViewHolderLineChart) holder;
-                vhl.chart.setData(lineChart.getData());
-                vhl.chart.setLayoutParams(lp2);
-                LineData data3 = vhl.chart.getData();
-                data3.setDrawValues(false);
-                break;
-            case Model.VIDEO_TYPE:
-                Uri videoURI = (Uri) model.getTheContent();
-                ViewHolderVideo viewHolderVideo = (ViewHolderVideo) holder;
-                viewHolderVideo.getVideoView().setVideoURI(videoURI);
-                viewHolderVideo.getVideoView().setTag(videoURI);
-                viewHolderVideo.getController().show();
-                viewHolderVideo.getVideoView().start();
-                Log.d(TAG, "pos = " + viewHolderVideo.getVideoView().getCurrentPosition());
-                break;
+        if (model instanceof GraphModel) {
+            GraphModel graphModel = (GraphModel) model;
+            ViewHolderChart chart = (ViewHolderChart) holder;
+            chart.getTitle().setText(graphModel.getTitle());
+            chart.getSubtitle().setText(graphModel.getSubtitle());
+            chart.getSource().setContentDescription(graphModel.getSource());
+            switch (graphModel.getType()) {
+                case GraphModel.GRAPH_TYPE_BARS:
+                    HorizontalBarChart horizontalBarChart = (HorizontalBarChart) graphModel.getChart();
+                    chart.getHorizontalBarChart().setVisibility(View.VISIBLE);
+                    chart.getHorizontalBarChart().setData(horizontalBarChart.getData());
+                    chart.getHorizontalBarChart().getData().setHighlightEnabled(false);
+                    chart.getHorizontalBarChart().getXAxis().setValueFormatter(horizontalBarChart.getXAxis().getValueFormatter());
+                    break;
+                case GraphModel.GRAPH_TYPE_COLUMNS:
+                    BarChart barChart = (BarChart) graphModel.getChart();
+                    chart.getBarChart().setVisibility(View.VISIBLE);
+                    chart.getBarChart().setData(barChart.getData());
+                    chart.getBarChart().getData().setHighlightEnabled(false);
+                    chart.getBarChart().getXAxis().setValueFormatter(barChart.getXAxis().getValueFormatter());
+                    break;
+                case GraphModel.GRAPH_TYPE_LINE:
+                    LineChart lineChart = (LineChart) graphModel.getChart();
+                    chart.getLineChart().setVisibility(View.VISIBLE);
+                    chart.getLineChart().setData(lineChart.getData());
+                    chart.getLineChart().getData().setHighlightEnabled(false);
+                    chart.getLineChart().getXAxis().setValueFormatter(lineChart.getXAxis().getValueFormatter());
+                    break;
+            }
+        } else {
+            RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            int defaultTextColor = ThemeUtils.getStyleableColor(holder.itemView.getContext(), R.styleable.CustomTheme_defaultText);
+            switch (model.getType()) {
+                case Model.TEXT_TYPE:
+                case Model.COMMENT_TYPE:
+                    TextView textView = (TextView) model.getTheContent();
+                    ViewHolderText vh = (ViewHolderText) holder;
+                    vh.text.setText(textView.getText());
+                    vh.text.setTypeface(textView.getTypeface());
+                    vh.text.setTextColor(defaultTextColor);
+                    vh.text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
+                    if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                        vh.text.setBackground(textView.getBackground());
+                    }
+                    // Tag doesn't expand horizontally to the max
+                    if (textView.getLayoutParams() == null) {
+                        vh.text.setLayoutParams(lp);
+                    } else {
+                        vh.text.setLayoutParams(textView.getLayoutParams());
+                    }
+                    vh.text.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize());
+                    break;
+                case Model.IMAGE_TYPE:
+                    String imageURI = (String) model.getTheContent();
+                    ((ViewHolderImage) holder).image.setLayoutParams(lp);
+                    Picasso.with(((ViewHolderImage) holder).image.getContext()).load(imageURI).into(((ViewHolderImage) holder).image);
+                    break;
+                case Model.TWEET_TYPE:
+                    CardView cardView = (CardView) model.getTheContent();
+                    TextView tweet = (TextView) cardView.getChildAt(0);
+                    Button link = (Button) cardView.getChildAt(1);
+                    if (tweet.getText().length() == 0) {
+                        View v = ((ViewHolderTweet) holder).view;
+                        v.setPadding(v.getPaddingLeft(), v.getPaddingBottom(), v.getPaddingRight(), v.getPaddingBottom());
+                        ((ViewHolderTweet) holder).getTweet().setVisibility(View.GONE);
+                    } else {
+                        ((ViewHolderTweet) holder).getTweet().setText(tweet.getText());
+                    }
+                    ((ViewHolderTweet) holder).getLink().setContentDescription(link.getContentDescription());
+                    break;
+                case Model.FACTS_TYPE:
+                    CardView factsView = (CardView) model.getTheContent();
+                    TextView fact = (TextView) factsView.getChildAt(0);
+                    ((ViewHolderFact) holder).getFact().setText(fact.getText());
+                    break;
+                case Model.VIDEO_TYPE:
+                    Uri videoURI = (Uri) model.getTheContent();
+                    ViewHolderVideo viewHolderVideo = (ViewHolderVideo) holder;
+                    viewHolderVideo.getVideoView().setVideoURI(videoURI);
+                    viewHolderVideo.getVideoView().setTag(videoURI);
+                    viewHolderVideo.getController().show();
+                    viewHolderVideo.getVideoView().start();
+                    Log.d(TAG, "pos = " + viewHolderVideo.getVideoView().getCurrentPosition());
+                    break;
+            }
         }
     }
 
@@ -284,44 +282,71 @@ class ArticleAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    static class ViewHolderBarChart extends RecyclerView.ViewHolder {
-
+    static class ViewHolderChart extends RecyclerView.ViewHolder {
         @NonNull
-        private final BarChart chart;
+        private final View view;
 
-        ViewHolderBarChart(@NonNull BarChart chart) {
-            super(chart);
-            this.chart = chart;
-            this.chart.setDrawGridBackground(false);
-            Log.d("ViewHolderChart", "class is : " + chart.toString());
+        ViewHolderChart(@NonNull View view) {
+            super(view);
+            this.view = view;
+            this.view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
+            HorizontalBarChart horizontalBarChart = view.findViewById(R.id.horizontalBarChartView);
+            horizontalBarChart.getLegend().setTextColor(ThemeUtils.getStyleableColor(horizontalBarChart.getContext(), R.styleable.CustomTheme_defaultText));
+            horizontalBarChart.getDescription().setEnabled(false);
+
+            BarChart barChart = view.findViewById(R.id.barChartView);
+            barChart.getLegend().setTextColor(ThemeUtils.getStyleableColor(barChart.getContext(), R.styleable.CustomTheme_defaultText));
+            barChart.getDescription().setEnabled(false);
+
+            LineChart lineChart = view.findViewById(R.id.lineChartView);
+            lineChart.getLegend().setTextColor(ThemeUtils.getStyleableColor(lineChart.getContext(), R.styleable.CustomTheme_defaultText));
+            lineChart.getDescription().setEnabled(false);
         }
-    }
 
-    /**
-     *
-     */
-    static class ViewHolderHorizontalBarChart extends RecyclerView.ViewHolder {
-
-        @NonNull
-        private final HorizontalBarChart chart;
-
-        ViewHolderHorizontalBarChart(@NonNull HorizontalBarChart chart) {
-            super(chart);
-            this.chart = chart;
+        /**
+         *
+         * @param chart the chart
+         * @return styled chart
+         */
+        private BarLineChartBase styledChart(@NonNull BarLineChartBase chart) {
+            XAxis x = chart.getXAxis();
+            x.setTextColor(ThemeUtils.getStyleableColor(chart.getContext(), R.styleable.CustomTheme_defaultText));
+            x.setDrawGridLines(false);
+            x.setGranularity(1f);
+            x.setGranularityEnabled(true);
+            YAxis yLeft = chart.getAxisLeft();
+            yLeft.setEnabled(false);
+            YAxis yRight = chart.getAxisRight();
+            yRight.setTextColor(ThemeUtils.getStyleableColor(chart.getContext(), R.styleable.CustomTheme_defaultText));
+            yRight.setGranularity(1f);
+            return chart;
         }
-    }
 
-    /**
-     *
-     */
-    static class ViewHolderLineChart extends RecyclerView.ViewHolder {
+        TextView getTitle() {
+            return view.findViewById(R.id.graphTitle);
+        }
 
-        @NonNull
-        private final LineChart chart;
+        TextView getSubtitle() {
+            return view.findViewById(R.id.graphSubtitle);
+        }
 
-        ViewHolderLineChart(@NonNull LineChart chart) {
-            super(chart);
-            this.chart = chart;
+        HorizontalBarChart getHorizontalBarChart() {
+            HorizontalBarChart horizontalBarChart = view.findViewById(R.id.horizontalBarChartView);
+            return (HorizontalBarChart) styledChart(horizontalBarChart);
+        }
+
+        BarChart getBarChart() {
+            BarChart barChart = view.findViewById(R.id.barChartView);
+            return (BarChart) styledChart(barChart);
+        }
+
+        LineChart getLineChart() {
+            LineChart lineChart = view.findViewById(R.id.lineChartView);
+            return (LineChart) styledChart(lineChart);
+        }
+
+        Button getSource() {
+            return view.findViewById(R.id.graphSource);
         }
     }
 
@@ -343,7 +368,6 @@ class ArticleAdapter extends RecyclerView.Adapter {
      *
      */
     static class ViewHolderVideo extends RecyclerView.ViewHolder {
-
         @NonNull
         private final View view;
 

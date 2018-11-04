@@ -11,8 +11,6 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
  */
 class AxisValueFormatter implements IAxisValueFormatter {
 
-    private static final String TAG = "XAxisVF";
-
     private final String[] labels;
 
     AxisValueFormatter(final String[] values) {

@@ -6,7 +6,7 @@
     android:orientation="horizontal"
     android:foreground="?attr/selectableItemBackground">
 
-    <android.support.v7.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/rss_image"
         android:layout_width="125dp"
         android:layout_height="100dp"

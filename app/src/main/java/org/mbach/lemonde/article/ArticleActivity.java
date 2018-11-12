@@ -77,9 +77,11 @@ public class ArticleActivity extends AppCompatActivity {
     private static final String STATE_RECYCLER_VIEW_POS = "STATE_RECYCLER_VIEW_POS";
     private static final String STATE_RECYCLER_VIEW = "STATE_RECYCLER_VIEW";
     private static final String STATE_ADAPTER_ITEM = "STATE_ADAPTER_ITEM";
-    private static final String ATTR_HEADLINE = "Headline";
-    private static final String ATTR_DESCRIPTION = "description";
-    private static final String ATTR_AUTHOR = "author";
+    private static final String ATTR_HEADLINE = "h1.article__title";
+    private static final String ATTR_DESCRIPTION = "p.article__desc";
+    private static final String ATTR_READ_TIME = "p.meta__reading-time";
+    private static final String ATTR_AUTHOR = "span.meta__author";
+    private static final String ATTR_DATE = "span.meta__date";
     private static final String TAG_TRUE = "vrai";
     private static final String TAG_FAKE = "faux";
     private static final String TAG_MOSTLY_TRUE = "plutot_vrai";
@@ -359,16 +361,18 @@ public class ArticleActivity extends AppCompatActivity {
 
             // Article is from a hosted blog
             ArrayList<Model> items;
-            Element content = doc.getElementById("content");
-            if (content != null) {
-                items = extractBlogArticle(content);
-                setTagInHeader(R.string.blog_article, R.color.accent_complementary, Color.WHITE);
+            Elements content = doc.select("section.zone--article");
+            if (content == null) {
+                /// FIXME
+                items = new ArrayList<>();
+                //items = extractBlogArticle(content.first());
+                //setTagInHeader(R.string.blog_article, R.color.accent_complementary, Color.WHITE);
             } else {
                 Elements category = doc.select("div.tt_rubrique_ombrelle");
                 if (atLeastOneChild(category)) {
                     setTitle(category.text());
                 }
-                Elements articles = doc.getElementsByTag("article");
+                Elements articles = doc.getElementsByTag("section");
                 Element largeFormat = doc.getElementById("hors_format");
                 if (largeFormat != null) {
                     items = new ArrayList<>();
@@ -585,25 +589,32 @@ public class ArticleActivity extends AppCompatActivity {
         TextView authors = new TextView(this);
         TextView dates = new TextView(this);
         TextView description = new TextView(this);
+        TextView readTime = new TextView(this);
 
         headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
         authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
         dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
         description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+        ArrayList<Model> views = new ArrayList<>();
 
         Element article = articles.first();
-        authors.setText(extractAttr(article, ATTR_AUTHOR));
-        dates.setText(extractDates(article));
-        shareSubject = extractAttr(article, ATTR_HEADLINE);
-        shareText = extractAttr(article, ATTR_DESCRIPTION);
-        description.setText(shareText);
-        headLine.setText(shareSubject);
-
-        ArrayList<Model> views = new ArrayList<>();
-        views.add(new Model(headLine));
-        views.add(new Model(authors));
-        views.add(new Model(dates));
-        views.add(new Model(description));
+        Elements headers = article.getElementsByTag("header");
+        if (atLeastOneChild(headers)) {
+            Element header = headers.first();
+            Log.d(TAG, header.html());
+            authors.setText(extractAttr(header, ATTR_AUTHOR));
+            dates.setText(extractAttr(article, ATTR_DATE));
+            shareSubject = extractAttr(article, ATTR_HEADLINE);
+            shareText = extractAttr(article, ATTR_DESCRIPTION);
+            readTime.setText(extractAttr(header, ATTR_READ_TIME));
+            description.setText(shareText);
+            headLine.setText(shareSubject);
+            views.add(new Model(headLine));
+            views.add(new Model(authors));
+            views.add(new Model(dates));
+            views.add(new Model(description));
+            views.add(new Model(readTime));
+        }
         views.addAll(extractParagraphs(article));
         return views;
     }
@@ -737,7 +748,8 @@ public class ArticleActivity extends AppCompatActivity {
 
     @NonNull
     private String extractAttr(@NonNull Element article, String attribute) {
-        Elements elements = article.select("[itemprop='" + attribute + "']");
+        Elements elements = article.select(attribute);
+        Log.d(TAG, elements.html());
         if (elements.isEmpty()) {
             return "";
         } else {

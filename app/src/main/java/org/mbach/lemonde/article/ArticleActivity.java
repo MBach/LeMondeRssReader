@@ -601,11 +601,10 @@ public class ArticleActivity extends AppCompatActivity {
         Elements headers = article.getElementsByTag("header");
         if (atLeastOneChild(headers)) {
             Element header = headers.first();
-            Log.d(TAG, header.html());
             authors.setText(extractAttr(header, ATTR_AUTHOR));
-            dates.setText(extractAttr(article, ATTR_DATE));
-            shareSubject = extractAttr(article, ATTR_HEADLINE);
-            shareText = extractAttr(article, ATTR_DESCRIPTION);
+            dates.setText(extractAttr(header, ATTR_DATE));
+            shareSubject = extractAttr(header, ATTR_HEADLINE);
+            shareText = extractAttr(header, ATTR_DESCRIPTION);
             readTime.setText(extractAttr(header, ATTR_READ_TIME));
             description.setText(shareText);
             headLine.setText(shareSubject);
@@ -615,7 +614,9 @@ public class ArticleActivity extends AppCompatActivity {
             views.add(new Model(description));
             views.add(new Model(readTime));
         }
-        views.addAll(extractParagraphs(article));
+        Elements section = articles.select("section");
+        //Log.d(TAG, section.html());
+        views.addAll(extractParagraphs(section.first()));
         return views;
     }
 
@@ -749,7 +750,6 @@ public class ArticleActivity extends AppCompatActivity {
     @NonNull
     private String extractAttr(@NonNull Element article, String attribute) {
         Elements elements = article.select(attribute);
-        Log.d(TAG, elements.html());
         if (elements.isEmpty()) {
             return "";
         } else {
@@ -775,14 +775,18 @@ public class ArticleActivity extends AppCompatActivity {
 
     @NonNull
     private List<Model> extractParagraphs(@NonNull Element article) {
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
 
         List<Model> p = new ArrayList<>();
-        Elements articleBody = article.select("[itemprop='articleBody']");
+        Elements articleBody = article.select("section.article__content");
+        Log.d(TAG, articleBody.html());
+
         if (articleBody.isEmpty()) {
             return p;
         }
+
         Element body = articleBody.first();
         Elements elements = body.children();
         for (int i = 0; i < elements.size(); i++) {

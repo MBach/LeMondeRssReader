@@ -602,16 +602,21 @@ public class ArticleActivity extends AppCompatActivity {
             }
         }
 
+
         ArrayList<Model> models = new ArrayList<>();
         if (data == null) {
             return models;
         }
 
         try {
-            JSONObject json = new JSONObject(data.substring(8));
+
+            int end = data.indexOf("};");
+            JSONObject json = new JSONObject(data.substring(8, end + 1));
+            Log.d(TAG, json.toString());
+
             JSONObject context = json.getJSONObject("context");
             JSONObject article = context.getJSONObject("article");
-            JSONArray parsedAuthors = article.getJSONArray("parsedAuthors");
+            JSONArray parsedAuthors = article.optJSONArray("parsedAuthors");
 
             TextView headLine = new TextView(this);
             TextView authors = new TextView(this);
@@ -626,21 +631,26 @@ public class ArticleActivity extends AppCompatActivity {
             readTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
 
             fromHtml(headLine, article.getString("title"));
-            fromHtml(description, article.getString("chapo"));
+            fromHtml(description, article.optString("chapo"));
             List<String> a = new ArrayList<>();
-            for (int i = 0; i < parsedAuthors.length(); i++) {
-                JSONObject author = (JSONObject) parsedAuthors.get(i);
-                a.add(author.getString("name"));
+            if (parsedAuthors != null) {
+                for (int i = 0; i < parsedAuthors.length(); i++) {
+                    JSONObject author = (JSONObject) parsedAuthors.get(i);
+                    a.add(author.getString("name"));
+                }
             }
             authors.setText(String.format("Par %1$s", TextUtils.join(",", a)));
-            JSONObject createdAt = article.getJSONObject("createdAt");
+            JSONObject createdAt = article.optJSONObject("createdAt");
             JSONObject updatedAt = article.optJSONObject("updatedAt");
-            if (updatedAt == null) {
-                dates.setText(String.format("Publié le %1$s", createdAt.getString("date")));
-            } else {
-                dates.setText(String.format("Publié le %1$s, mis à jour le %2$s", createdAt.getString("date"), updatedAt.getString("date")));
+            if (createdAt != null) {
+                if (updatedAt == null) {
+                    dates.setText(String.format("Publié le %1$s", createdAt.getString("date")));
+                } else {
+                    dates.setText(String.format("Publié le %1$s, mis à jour le %2$s", createdAt.getString("date"), updatedAt.getString("date")));
+                }
             }
-            readTime.setText(String.format("Lecture %1$s min.", article.getInt("readingTime")));
+
+            readTime.setText(String.format("Lecture %1$s min.", article.optInt("readingTime", 0)));
 
             models.add(new Model(headLine));
             models.add(new Model(authors));
@@ -649,33 +659,35 @@ public class ArticleActivity extends AppCompatActivity {
             models.add(new Model(readTime));
 
             // Extract the rest
-            JSONArray parsedNodes = article.getJSONArray("parsedNodes");
-            for (int i = 0; i < parsedNodes.length(); i++) {
-                JSONObject parsedNode = (JSONObject) parsedNodes.get(i);
-                JSONObject content = parsedNode.getJSONObject("content");
-                switch (parsedNode.getString("type")) {
-                    case "text":
-                        TextView paragraph = new TextView(this);
-                        fromHtml(paragraph, content.getString("text"));
-                        if (content.getString("type").equals("heading")) {
-                            paragraph.setTypeface(Typeface.SERIF);
-                            paragraph.setPadding(0, Constants.PADDING_TOP_SUBTITLE, 0, Constants.PADDING_BOTTOM_SUBTITLE);
-                            paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-                        } else {
-                            paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-                            paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
-                        }
-                        models.add(new Model(paragraph, Model.TEXT_TYPE));
-                        break;
-                    case "media":
-                        if (content.getString("type").equals("image")) {
-                            String image = String.format("%s%s", IMAGE_PREFIX, content.getJSONObject("media").getString("cloudPath"));
-                            Log.d(TAG, image);
-                            models.add(new Model(Model.IMAGE_TYPE, image));
-                        }
-                        break;
-                }
+            JSONArray parsedNodes = article.optJSONArray("parsedNodes");
+            if (parsedNodes != null) {
+                for (int i = 0; i < parsedNodes.length(); i++) {
+                    JSONObject parsedNode = (JSONObject) parsedNodes.get(i);
+                    JSONObject content = parsedNode.getJSONObject("content");
+                    switch (parsedNode.getString("type")) {
+                        case "text":
+                            TextView paragraph = new TextView(this);
+                            fromHtml(paragraph, content.getString("text"));
+                            if (content.getString("type").equals("heading")) {
+                                paragraph.setTypeface(Typeface.SERIF);
+                                paragraph.setPadding(0, Constants.PADDING_TOP_SUBTITLE, 0, Constants.PADDING_BOTTOM_SUBTITLE);
+                                paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+                            } else {
+                                paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
+                                paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
+                            }
+                            models.add(new Model(paragraph, Model.TEXT_TYPE));
+                            break;
+                        case "media":
+                            if (content.getString("type").equals("image")) {
+                                String image = String.format("%s%s", IMAGE_PREFIX, content.getJSONObject("media").getString("cloudPath"));
+                                Log.d(TAG, image);
+                                models.add(new Model(Model.IMAGE_TYPE, image));
+                            }
+                            break;
+                    }
 
+                }
             }
         } catch (JSONException e) {
             Log.e(TAG, "error", e);
@@ -765,6 +777,9 @@ public class ArticleActivity extends AppCompatActivity {
      * @param html     raw string
      */
     static void fromHtml(@NonNull TextView textView, String html) {
+        if (html == null) {
+            return;
+        }
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             textView.setText(Html.fromHtml(html));
         } else {

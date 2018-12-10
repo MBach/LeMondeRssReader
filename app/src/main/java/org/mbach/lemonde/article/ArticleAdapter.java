@@ -162,9 +162,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                     vh.text.setTypeface(textView.getTypeface());
                     vh.text.setTextColor(defaultTextColor);
                     vh.text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
-                    if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                        vh.text.setBackground(textView.getBackground());
-                    }
+                    vh.text.setBackground(textView.getBackground());
+
                     // Tag doesn't expand horizontally to the max
                     if (textView.getLayoutParams() == null) {
                         vh.text.setLayoutParams(lp);

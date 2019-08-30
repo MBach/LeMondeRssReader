@@ -44,7 +44,7 @@ class RssParser {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            InputStream s = new ByteArrayInputStream(stream.getBytes( "ISO-8859-1"));
+            InputStream s = new ByteArrayInputStream(stream.getBytes());
             parser.setInput(s, "UTF-8");
             parser.nextTag();
             parser.require(XmlPullParser.START_TAG, null, TAG_RSS);

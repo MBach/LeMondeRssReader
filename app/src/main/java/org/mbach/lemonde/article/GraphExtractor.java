@@ -138,7 +138,7 @@ class GraphExtractor {
         BarChart barChart = new BarChart(context);
         JSONArray series = json.getJSONArray("series");
         JSONArray categories = json.getJSONObject("xAxis").getJSONArray("categories");
-        String labels[] = new String[categories.length()];
+        String[] labels = new String[categories.length()];
         for (int i = 0; i < categories.length(); i++) {
             Log.d(TAG, "labels = " + categories.getString(i));
             labels[i] = categories.getString(i);
@@ -196,7 +196,7 @@ class GraphExtractor {
         List<BarEntry> values = new ArrayList<>();
         JSONArray series = json.getJSONArray("series");
         JSONArray categories = json.getJSONObject("xAxis").getJSONArray("categories");
-        String labels[] = new String[categories.length()];
+        String[] labels = new String[categories.length()];
         for (int i = 0; i < categories.length(); i++) {
             Log.d(TAG, "labels = " + categories.getString(i));
             labels[i] = categories.getString(i);
@@ -250,7 +250,7 @@ class GraphExtractor {
         LineChart lineChart = new LineChart(context);
         JSONArray series = json.getJSONArray("series");
         JSONArray categories = json.getJSONObject("xAxis").getJSONArray("categories");
-        String labels[] = new String[categories.length()];
+        String[] labels = new String[categories.length()];
         for (int i = 0; i < categories.length(); i++) {
             Log.d(TAG, "labels = " + categories.getString(i));
             labels[i] = categories.getString(i);

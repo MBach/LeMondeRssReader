@@ -27,14 +27,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -47,12 +45,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.github.mikephil.charting.charts.Chart;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -66,9 +60,6 @@ import org.mbach.lemonde.home.MainActivity;
 import org.mbach.lemonde.home.RssItem;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * ArticleActivity class fetch an article from an URI, and parse the HTML response.
@@ -82,16 +73,6 @@ public class ArticleActivity extends AppCompatActivity {
     private static final String STATE_RECYCLER_VIEW_POS = "STATE_RECYCLER_VIEW_POS";
     private static final String STATE_RECYCLER_VIEW = "STATE_RECYCLER_VIEW";
     private static final String STATE_ADAPTER_ITEM = "STATE_ADAPTER_ITEM";
-    private static final String ATTR_HEADLINE = "h1.article__title";
-    private static final String ATTR_DESCRIPTION = "p.article__desc";
-    private static final String ATTR_READ_TIME = "p.meta__reading-time";
-    private static final String ATTR_AUTHOR = "span.meta__author";
-    private static final String ATTR_DATE = "span.meta__date";
-    private static final String TAG_TRUE = "vrai";
-    private static final String TAG_FAKE = "faux";
-    private static final String TAG_MOSTLY_TRUE = "plutot_vrai";
-    private static final String TAG_FORGOTTEN = "oubli";
-    private static final String IMAGE_PREFIX = "https://img.lemde.fr/";
 
     @Nullable
     static RequestQueue REQUEST_QUEUE = null;
@@ -367,35 +348,6 @@ public class ArticleActivity extends AppCompatActivity {
 
             // Article is from a hosted blog
             ArrayList<Model> items;
-            /// FIXME
-            /*Elements content = doc.select("section.zone--article");
-            if (content == null) {
-                items = new ArrayList<>();
-                //items = extractBlogArticle(content.first());
-                //setTagInHeader(R.string.blog_article, R.color.accent_complementary, Color.WHITE);
-            } else {
-                Elements category = doc.select("div.tt_rubrique_ombrelle");
-                if (atLeastOneChild(category)) {
-                    setTitle(category.text());
-                }
-                Elements articles = doc.getElementsByTag("section");
-                Element largeFormat = doc.getElementById("hors_format");
-                if (largeFormat != null) {
-                    items = new ArrayList<>();
-                    setTagInHeader(R.string.large_article, R.color.primary_dark, Color.WHITE);
-                } else if (articles.isEmpty()) {
-                    Elements liveContainer = doc.getElementsByClass("live2-container");
-                    if (liveContainer.isEmpty()) {
-                        // Video
-                        items = extractVideo(doc);
-                        setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);
-                    } else {
-                        LiveFeedParser liveFeedParser = new LiveFeedParser(getApplicationContext(), articleAdapter, doc);
-                        items = liveFeedParser.extractLiveFacts();
-                        liveFeedParser.fetchPosts(liveContainer.select("script").html());
-                        setTagInHeader(R.string.live_article, R.color.accent_live, Color.WHITE);
-                    }
-                } else {*/
 
             // Standard article
             items = extractDataFromHtml(doc);
@@ -522,7 +474,7 @@ public class ArticleActivity extends AppCompatActivity {
                             author.setPadding(0, 0, 0, 12);
                             content.setPadding(0, 0, 0, 16);
                         }
-                        int commentId = Integer.valueOf(comment.attr("data-reaction_id"));
+                        int commentId = Integer.parseInt(comment.attr("data-reaction_id"));
                         items.add(new Model(author, commentId));
                         items.add(new Model(content, commentId));
                     }
@@ -579,122 +531,6 @@ public class ArticleActivity extends AppCompatActivity {
      */
     public static boolean atLeastOneChild(@Nullable Elements elements) {
         return elements != null && !elements.isEmpty();
-    }
-
-    /**
-     * Extract and parse a standard article. A standard article is published on the main page and by definition,
-     * is not: from a hosted blog, nor a video, nor a special multimedia content. It has some standardized fields like
-     * one (or multiple) author(s), a date, a description, an headline, a description and a list of paragraphs.
-     * Each paragraph is a block of text (comments included) or an image or an embedded tweet.
-     *
-     * @param doc article to analyze
-     * @return a list of formatted content that can be nicely displayed in the recycler view.
-     */
-    private ArrayList<Model> extractData(@NonNull Document doc) {
-
-        Elements scripts = doc.getElementsByTag("script");
-        String data = null;
-        for (Element element : scripts) {
-            String html = element.html();
-            if (html.startsWith("var lmd=")) {
-                data = html;
-                break;
-            }
-        }
-
-
-        ArrayList<Model> models = new ArrayList<>();
-        if (data == null) {
-            return models;
-        }
-
-        try {
-
-            int end = data.indexOf("};");
-            JSONObject json = new JSONObject(data.substring(8, end + 1));
-            Log.d(TAG, json.toString());
-
-            JSONObject context = json.getJSONObject("context");
-            JSONObject article = context.getJSONObject("article");
-            JSONArray parsedAuthors = article.optJSONArray("parsedAuthors");
-
-            TextView headLine = new TextView(this);
-            TextView authors = new TextView(this);
-            TextView dates = new TextView(this);
-            TextView description = new TextView(this);
-            TextView readTime = new TextView(this);
-
-            headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
-            authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
-            dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
-            description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-            readTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-
-            fromHtml(headLine, article.getString("title"));
-            fromHtml(description, article.optString("chapo"));
-            List<String> a = new ArrayList<>();
-            if (parsedAuthors != null) {
-                for (int i = 0; i < parsedAuthors.length(); i++) {
-                    JSONObject author = (JSONObject) parsedAuthors.get(i);
-                    a.add(author.getString("name"));
-                }
-            }
-            authors.setText(String.format("Par %1$s", TextUtils.join(",", a)));
-            JSONObject createdAt = article.optJSONObject("createdAt");
-            JSONObject updatedAt = article.optJSONObject("updatedAt");
-            if (createdAt != null) {
-                if (updatedAt == null) {
-                    dates.setText(String.format("Publié le %1$s", createdAt.getString("date")));
-                } else {
-                    dates.setText(String.format("Publié le %1$s, mis à jour le %2$s", createdAt.getString("date"), updatedAt.getString("date")));
-                }
-            }
-
-            readTime.setText(String.format("Lecture %1$s min.", article.optInt("readingTime", 0)));
-
-            models.add(new Model(headLine));
-            models.add(new Model(authors));
-            models.add(new Model(dates));
-            models.add(new Model(description));
-            models.add(new Model(readTime));
-
-            // Extract the rest
-            JSONArray parsedNodes = article.optJSONArray("parsedNodes");
-            if (parsedNodes != null) {
-                for (int i = 0; i < parsedNodes.length(); i++) {
-                    JSONObject parsedNode = (JSONObject) parsedNodes.get(i);
-                    JSONObject content = parsedNode.getJSONObject("content");
-                    switch (parsedNode.getString("type")) {
-                        case "text":
-                            TextView paragraph = new TextView(this);
-                            fromHtml(paragraph, content.getString("text"));
-                            if (content.getString("type").equals("heading")) {
-                                paragraph.setTypeface(Typeface.SERIF);
-                                paragraph.setPadding(0, Constants.PADDING_TOP_SUBTITLE, 0, Constants.PADDING_BOTTOM_SUBTITLE);
-                                paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-                            } else {
-                                paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-                                paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
-                            }
-                            models.add(new Model(paragraph, Model.TEXT_TYPE));
-                            break;
-                        case "media":
-                            if (content.getString("type").equals("image")) {
-                                String image = String.format("%s%s", IMAGE_PREFIX, content.getJSONObject("media").getString("cloudPath"));
-                                Log.d(TAG, image);
-                                models.add(new Model(Model.IMAGE_TYPE, image));
-                            }
-                            break;
-                    }
-
-                }
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, "error", e);
-        }
-
-        //doc.select("");
-        return models;
     }
 
     /**
@@ -791,79 +627,6 @@ public class ArticleActivity extends AppCompatActivity {
     }
 
     /**
-     * This method is not functionnal at this moment.
-     *
-     * @param doc the document to analyze
-     * @return a list of formatted content that can be nicely displayed in the recycler view.
-     */
-    @NonNull
-    private ArrayList<Model> extractVideo(@NonNull Document doc) {
-        Elements elements = doc.select("section.video");
-        if (elements.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        TextView headLine = new TextView(this);
-        TextView authors = new TextView(this);
-        TextView dates = new TextView(this);
-        TextView content = new TextView(this);
-
-        headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
-        authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
-        dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
-        content.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
-
-        Element video = elements.first();
-        headLine.setText(extractAttr(video, ATTR_HEADLINE));
-        authors.setText(extractAttr(video, ATTR_AUTHOR));
-        dates.setText(extractDates(video));
-        Elements els = video.select("div.grid_12.alpha");
-        if (atLeastOneChild(els)) {
-            els.select("h2").remove();
-            els.select("span.txt_gris_soutenu").remove();
-            els.select("#recos_videos_outbrain").remove();
-            fromHtml(content, els.html());
-        }
-        ArrayList<Model> views = new ArrayList<>();
-        views.add(new Model(headLine));
-        views.add(new Model(authors));
-        views.add(new Model(dates));
-        views.add(new Model(content));
-        Elements scripts = doc.getElementsByTag("script");
-        for (Element script : scripts) {
-            if (script.html().contains("lmd/module/video/player")) {
-                Pattern p = Pattern.compile("url: '//(.+)',", Pattern.DOTALL);
-                Matcher m = p.matcher(script.html());
-                if (m.find()) {
-                    String iFrame = m.group(1);
-                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, "https://" + iFrame, videoFrameReceived, errorResponse));
-                }
-            }
-        }
-        return views;
-    }
-
-    /**
-     * Extract Video URI.
-     */
-    private final Response.Listener<String> videoFrameReceived = new Response.Listener<String>() {
-        @Override
-        public void onResponse(@NonNull String response) {
-            Pattern p = Pattern.compile("\"mp4_720\":\"(https:.*\\.mp4)\\?mdtk=.*\",\"mp4_480\":.*", Pattern.DOTALL);
-            Matcher m = p.matcher(response);
-            if (m.find()) {
-                String videoURI = m.group(1);
-                videoURI = videoURI.replace("\\", "");
-                Model model = new Model(Model.VIDEO_TYPE, Uri.parse(videoURI));
-                articleAdapter.addItem(model);
-                Log.d(TAG, "videoURI = " + videoURI);
-            } else {
-                Log.d(TAG, "not found >> " + response);
-            }
-        }
-    };
-
-    /**
      * Static fromHtml to deal with older SDK.
      *
      * @param textView the textView to fill
@@ -878,31 +641,5 @@ public class ArticleActivity extends AppCompatActivity {
         } else {
             textView.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT));
         }
-    }
-
-    @NonNull
-    private String extractAttr(@NonNull Element article, String attribute) {
-        Elements elements = article.select(attribute);
-        if (elements.isEmpty()) {
-            return "";
-        } else {
-            return elements.first().text();
-        }
-    }
-
-    @NonNull
-    private String extractDates(@NonNull Element article) {
-        StringBuilder builder = new StringBuilder();
-        Elements datePublished = article.select("[itemprop='datePublished']");
-        if (!datePublished.isEmpty()) {
-            builder.append("Publié le ")
-                    .append(datePublished.first().text());
-        }
-        Elements dateModified = article.select("[itemprop='dateModified']");
-        if (!dateModified.isEmpty()) {
-            builder.append(", modifié le ")
-                    .append(dateModified.first().text());
-        }
-        return builder.toString();
     }
 }

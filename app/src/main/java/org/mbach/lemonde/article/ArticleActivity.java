@@ -349,11 +349,16 @@ public class ArticleActivity extends AppCompatActivity {
             // Article is from a hosted blog
             ArrayList<Model> items;
 
+            // Full article is restricted to paid members
+            Elements articleStatus = doc.select(".article__status");
+            if (!articleStatus.select(".icon__premium").isEmpty()) {
+                isRestricted = true;
+                articleStatus.remove();
+            }
+
             // Standard article
             items = extractDataFromHtml(doc);
             LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
-            // Full article is restricted to paid members
-            isRestricted = doc.getElementById("teaser_article") != null;
             Log.d(TAG, "articleId " + articleId);
             boolean hasArticle = leMondeDB.hasArticle(articleId);
             toggleFavIcon(hasArticle);

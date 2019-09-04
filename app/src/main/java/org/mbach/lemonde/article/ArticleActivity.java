@@ -398,7 +398,7 @@ public class ArticleActivity extends AppCompatActivity {
                 } else {*/
 
             // Standard article
-            items = extractData(doc);
+            items = extractDataFromHtml(doc);
             LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
             // Full article is restricted to paid members
             isRestricted = doc.getElementById("teaser_article") != null;
@@ -694,6 +694,99 @@ public class ArticleActivity extends AppCompatActivity {
         }
 
         //doc.select("");
+        return models;
+    }
+
+    /**
+     * Extract and parse a standard article from HTML. A standard article is published on the main page and by definition,
+     * is not: from a hosted blog, nor a video, nor a special multimedia content. It has some standardized fields like
+     * one (or multiple) author(s), a date, a description, an headline, a description and a list of paragraphs.
+     * Each paragraph is a block of text (comments included) or an image or an embedded tweet.
+     *
+     * @param doc article to analyze
+     * @return a list of formatted content that can be nicely displayed in the recycler view.
+     */
+    private ArrayList<Model> extractDataFromHtml(@NonNull Document doc) {
+
+        ArrayList<Model> models = new ArrayList<>();
+
+        TextView headLine = new TextView(this);
+        TextView authors = new TextView(this);
+        TextView dates = new TextView(this);
+        TextView description = new TextView(this);
+        TextView readTime = new TextView(this);
+
+        headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
+        authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
+        dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
+        description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+        readTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+
+        fromHtml(headLine, doc.select(".article__header .article__title").html());
+        fromHtml(description, doc.select(".article__header .article__desc").html());
+
+        authors.setText(doc.select(".article__header .meta__author").text());
+        dates.setText(doc.select(".article__header .meta__date").text());
+        readTime.setText(doc.select(".article__header .meta__reading-time").text());
+
+        models.add(new Model(headLine));
+        models.add(new Model(authors));
+        models.add(new Model(dates));
+        models.add(new Model(description));
+        models.add(new Model(readTime));
+
+        Elements articleElems = doc.select(".article__content > *");
+        for(Element elem : articleElems) {
+            // Image
+            if(elem.tagName().equals("figure")) {
+                String imgSrc = elem.select("img").attr("src");
+                if( ! imgSrc.equals("")) {
+                    models.add(new Model(Model.IMAGE_TYPE, imgSrc));
+                }
+            }
+            // Subtitle
+            else if(elem.tagName().equals("h2")) {
+                TextView paragraph = new TextView(this);
+                fromHtml(paragraph, elem.text());
+                paragraph.setTypeface(Typeface.SERIF);
+                paragraph.setPadding(0, Constants.PADDING_TOP_SUBTITLE, 0, Constants.PADDING_BOTTOM_SUBTITLE);
+                paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
+                models.add(new Model(paragraph, Model.TEXT_TYPE));
+            }
+            // Paragraph
+            else if(elem.hasClass("article__paragraph") |
+                    elem.hasClass("article__status") |
+                    elem.hasClass("article__cite")) {
+                String par = elem.html();
+                // Deleting links
+                par = par.replaceAll("<a[^>]*>", "");
+                TextView paragraph = new TextView(this);
+                fromHtml(paragraph, par);
+                paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
+                paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
+                models.add(new Model(paragraph, Model.TEXT_TYPE));
+            }
+            // Tweets
+            else if(elem.hasClass("twitter-tweet")) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
+
+                if (displayTweets) {
+                    TextView t = new TextView(this);
+                    ArticleActivity.fromHtml(t, elem.html());
+                    Button link = new Button(this);
+                    Elements links = elem.select("a[href]");
+                    if (ArticleActivity.atLeastOneChild(links)) {
+                        link.setContentDescription("http://"+links.first().attr("href").replaceAll("^//",""));
+                    }
+                    CardView cardView = new CardView(this);
+                    cardView.addView(t);
+                    cardView.addView(link);
+                    models.add(new Model(Model.TWEET_TYPE, cardView));
+                }
+            }
+        }
+
         return models;
     }
 

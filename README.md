@@ -3,12 +3,13 @@
 This App for Android 4.0.3 Ice Cream Sandwich and later (Android 10) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping). It renders the items in the feed directly in native Android components, such as [TextView](https://developer.android.com/reference/android/widget/TextView.html), [ImageView](https://developer.android.com/reference/android/widget/ImageView.html)
 
 This App was also built to be as fastest and simple as possible. Material design guidelines were applied so you'll find:
-* A navigation drawer with a header (see this [tutorial](https://developer.android.com/training/implementing-navigation/nav-drawer.html))
-* A [SwipeRefreshLayout](https://developer.android.com/reference/android/support/v4/widget/SwipeRefreshLayout.html) layout to simply refresh the RSS feed
-* A collapsing toolbar layout when you're consulting an article from the feed: expanded toolbar with header image is fading to simple toolbar
-* [Settings activity](https://developer.android.com/reference/android/preference/PreferenceActivity.html) lets you customize the article you're currently reading, by excluding unnecessary content (like tweets), to leverage written content instead
-* ArticleActivity is using a [RecyclerView](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html) where items are layout vertically. It has a complex [RecyclerView.Adapter](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Adapter.html) which holds at least more than one [ViewHolder](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.ViewHolder.html)
-* For Android 7.1 (API 25): [dynamic App Shortcuts](https://developer.android.com/guide/topics/ui/shortcuts.html#dynamic) to quickly open the category that you're reading the most!
+
+- A navigation drawer with a header (see this [tutorial](https://developer.android.com/training/implementing-navigation/nav-drawer.html))
+- A [SwipeRefreshLayout](https://developer.android.com/reference/android/support/v4/widget/SwipeRefreshLayout.html) layout to simply refresh the RSS feed
+- A collapsing toolbar layout when you're consulting an article from the feed: expanded toolbar with header image is fading to simple toolbar
+- [Settings activity](https://developer.android.com/reference/android/preference/PreferenceActivity.html) lets you customize the article you're currently reading, by excluding unnecessary content (like tweets), to leverage written content instead
+- ArticleActivity is using a [RecyclerView](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html) where items are layout vertically. It has a complex [RecyclerView.Adapter](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Adapter.html) which holds at least more than one [ViewHolder](https://developer.android.com/reference/android/support/v7/widget/RecyclerView.ViewHolder.html)
+- For Android 7.1 (API 25): [dynamic App Shortcuts](https://developer.android.com/guide/topics/ui/shortcuts.html#dynamic) to quickly open the category that you're reading the most!
 
 ### Comments
 
@@ -16,7 +17,7 @@ Comments are loaded automatically in the same view when one has reached the bott
 
 ### Dynamic theme
 
-In addition, this App has 2 themes. Dark Theme is the default theme, but it can be easily switched to Light Theme in settings. To do so, these themes are defined in [styles.xml](https://developer.android.com/guide/topics/ui/themes.html) and some utility functions are used to paint or repaint remaining items accordingly. In layouts, colors aren't hardcoded and are using extensively ```?attr/myColor```
+In addition, this App has 2 themes. Dark Theme is the default theme, but it can be easily switched to Light Theme in settings. To do so, these themes are defined in [styles.xml](https://developer.android.com/guide/topics/ui/themes.html) and some utility functions are used to paint or repaint remaining items accordingly. In layouts, colors aren't hardcoded and are using extensively `?attr/myColor`
 
 ```xml
 <android.support.v7.widget.Toolbar
@@ -26,7 +27,7 @@ In addition, this App has 2 themes. Dark Theme is the default theme, but it can 
     android:background="?attr/colorPrimary" />
 ```
 
-Dynamic widgets built by parsing to render a web page are in pure Java code, so the trick is to retrieve the color from the current applied style. These custom colors must be declared as styleable attributes in ```attrs.xml``` file.
+Dynamic widgets built by parsing to render a web page are in pure Java code, so the trick is to retrieve the color from the current applied style. These custom colors must be declared as styleable attributes in `attrs.xml` file.
 
 ```java
 private int getStyleableColor(int resourceId) {
@@ -72,12 +73,14 @@ A smartphone at least on Android 4.0.3 (API 15) ! That should not be a real prob
 <a href="https://f-droid.org/packages/org.mbach.lemonde/">
 <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a>
 
-Or you can get the app directly on GitHub, here is the [v1.15](https://github.com/MBach/LeMondeRssReader/releases/download/v1.15/LeMondeRssReader-1.15.apk)
+Or you can get the app directly on GitHub, here is the [v1.17](https://github.com/MBach/LeMondeRssReader/releases/download/v1.17/LeMondeRssReader-1.17.apk)
 
 ## Video
+
 [Overview of the App](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)
 
 ## Screenshots
+
 ![Main page](https://mbach.github.io/LeMondeRssReader/screenshots/main.jpg)
 
 ![Article](https://mbach.github.io/LeMondeRssReader/screenshots/article.jpg)

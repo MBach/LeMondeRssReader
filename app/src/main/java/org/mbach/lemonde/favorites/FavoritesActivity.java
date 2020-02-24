@@ -115,7 +115,7 @@ public class FavoritesActivity extends AppCompatActivity {
         Bundle extras = new Bundle();
         extras.putInt(Constants.EXTRA_RSS_ARTICLE_ID, view.getId());
         extras.putString(Constants.EXTRA_RSS_LINK, favoritesModel.getLink());
-        extras.putString(Constants.EXTRA_RSS_IMAGE, favoritesModel.getEnclosure());
+        extras.putString(Constants.EXTRA_RSS_IMAGE, favoritesModel.getMediaContent());
         extras.putString(Constants.EXTRA_RSS_TITLE, favoritesModel.getTitle());
         extras.putLong(Constants.EXTRA_RSS_DATE, favoritesModel.getPubDate());
         intent.putExtras(extras);

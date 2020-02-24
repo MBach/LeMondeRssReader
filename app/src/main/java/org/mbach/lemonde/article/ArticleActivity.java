@@ -570,6 +570,16 @@ public class ArticleActivity extends AppCompatActivity {
         dates.setText(doc.select(".article__header .meta__date").text());
         readTime.setText(doc.select(".article__header .meta__reading-time").text());
 
+        // Other page format...
+        if(headLine.getText().length() == 0) {
+            fromHtml(headLine, doc.select(".article__heading .article__title").html());
+            fromHtml(description, doc.select(".article__heading .article__desc").html());
+
+            authors.setText(doc.select(".article__heading .meta__authors").text());
+            dates.setText(doc.select(".article__heading .meta__publisher").text());
+            readTime.setText(doc.select(".article__heading .meta__reading-time").text());
+        }
+
         models.add(new Model(headLine));
         models.add(new Model(authors));
         models.add(new Model(dates));

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CustomTheme">
-        <attr name="defaultText" />
-        <attr name="authorDateText" />
-        <attr name="articleHeaderGradient" />
-        <attr name="colorBackgroundDrawer" />
-        <attr name="deleteFavoriteIcon" />
+        <attr name="defaultText" format="string" />
+        <attr name="authorDateText"  format="string" />
+        <attr name="articleHeaderGradient" format="color" />
+        <attr name="colorBackgroundDrawer" format="color" />
+        <attr name="deleteFavoriteIcon"  format="reference" />
     </declare-styleable>
 </resources>

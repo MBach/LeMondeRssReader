@@ -25,6 +25,8 @@ public class RssItem implements Parcelable {
     @Nullable
     private String enclosure = null;
     @Nullable
+    private String mediaContent = null;
+    @Nullable
     private String category = null;
     private long pubDate;
     private final int type;
@@ -45,6 +47,7 @@ public class RssItem implements Parcelable {
         articleId = in.readInt();
         enclosure = in.readString();
         pubDate = in.readLong();
+        mediaContent = in.readString();
         type = ARTICLE_TYPE;
     }
 
@@ -77,6 +80,15 @@ public class RssItem implements Parcelable {
 
     public void setEnclosure(@Nullable String enclosure) {
         this.enclosure = enclosure;
+    }
+
+    @Nullable
+    public String getMediaContent() {
+        return mediaContent;
+    }
+
+    public void setMediaContent(@Nullable String mediaContent) {
+        this.mediaContent = mediaContent;
     }
 
     public int getArticleId() {
@@ -120,5 +132,6 @@ public class RssItem implements Parcelable {
         dest.writeInt(articleId);
         dest.writeString(enclosure);
         dest.writeLong(pubDate);
+        dest.writeString(mediaContent);
     }
 }

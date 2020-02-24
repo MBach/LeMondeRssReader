@@ -52,7 +52,7 @@ public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItem
         RssItem item = items.get(position);
         holder.title.setText(item.getTitle());
         holder.image.setImageBitmap(null);
-        Picasso.with(holder.image.getContext()).load(item.getEnclosure()).into(holder.image);
+        Picasso.with(holder.image.getContext()).load(item.getMediaContent()).into(holder.image);
         holder.itemView.setTag(item);
     }
 

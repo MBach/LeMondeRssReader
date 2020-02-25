@@ -73,7 +73,7 @@ A smartphone at least on Android 4.0.3 (API 15) ! That should not be a real prob
 <a href="https://f-droid.org/packages/org.mbach.lemonde/">
 <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a>
 
-Or you can get the app directly on GitHub, here is the [v1.17](https://github.com/MBach/LeMondeRssReader/releases/download/v1.17/LeMondeRssReader-1.17.apk)
+Or you can get the app directly on GitHub, here is the [v1.18](https://github.com/MBach/LeMondeRssReader/releases/download/v1.18/LeMondeRssReader-1.18.apk)
 
 ## Video
 

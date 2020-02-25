@@ -172,7 +172,7 @@ public class LeMondeDB {
         values.put(FavEntry.COL_TITLE, favorite.getTitle());
         values.put(FavEntry.COL_CATEGORY, favorite.getCategory());
         values.put(FavEntry.COL_LINK, favorite.getLink());
-        values.put(FavEntry.COL_ENCLOSURE, favorite.getEnclosure());
+        values.put(FavEntry.COL_ENCLOSURE, favorite.getMediaContent());
         values.put(FavEntry.COL_DATE, favorite.getPubDate());
         long id = sqLiteDatabase.insert(FavEntry.TABLE, null, values);
         close();

@@ -32,6 +32,7 @@ class RssParser {
     private static final String TAG_TITLE = "title";
     private static final String TAG_LINK = "link";
     private static final String TAG_ENCLOSURE = "enclosure";
+    private static final String TAG_MEDIA_CONTENT = "media:content";
     private static final String TAG_RSS = "rss";
     private static final String TAG_ITEM = "item";
     private static final String TAG_GUID = "guid";
@@ -79,6 +80,9 @@ class RssParser {
                     case XmlPullParser.START_TAG:
                         if (tagName.equalsIgnoreCase(TAG_ITEM)) {
                             item = new RssItem(RssItem.ARTICLE_TYPE);
+                        } else if (tagName.equalsIgnoreCase(TAG_MEDIA_CONTENT)) {
+                            text = parser.getAttributeValue(null, "url");
+                            item.setMediaContent(text);
                         }
                         break;
                     case XmlPullParser.TEXT:

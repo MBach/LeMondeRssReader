@@ -389,7 +389,7 @@ public class ArticleActivity extends AppCompatActivity {
                     REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
                 }
             }
-                //}
+            //}
             //}
             articleAdapter.addItems(items);
             findViewById(R.id.articleLoader).setVisibility(View.GONE);
@@ -548,113 +548,9 @@ public class ArticleActivity extends AppCompatActivity {
      * @return a list of formatted content that can be nicely displayed in the recycler view.
      */
     private ArrayList<Model> extractDataFromHtml(@NonNull Document doc) {
+        ArticleHtmlParser htmlParser = new ArticleHtmlParser(this);
 
-        ArrayList<Model> models = new ArrayList<>();
-
-        TextView headLine = new TextView(this);
-        TextView authors = new TextView(this);
-        TextView dates = new TextView(this);
-        TextView description = new TextView(this);
-        TextView readTime = new TextView(this);
-
-        headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_headline));
-        authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
-        dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_authors));
-        description.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-        readTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-
-        fromHtml(headLine, doc.select(".article__header .article__title").html());
-        fromHtml(description, doc.select(".article__header .article__desc").html());
-
-        authors.setText(doc.select(".article__header .meta__author").text());
-        dates.setText(doc.select(".article__header .meta__date").text());
-        readTime.setText(doc.select(".article__header .meta__reading-time").text());
-
-        // Other page format...
-        if(headLine.getText().length() == 0) {
-            fromHtml(headLine, doc.select(".article__heading .article__title").html());
-            fromHtml(description, doc.select(".article__heading .article__desc").html());
-
-            authors.setText(doc.select(".article__heading .meta__authors").text());
-            dates.setText(doc.select(".article__heading .meta__publisher").text());
-            readTime.setText(doc.select(".article__heading .meta__reading-time").text());
-        }
-
-        models.add(new Model(headLine));
-        models.add(new Model(authors));
-        models.add(new Model(dates));
-        models.add(new Model(description));
-        models.add(new Model(readTime));
-
-        Elements articleElems = doc.select(".article__content > *");
-        for(Element elem : articleElems) {
-            // Image
-            if(elem.tagName().equals("figure")) {
-                String imgSrc = elem.select("img").attr("src");
-                if( ! imgSrc.equals("")) {
-                    models.add(new Model(Model.IMAGE_TYPE, imgSrc));
-                }
-            }
-            // Subtitle
-            else if(elem.tagName().equals("h2")) {
-                TextView paragraph = new TextView(this);
-                fromHtml(paragraph, elem.text());
-                paragraph.setTypeface(Typeface.SERIF);
-                paragraph.setPadding(0, Constants.PADDING_TOP_SUBTITLE, 0, Constants.PADDING_BOTTOM_SUBTITLE);
-                paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_description));
-                models.add(new Model(paragraph, Model.TEXT_TYPE));
-            }
-            // Paragraph
-            else if(elem.hasClass("article__paragraph") |
-                    elem.hasClass("article__status") |
-                    elem.hasClass("article__cite")) {
-                String par = elem.html();
-                // Deleting links
-                par = par.replaceAll("<a[^>]*>", "");
-                TextView paragraph = new TextView(this);
-                fromHtml(paragraph, par);
-                paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-                paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_body));
-                models.add(new Model(paragraph, Model.TEXT_TYPE));
-            }
-            // Tweets
-            else if(elem.hasClass("twitter-tweet")) {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
-
-                if (displayTweets) {
-                    TextView t = new TextView(this);
-                    ArticleActivity.fromHtml(t, elem.html());
-                    Button link = new Button(this);
-                    Elements links = elem.select("a[href]");
-                    if (ArticleActivity.atLeastOneChild(links)) {
-                        link.setContentDescription("http://"+links.first().attr("href").replaceAll("^//",""));
-                    }
-                    CardView cardView = new CardView(this);
-                    cardView.addView(t);
-                    cardView.addView(link);
-                    models.add(new Model(Model.TWEET_TYPE, cardView));
-                }
-            }
-        }
-
-        return models;
+        return htmlParser.parse(doc);
     }
 
-    /**
-     * Static fromHtml to deal with older SDK.
-     *
-     * @param textView the textView to fill
-     * @param html     raw string
-     */
-    static void fromHtml(@NonNull TextView textView, String html) {
-        if (html == null) {
-            return;
-        }
-        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            textView.setText(Html.fromHtml(html));
-        } else {
-            textView.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT));
-        }
-    }
 }

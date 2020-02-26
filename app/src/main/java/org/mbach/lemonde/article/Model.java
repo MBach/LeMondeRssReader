@@ -22,6 +22,7 @@ class Model implements Parcelable {
     static final int COMMENT_TYPE = 4;
     static final int BUTTON_TYPE = 5;
     static final int VIDEO_TYPE = 6;
+    static final int LIVE_TYPE = 7;
 
     private final int id;
     private final int type;
@@ -61,6 +62,8 @@ class Model implements Parcelable {
         this.id = id;
         theContent = textView;
     }
+
+    Model() {}
 
     int getType() {
         return type;

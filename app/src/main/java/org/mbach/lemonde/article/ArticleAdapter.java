@@ -1,7 +1,6 @@
 package org.mbach.lemonde.article;
 
 import android.net.Uri;
-import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -101,6 +100,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                 return new ViewHolderImage(new ImageView(parent.getContext()));
             case Model.TWEET_TYPE:
                 return new ViewHolderTweet(LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent, false));
+            case Model.LIVE_TYPE:
+                return new ViewHolderText(LayoutInflater.from(parent.getContext()).inflate(R.layout.live_card, parent, false));
             case Model.FACTS_TYPE:
                 return new ViewHolderFact(LayoutInflater.from(parent.getContext()).inflate(R.layout.fact_card, parent, false));
             case Model.BUTTON_TYPE:
@@ -222,6 +223,19 @@ class ArticleAdapter extends RecyclerView.Adapter {
         ViewHolderText(@NonNull View view) {
             super(view);
             this.text = (TextView) view;
+        }
+    }
+
+    /**
+     *
+     */
+    static class ViewHolderLive extends RecyclerView.ViewHolder {
+        @NonNull
+        private final View view;
+
+        ViewHolderText(@NonNull View view) {
+            super(view);
+            this.view = view;
         }
     }
 

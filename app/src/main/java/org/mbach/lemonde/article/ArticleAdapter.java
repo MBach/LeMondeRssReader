@@ -1,9 +1,9 @@
 package org.mbach.lemonde.article;
 
+import android.content.Context;
 import android.net.Uri;
-import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.RecyclerView;
+import android.os.Build;
+import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -11,9 +11,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
+
+import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.BarLineChartBase;
@@ -23,6 +28,7 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.squareup.picasso.Picasso;
 
+import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 
@@ -101,7 +107,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
             case Model.TWEET_TYPE:
                 return new ViewHolderTweet(LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent, false));
             case Model.LIVE_TYPE:
-                return new ViewHolderText(LayoutInflater.from(parent.getContext()).inflate(R.layout.live_card, parent, false));
+                return new ViewHolderLive(LayoutInflater.from(parent.getContext()).inflate(R.layout.live_card, parent, false));
             case Model.FACTS_TYPE:
                 return new ViewHolderFact(LayoutInflater.from(parent.getContext()).inflate(R.layout.fact_card, parent, false));
             case Model.BUTTON_TYPE:
@@ -205,6 +211,27 @@ class ArticleAdapter extends RecyclerView.Adapter {
                     viewHolderVideo.getVideoView().start();
                     Log.d(TAG, "pos = " + viewHolderVideo.getVideoView().getCurrentPosition());
                     break;
+                case Model.LIVE_TYPE:
+                    ViewHolderLive viewHolder = (ViewHolderLive) holder;
+                    LiveModel liveModel = (LiveModel) model;
+                    viewHolder.setAuthorText(liveModel.getAuthorName());
+                    viewHolder.setDateText(liveModel.getDate());
+                    Picasso.with((viewHolder.avatarView.getContext())).load(liveModel.getAuthorAvatar()).into(viewHolder.avatarView);
+
+                    ArrayList<LiveModel.SubModel> subModels = liveModel.getSubModels();
+                    Context context = viewHolder.authorView.getContext();
+                    for(LiveModel.SubModel subModel : subModels) {
+                        String par = ((LiveModel.Paragraph) subModel).getHtml();
+                        // Deleting links
+                        par = par.replaceAll("<a[^>]*>", "");
+                        TextView paragraph = new TextView(context);
+                        fromHtml(paragraph, par);
+                        paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
+                        paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_body));
+                        viewHolder.addContent(paragraph);
+                    }
+
+                    break;
             }
         }
     }
@@ -231,11 +258,32 @@ class ArticleAdapter extends RecyclerView.Adapter {
      */
     static class ViewHolderLive extends RecyclerView.ViewHolder {
         @NonNull
-        private final View view;
+        private final TextView authorView;
+        @NonNull
+        private final TextView dateView;
+        @NonNull
+        private final ImageView avatarView;
+        @NonNull
+        private final LinearLayout contentLayout;
 
-        ViewHolderText(@NonNull View view) {
+        ViewHolderLive(@NonNull View view) {
             super(view);
-            this.view = view;
+            this.authorView = view.findViewById(R.id.live_author);
+            this.dateView = view.findViewById(R.id.live_date);
+            this.avatarView = view.findViewById(R.id.live_avatar);
+            this.contentLayout = view.findViewById(R.id.live_content);
+        }
+
+        public void setAuthorText(String text) {
+            this.authorView.setText(text);
+        }
+
+        public void setDateText(String text) {
+            this.dateView.setText(text);
+        }
+
+        public void addContent(View view) {
+            this.contentLayout.addView(view);
         }
     }
 
@@ -403,6 +451,23 @@ class ArticleAdapter extends RecyclerView.Adapter {
         @NonNull
         MediaController getController() {
             return controller;
+        }
+    }
+
+    /**
+     * fromHtml to deal with older SDK.
+     *
+     * @param textView the textView to fill
+     * @param html     raw string
+     */
+    private void fromHtml(@NonNull TextView textView, String html) {
+        if (html == null) {
+            return;
+        }
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            textView.setText(Html.fromHtml(html));
+        } else {
+            textView.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT));
         }
     }
 }

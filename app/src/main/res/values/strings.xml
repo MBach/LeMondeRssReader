@@ -81,4 +81,5 @@
     <string name="error_invalid_email">Cette adresse email est invalide</string>
     <string name="error_invalid_password">Le mot de passe est trop court</string>
     <string name="error_field_required">Champ obligatoire</string>
+    <string name="user_avatar">User avatar</string>
 </resources>

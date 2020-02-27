@@ -236,24 +236,17 @@ public class ArticleHtmlParser {
     }
 
     private Model buildLive(Element elem) {
-        CardView card = new CardView(context);
+        LiveModel model = new LiveModel();
+        model.setAuthorName(elem.select(".info-content .creator-name").text());
+        model.setDate(elem.select(".info-content .date").text());
+        model.setAuthorAvatar(elem.select(".creator-avatar img").attr("src"));
 
-        TextView creator = new TextView(context);
-        creator.setText(elem.select(".creator-name").text());
+        Elements contents = elem.select(".content--live div");
+        for(Element content : contents) {
+            model.addParagraph(content.html());
+        }
 
-        card.addView(creator);
-
-        /*
-        String par = elem.html();
-        // Deleting links
-        par = par.replaceAll("<a[^>]*>", "");
-        TextView paragraph = new TextView(context);
-        fromHtml(paragraph, par);
-        paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-        paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_body));
-        */
-
-        return new Model(Model.LIVE_TYPE, card);
+        return model;
     }
 
     /**

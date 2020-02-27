@@ -63,7 +63,11 @@ class Model implements Parcelable {
         theContent = textView;
     }
 
-    Model() {}
+    Model(int type) {
+        this.id = 0;
+        this.type = type;
+        this.theContent = null;
+    }
 
     int getType() {
         return type;

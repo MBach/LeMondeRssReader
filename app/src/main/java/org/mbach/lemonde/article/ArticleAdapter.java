@@ -221,14 +221,33 @@ class ArticleAdapter extends RecyclerView.Adapter {
                     ArrayList<LiveModel.SubModel> subModels = liveModel.getSubModels();
                     Context context = viewHolder.authorView.getContext();
                     for(LiveModel.SubModel subModel : subModels) {
-                        String par = ((LiveModel.Paragraph) subModel).getHtml();
-                        // Deleting links
-                        par = par.replaceAll("<a[^>]*>", "");
-                        TextView paragraph = new TextView(context);
-                        fromHtml(paragraph, par);
-                        paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-                        paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_body));
-                        viewHolder.addContent(paragraph);
+                        if(subModel instanceof LiveModel.Paragraph) {
+                            String par = ((LiveModel.Paragraph) subModel).getHtml();
+                            // Deleting links
+                            par = par.replaceAll("<a[^>]*>", "");
+                            TextView paragraph = new TextView(context);
+                            fromHtml(paragraph, par);
+                            paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
+                            paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_body));
+                            viewHolder.addContent(paragraph);
+                        }
+                        if(subModel instanceof LiveModel.Quote) {
+                            String par = ((LiveModel.Quote) subModel).getHtml();
+                            // Deleting links
+                            par = par.replaceAll("<a[^>]*>", "");
+                            TextView paragraph = new TextView(context);
+                            fromHtml(paragraph, par);
+                            paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
+                            paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_body));
+                            viewHolder.addContent(paragraph);
+                        }
+                        if(subModel instanceof LiveModel.Image) {
+                            ImageView image = new ImageView(context);
+                            Picasso.with(context).load(((LiveModel.Image) subModel).getUrl()).into(image);
+                            viewHolder.addContent(image);
+                        }
+
+
                     }
 
                     break;

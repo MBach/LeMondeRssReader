@@ -241,12 +241,44 @@ public class ArticleHtmlParser {
         model.setDate(elem.select(".info-content .date").text());
         model.setAuthorAvatar(elem.select(".creator-avatar img").attr("src"));
 
-        Elements contents = elem.select(".content--live div");
+        Elements contents = elem.select(".content--live > div");
+        ArrayList<LiveModel.SubModel> subModels = new ArrayList<>();
         for(Element content : contents) {
-            model.addParagraph(content.html());
+            subModels = this.buildSubLive(content, model);
         }
+        model.addSubModels(subModels);
 
         return model;
+    }
+
+    private ArrayList<LiveModel.SubModel> buildSubLive(Element elem, LiveModel model) {
+        ArrayList<LiveModel.SubModel> subModels = new ArrayList<>();
+
+        if(elem.is("img")) {
+            subModels.add(model.buildImage(elem.attr("src")));
+        }
+        else if(elem.is("blockquote")) {
+            subModels.add(model.buildQuote(elem.html()));
+        }
+        else if(elem.is("div")) {
+            if(elem.select("> div").size() == 0) {
+                subModels.add(model.buildParagraph(elem.html()));
+            }
+            else {
+                Elements subContents = elem.select("> div");
+                for(Element subContent : subContents) {
+                    subModels.addAll(this.buildSubLive(subContent, model));
+                }
+            }
+        }
+        else if(elem.is("a")) {
+            Elements subContents = elem.children();
+            for(Element subContent : subContents) {
+                subModels.addAll(this.buildSubLive(subContent, model));
+            }
+        }
+
+        return subModels;
     }
 
     /**

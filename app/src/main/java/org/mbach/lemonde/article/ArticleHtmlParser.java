@@ -37,14 +37,17 @@ public class ArticleHtmlParser {
      * @return ArrayList<Model>
      */
     public ArrayList<Model> parse(Document doc) {
-        if(isLive(doc)) {
-            return parseLive(doc);
+        if(this.isLive(doc)) {
+            return this.parseLive(doc);
         }
-        if(isLongForm(doc)){
-            return parseLongForm(doc);
+        if(this.isLongForm(doc)){
+            return this.parseLongForm(doc);
+        }
+        if(this.isBlog(doc)) {
+            return this.parseBlog(doc);
         }
 
-        return parseArticle(doc);
+        return this.parseArticle(doc);
     }
 
     private boolean isLive(Document doc) {
@@ -53,6 +56,10 @@ public class ArticleHtmlParser {
 
     private boolean isLongForm(Document doc) {
         return doc.select(".article--longform").size() > 0;
+    }
+
+    private boolean isBlog(Document doc) {
+        return doc.select(".site-main").size() > 0;
     }
 
     private ArrayList<Model> parseLive(Document doc) {
@@ -64,6 +71,29 @@ public class ArticleHtmlParser {
         Elements articleElems = doc.select("#post-container .post");
         for(Element elem : articleElems) {
             models.add(buildLive(elem));
+        }
+
+        return models;
+    }
+
+    private ArrayList<Model> parseBlog(Document doc) {
+        ArrayList<Model> models = new ArrayList<>();
+
+        models.add(buildHeadline(doc, ".entry-header .entry-title"));
+        models.add(buildDate(doc, ".entry-header .updated"));
+        models.add(buildDate(doc, ".entry-header .author"));
+
+        Elements elements = doc.select(".entry-content > p");
+        for(Element element : elements) {
+            if(element.select("img").size() > 0) {
+                String imgSrc = element.select("img").attr("src");
+                if( ! imgSrc.equals("")) {
+                    models.add(new Model(Model.IMAGE_TYPE, imgSrc));
+                }
+            }
+            else {
+                models.add(buildParagraph(element));
+            }
         }
 
         return models;

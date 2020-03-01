@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Button;
 import android.widget.TextView;
@@ -272,11 +273,10 @@ public class ArticleHtmlParser {
         model.setAuthorAvatar(elem.select(".creator-avatar img").attr("src"));
 
         Elements contents = elem.select(".content--live > div");
-        ArrayList<LiveModel.SubModel> subModels = new ArrayList<>();
         for(Element content : contents) {
-            subModels = this.buildSubLive(content, model);
+            ArrayList<LiveModel.SubModel> subModels = this.buildSubLive(content, model);
+            model.addSubModels(subModels);
         }
-        model.addSubModels(subModels);
 
         return model;
     }
@@ -284,18 +284,24 @@ public class ArticleHtmlParser {
     private ArrayList<LiveModel.SubModel> buildSubLive(Element elem, LiveModel model) {
         ArrayList<LiveModel.SubModel> subModels = new ArrayList<>();
 
+        /*
         if(elem.is("img")) {
             subModels.add(model.buildImage(elem.attr("src")));
+            Log.d("parse", "addImg "+elem.attr("src"));
         }
         else if(elem.is("blockquote")) {
             subModels.add(model.buildQuote(elem.html()));
+            Log.d("parse", "addQuote "+elem.html());
         }
         else if(elem.is("div")) {
-            if(elem.select("> div").size() == 0) {
+            if(elem.select("> div").size() == 0 &&
+                    elem.select("> blockquote").size() == 0 &&
+                    elem.select("> img").size() == 0) {
                 subModels.add(model.buildParagraph(elem.html()));
+                Log.d("parse", "addPar "+elem.html());
             }
             else {
-                Elements subContents = elem.select("> div");
+                Elements subContents = elem.select("> *");
                 for(Element subContent : subContents) {
                     subModels.addAll(this.buildSubLive(subContent, model));
                 }
@@ -307,6 +313,9 @@ public class ArticleHtmlParser {
                 subModels.addAll(this.buildSubLive(subContent, model));
             }
         }
+        */
+
+        subModels.add(model.buildParagraph(elem.html()));
 
         return subModels;
     }

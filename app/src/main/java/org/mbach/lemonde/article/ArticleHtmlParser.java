@@ -284,6 +284,17 @@ public class ArticleHtmlParser {
     private ArrayList<LiveModel.SubModel> buildSubLive(Element elem, LiveModel model) {
         ArrayList<LiveModel.SubModel> subModels = new ArrayList<>();
 
+        if(elem.select("> div").size() == 0) {
+            if( ! elem.text().equals("")) {
+                subModels.add(model.buildParagraph(elem.html()));
+            }
+        }
+        else {
+            for(Element subElem : elem.children()) {
+                subModels.addAll(this.buildSubLive(subElem, model));
+            }
+        }
+
         /*
         if(elem.is("img")) {
             subModels.add(model.buildImage(elem.attr("src")));
@@ -314,8 +325,6 @@ public class ArticleHtmlParser {
             }
         }
         */
-
-        subModels.add(model.buildParagraph(elem.html()));
 
         return subModels;
     }

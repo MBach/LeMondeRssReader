@@ -220,15 +220,18 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
                     ArrayList<LiveModel.SubModel> subModels = liveModel.getSubModels();
                     Context context = viewHolder.authorView.getContext();
+                    viewHolder.clearContent();
                     for(LiveModel.SubModel subModel : subModels) {
                         if(subModel instanceof LiveModel.Paragraph) {
                             String par = ((LiveModel.Paragraph) subModel).getHtml();
                             // Deleting links
                             par = par.replaceAll("<a[^>]*>", "");
+                            // Deleting images
+                            par = par.replaceAll("<img[^>]*>", "");
                             TextView paragraph = new TextView(context);
                             fromHtml(paragraph, par);
                             paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-                            paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_body));
+                            paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.live_body));
                             viewHolder.addContent(paragraph);
                         }
                         if(subModel instanceof LiveModel.Quote) {
@@ -238,7 +241,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
                             TextView paragraph = new TextView(context);
                             fromHtml(paragraph, par);
                             paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
-                            paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_body));
+                            paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.live_body));
                             viewHolder.addContent(paragraph);
                         }
                         if(subModel instanceof LiveModel.Image) {
@@ -303,6 +306,10 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
         public void addContent(View view) {
             this.contentLayout.addView(view);
+        }
+
+        public void clearContent() {
+            this.contentLayout.removeAllViews();
         }
     }
 

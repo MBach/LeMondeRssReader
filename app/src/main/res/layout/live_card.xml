@@ -17,8 +17,8 @@
 
         <ImageView
             android:id="@+id/live_avatar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:contentDescription="@string/user_avatar" />
 
         <TextView
@@ -27,6 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
+            android:textStyle="bold"
             android:layout_toRightOf="@+id/live_avatar"
             android:layout_toEndOf="@+id/live_avatar" />
 
@@ -43,8 +44,8 @@
 
     <LinearLayout
         android:id="@+id/live_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginLeft="32dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">

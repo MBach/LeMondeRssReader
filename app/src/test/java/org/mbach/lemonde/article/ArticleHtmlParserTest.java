@@ -59,7 +59,13 @@ public class ArticleHtmlParserTest
     public void parseLive_modelTextImageOK() {
         LiveModel model = this.getLiveModelFromIndex(2);
 
-        assertEquals("Number of submodels correct", 4, model.getSubModels().size());
+        assertEquals("Number of submodels correct", 6, model.getSubModels().size());
+
+        String html0 = ((LiveModel.Paragraph) model.getSubModels().get(0)).getHtml();
+        assertEquals("Text found", "Cet Olympique lyonnais adore", html0.substring(0, 28));
+
+        String url5 = ((LiveModel.Image) model.getSubModels().get(5)).getUrl();
+        assertEquals("Image found", "page_live_fichiers/2e6ab343-c8a9-4d10-a9c7-bb9a19cafd4c.gif", url5);
     }
 
     private String getContentFromViewIndex(int index) {

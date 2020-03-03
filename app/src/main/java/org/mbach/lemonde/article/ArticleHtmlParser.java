@@ -272,7 +272,7 @@ public class ArticleHtmlParser {
         model.setDate(elem.select(".info-content .date").text());
         model.setAuthorAvatar(elem.select(".creator-avatar img").attr("src"));
 
-        Elements contents = elem.select(".content--live > div");
+        Elements contents = elem.select(".content--live");
         for(Element content : contents) {
             ArrayList<LiveModel.SubModel> subModels = this.buildSubLive(content, model);
             model.addSubModels(subModels);
@@ -287,6 +287,12 @@ public class ArticleHtmlParser {
         if(elem.select("> div").size() == 0) {
             if( ! elem.text().equals("")) {
                 subModels.add(model.buildParagraph(elem.html()));
+            }
+            if(elem.tagName() == "img") {
+                subModels.add(model.buildImage(elem.attr("src")));
+            }
+            if(elem.select("> strong img").size() == 1) {
+                subModels.add(model.buildImage(elem.select("> strong img").first().attr("src")));
             }
         }
         else {

@@ -1,0 +1,53 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    android:elevation="2dp"
+    android:orientation="vertical"
+    android:paddingTop="24dp"
+    android:paddingBottom="0dp"
+    tools:targetApi="LOLLIPOP">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="UselessParent">
+
+        <ImageView
+            android:id="@+id/live_avatar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/user_avatar" />
+
+        <TextView
+            android:id="@+id/live_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textStyle="bold"
+            android:layout_toRightOf="@+id/live_avatar"
+            android:layout_toEndOf="@+id/live_avatar" />
+
+        <TextView
+            android:id="@+id/live_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_toRightOf="@+id/live_author"
+            android:layout_toEndOf="@+id/live_author" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/live_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginLeft="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    </LinearLayout>
+</LinearLayout>

@@ -4,10 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ViewGroup;
@@ -223,7 +226,7 @@ class LiveFeedParser {
                                 } else if (!element.text().replace("\u00a0", "").replace("\n", "").isEmpty()) {
                                     //Log.d(TAG, "text = '" + element.text().trim() + "'");
                                     TextView t = new TextView(context);
-                                    ArticleActivity.fromHtml(t, element.html());
+                                    fromHtml(t, element.html());
                                     facts.add(new Model(t));
                                 }
                             } else {
@@ -250,6 +253,23 @@ class LiveFeedParser {
             }
         }
     };
+
+    /**
+     * Static fromHtml to deal with older SDK.
+     *
+     * @param textView the textView to fill
+     * @param html     raw string
+     */
+    static void fromHtml(@NonNull TextView textView, String html) {
+        if (html == null) {
+            return;
+        }
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            textView.setText(Html.fromHtml(html));
+        } else {
+            textView.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT));
+        }
+    }
 
     /**
      *

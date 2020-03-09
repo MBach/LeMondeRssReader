@@ -221,8 +221,8 @@ class ArticleAdapter extends RecyclerView.Adapter {
                     ArrayList<LiveModel.SubModel> subModels = liveModel.getSubModels();
                     Context context = viewHolder.authorView.getContext();
                     viewHolder.clearContent();
-                    for(LiveModel.SubModel subModel : subModels) {
-                        if(subModel instanceof LiveModel.Paragraph) {
+                    for (LiveModel.SubModel subModel : subModels) {
+                        if (subModel instanceof LiveModel.Paragraph) {
                             String par = ((LiveModel.Paragraph) subModel).getHtml();
                             // Deleting links
                             par = par.replaceAll("<a[^>]*>", "");
@@ -234,7 +234,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
                             paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.live_body));
                             viewHolder.addContent(paragraph);
                         }
-                        if(subModel instanceof LiveModel.Quote) {
+                        if (subModel instanceof LiveModel.Quote) {
                             String par = ((LiveModel.Quote) subModel).getHtml();
                             // Deleting links
                             par = par.replaceAll("<a[^>]*>", "");
@@ -244,7 +244,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
                             paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.live_body));
                             viewHolder.addContent(paragraph);
                         }
-                        if(subModel instanceof LiveModel.Image) {
+                        if (subModel instanceof LiveModel.Image) {
                             ImageView image = new ImageView(context);
                             Picasso.with(context).load(((LiveModel.Image) subModel).getUrl()).into(image);
                             viewHolder.addContent(image);
@@ -260,6 +260,23 @@ class ArticleAdapter extends RecyclerView.Adapter {
 
     ArrayList<Model> getItems() {
         return items;
+    }
+
+    /**
+     * fromHtml to deal with older SDK.
+     *
+     * @param textView the textView to fill
+     * @param html     raw string
+     */
+    private void fromHtml(@NonNull TextView textView, String html) {
+        if (html == null) {
+            return;
+        }
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            textView.setText(Html.fromHtml(html));
+        } else {
+            textView.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT));
+        }
     }
 
     /**
@@ -391,7 +408,6 @@ class ArticleAdapter extends RecyclerView.Adapter {
         }
 
         /**
-         *
          * @param chart the chart
          * @return styled chart
          */
@@ -477,23 +493,6 @@ class ArticleAdapter extends RecyclerView.Adapter {
         @NonNull
         MediaController getController() {
             return controller;
-        }
-    }
-
-    /**
-     * fromHtml to deal with older SDK.
-     *
-     * @param textView the textView to fill
-     * @param html     raw string
-     */
-    private void fromHtml(@NonNull TextView textView, String html) {
-        if (html == null) {
-            return;
-        }
-        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            textView.setText(Html.fromHtml(html));
-        } else {
-            textView.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT));
         }
     }
 }

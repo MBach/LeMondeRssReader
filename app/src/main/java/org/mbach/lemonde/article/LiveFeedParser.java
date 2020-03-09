@@ -6,16 +6,16 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -58,78 +58,6 @@ class LiveFeedParser {
     private final Document document;
     @NonNull
     private final ArticleAdapter articleAdapter;
-
-    LiveFeedParser(@NonNull Context context, @NonNull ArticleAdapter articleAdapter, @NonNull Document document) {
-        this.context = context;
-        this.articleAdapter = articleAdapter;
-        this.document = document;
-    }
-
-    @NonNull
-    ArrayList<Model> extractLiveFacts() {
-        TextView headLine = new TextView(context);
-        TextView description = new TextView(context);
-
-        int defaultText = ThemeUtils.getStyleableColor(context, R.styleable.CustomTheme_defaultText);
-
-        headLine.setTextColor(defaultText);
-        description.setTextColor(defaultText);
-
-        headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_headline));
-        description.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_description));
-
-        if (!document.getElementsByClass("title js-live-page-title").isEmpty()) {
-            headLine.setText(document.getElementsByClass("title js-live-page-title").first().text());
-        }
-        if (!document.getElementsByClass("description js-live-page-description").isEmpty()) {
-            description.setText(document.getElementsByClass("description js-live-page-description").first().text());
-        }
-        ArrayList<Model> views = new ArrayList<>();
-        views.add(new Model(headLine));
-        views.add(new Model(description));
-
-        // Extract facts, if any
-        Elements factBlock = document.getElementsByClass("facts-content");
-        if (ArticleActivity.atLeastOneChild(factBlock)) {
-            List<Model> factList = new ArrayList<>();
-            Elements facts = factBlock.first().getElementsByTag("ul");
-            for (Element fact : facts) {
-                TextView factView = new TextView(context);
-                factView.setText(fact.text());
-                CardView cardView = new CardView(context);
-                cardView.addView(factView);
-                factList.add(new Model(Model.FACTS_TYPE, cardView));
-            }
-
-            // Add header only if there's at least one fact
-            if (!factList.isEmpty()) {
-                TextView liveFacts = new TextView(context);
-                liveFacts.setText(context.getString(R.string.live_facts));
-                liveFacts.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_description));
-                views.add(new Model(liveFacts));
-            }
-            views.addAll(factList);
-        }
-        return views;
-    }
-
-    /**
-     * Parse remote webservice URL and enqueue request.
-     *
-     * @param liveScript script to parse
-     */
-    void fetchPosts(@NonNull String liveScript) {
-        // We need to extract the EventID for every live using regular expressions
-        Pattern p = Pattern.compile("base\\.start\\(provider, '([0-9]+)'\\);");
-        Matcher m = p.matcher(liveScript);
-        if (m.find()) {
-            String eventId = m.group(1);
-            // The credential seems to be static, so we're assuming it won't change over time
-            String livePostsURI = "https://apiv1secure.scribblelive.com/event/" + eventId + "/page/last?token=" + SCRIBBLELIVE_TOKEN + "&format=json&pageSize=20";
-            ArticleActivity.REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, livePostsURI, factsReceived, errorResponse));
-        }
-    }
-
     /**
      * See @articleReceived field.
      */
@@ -253,6 +181,23 @@ class LiveFeedParser {
             }
         }
     };
+    /**
+     *
+     */
+    private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.e(TAG, "onErrorResponse: " + error.toString());
+            Log.e(TAG, "onErrorResponse: " + error.networkResponse);
+            Log.e(TAG, "onErrorResponse: " + error.getMessage());
+        }
+    };
+
+    LiveFeedParser(@NonNull Context context, @NonNull ArticleAdapter articleAdapter, @NonNull Document document) {
+        this.context = context;
+        this.articleAdapter = articleAdapter;
+        this.document = document;
+    }
 
     /**
      * Static fromHtml to deal with older SDK.
@@ -271,15 +216,68 @@ class LiveFeedParser {
         }
     }
 
-    /**
-     *
-     */
-    private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            Log.e(TAG, "onErrorResponse: " + error.toString());
-            Log.e(TAG, "onErrorResponse: " + error.networkResponse);
-            Log.e(TAG, "onErrorResponse: " + error.getMessage());
+    @NonNull
+    ArrayList<Model> extractLiveFacts() {
+        TextView headLine = new TextView(context);
+        TextView description = new TextView(context);
+
+        int defaultText = ThemeUtils.getStyleableColor(context, R.styleable.CustomTheme_defaultText);
+
+        headLine.setTextColor(defaultText);
+        description.setTextColor(defaultText);
+
+        headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_headline));
+        description.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_description));
+
+        if (!document.getElementsByClass("title js-live-page-title").isEmpty()) {
+            headLine.setText(document.getElementsByClass("title js-live-page-title").first().text());
         }
-    };
+        if (!document.getElementsByClass("description js-live-page-description").isEmpty()) {
+            description.setText(document.getElementsByClass("description js-live-page-description").first().text());
+        }
+        ArrayList<Model> views = new ArrayList<>();
+        views.add(new Model(headLine));
+        views.add(new Model(description));
+
+        // Extract facts, if any
+        Elements factBlock = document.getElementsByClass("facts-content");
+        if (ArticleActivity.atLeastOneChild(factBlock)) {
+            List<Model> factList = new ArrayList<>();
+            Elements facts = factBlock.first().getElementsByTag("ul");
+            for (Element fact : facts) {
+                TextView factView = new TextView(context);
+                factView.setText(fact.text());
+                CardView cardView = new CardView(context);
+                cardView.addView(factView);
+                factList.add(new Model(Model.FACTS_TYPE, cardView));
+            }
+
+            // Add header only if there's at least one fact
+            if (!factList.isEmpty()) {
+                TextView liveFacts = new TextView(context);
+                liveFacts.setText(context.getString(R.string.live_facts));
+                liveFacts.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_description));
+                views.add(new Model(liveFacts));
+            }
+            views.addAll(factList);
+        }
+        return views;
+    }
+
+    /**
+     * Parse remote webservice URL and enqueue request.
+     *
+     * @param liveScript script to parse
+     */
+    void fetchPosts(@NonNull String liveScript) {
+        // We need to extract the EventID for every live using regular expressions
+        Pattern p = Pattern.compile("base\\.start\\(provider, '([0-9]+)'\\);");
+        Matcher m = p.matcher(liveScript);
+        if (m.find()) {
+            String eventId = m.group(1);
+            // The credential seems to be static, so we're assuming it won't change over time
+            String livePostsURI = "https://apiv1secure.scribblelive.com/event/" + eventId + "/page/last?token=" + SCRIBBLELIVE_TOKEN + "&format=json&pageSize=20";
+            ArticleActivity.REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, livePostsURI, factsReceived, errorResponse));
+        }
+    }
 }

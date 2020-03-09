@@ -2,9 +2,10 @@ package org.mbach.lemonde.article;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.Chart;
@@ -43,23 +44,6 @@ class GraphExtractor {
 
     private JSONObject json;
 
-    static int getModelType(@Nullable Chart chart) {
-        if (chart == null) {
-            return Model.UNKNOWN_TYPE;
-        } else {
-            String type = chart.getTag().toString();
-            if (HorizontalBarChart.class.getSimpleName().equals(type)) {
-                return GraphModel.GRAPH_TYPE_BARS;
-            } else if (BarChart.class.getSimpleName().equals(type)) {
-                return GraphModel.GRAPH_TYPE_COLUMNS;
-            } else if (LineChart.class.getSimpleName().equals(type)) {
-                return GraphModel.GRAPH_TYPE_LINE;
-            } else {
-                return Model.UNKNOWN_TYPE;
-            }
-        }
-    }
-
     /**
      * @param context the context from the Activity
      * @param script  raw data extracted with JSoup from a script tag in the HTML page
@@ -89,6 +73,23 @@ class GraphExtractor {
                 json = new JSONObject(rawChart);
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
+            }
+        }
+    }
+
+    static int getModelType(@Nullable Chart chart) {
+        if (chart == null) {
+            return Model.UNKNOWN_TYPE;
+        } else {
+            String type = chart.getTag().toString();
+            if (HorizontalBarChart.class.getSimpleName().equals(type)) {
+                return GraphModel.GRAPH_TYPE_BARS;
+            } else if (BarChart.class.getSimpleName().equals(type)) {
+                return GraphModel.GRAPH_TYPE_COLUMNS;
+            } else if (LineChart.class.getSimpleName().equals(type)) {
+                return GraphModel.GRAPH_TYPE_LINE;
+            } else {
+                return Model.UNKNOWN_TYPE;
             }
         }
     }

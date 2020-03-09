@@ -6,7 +6,6 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Button;
 import android.widget.TextView;
@@ -34,17 +33,16 @@ public class ArticleHtmlParser {
      * Parse an article from an HTML Document.
      *
      * @param doc
-     *
      * @return ArrayList<Model>
      */
     public ArrayList<Model> parse(Document doc) {
-        if(this.isLive(doc)) {
+        if (this.isLive(doc)) {
             return this.parseLive(doc);
         }
-        if(this.isLongForm(doc)){
+        if (this.isLongForm(doc)) {
             return this.parseLongForm(doc);
         }
-        if(this.isBlog(doc)) {
+        if (this.isBlog(doc)) {
             return this.parseBlog(doc);
         }
 
@@ -70,7 +68,7 @@ public class ArticleHtmlParser {
         models.add(buildDescription(doc, ".title .summary--live"));
 
         Elements articleElems = doc.select("#post-container .post");
-        for(Element elem : articleElems) {
+        for (Element elem : articleElems) {
             models.add(buildLive(elem));
         }
 
@@ -85,14 +83,13 @@ public class ArticleHtmlParser {
         models.add(buildDate(doc, ".entry-header .author"));
 
         Elements elements = doc.select(".entry-content > p");
-        for(Element element : elements) {
-            if(element.select("img").size() > 0) {
+        for (Element element : elements) {
+            if (element.select("img").size() > 0) {
                 String imgSrc = element.select("img").attr("src");
-                if( ! imgSrc.equals("")) {
+                if (!imgSrc.equals("")) {
                     models.add(new Model(Model.IMAGE_TYPE, imgSrc));
                 }
-            }
-            else {
+            } else {
                 models.add(buildParagraph(element));
             }
         }
@@ -110,16 +107,16 @@ public class ArticleHtmlParser {
         models.add(buildReadTime(doc, ".article__heading .meta__reading-time"));
 
         Elements articleElems = doc.select(".article__content > *");
-        for(Element elem : articleElems) {
+        for (Element elem : articleElems) {
             // Image
-            if(elem.tagName().equals("figure")) {
+            if (elem.tagName().equals("figure")) {
                 String imgSrc = elem.select("img").attr("src");
-                if( ! imgSrc.equals("")) {
+                if (!imgSrc.equals("")) {
                     models.add(new Model(Model.IMAGE_TYPE, imgSrc));
                 }
             }
             // Subtitle
-            else if(elem.tagName().equals("h2")) {
+            else if (elem.tagName().equals("h2")) {
                 TextView paragraph = new TextView(context);
                 fromHtml(paragraph, elem.text());
                 paragraph.setTypeface(Typeface.SERIF);
@@ -128,13 +125,13 @@ public class ArticleHtmlParser {
                 models.add(new Model(paragraph, Model.TEXT_TYPE));
             }
             // Paragraph
-            else if(elem.hasClass("article__paragraph") |
+            else if (elem.hasClass("article__paragraph") |
                     elem.hasClass("article__status") |
                     elem.hasClass("article__cite")) {
                 models.add(buildParagraph(elem));
             }
             // Tweets
-            else if(elem.hasClass("twitter-tweet")) {
+            else if (elem.hasClass("twitter-tweet")) {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                 boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
 
@@ -144,7 +141,7 @@ public class ArticleHtmlParser {
                     Button link = new Button(context);
                     Elements links = elem.select("a[href]");
                     if (ArticleActivity.atLeastOneChild(links)) {
-                        link.setContentDescription("http://"+links.first().attr("href").replaceAll("^//",""));
+                        link.setContentDescription("http://" + links.first().attr("href").replaceAll("^//", ""));
                     }
                     CardView cardView = new CardView(context);
                     cardView.addView(t);
@@ -167,16 +164,16 @@ public class ArticleHtmlParser {
         models.add(buildReadTime(doc, ".article__header .meta__reading-time"));
 
         Elements articleElems = doc.select(".article__content > *");
-        for(Element elem : articleElems) {
+        for (Element elem : articleElems) {
             // Image
-            if(elem.tagName().equals("figure")) {
+            if (elem.tagName().equals("figure")) {
                 String imgSrc = elem.select("img").attr("src");
-                if( ! imgSrc.equals("")) {
+                if (!imgSrc.equals("")) {
                     models.add(new Model(Model.IMAGE_TYPE, imgSrc));
                 }
             }
             // Subtitle
-            else if(elem.tagName().equals("h2")) {
+            else if (elem.tagName().equals("h2")) {
                 TextView paragraph = new TextView(context);
                 fromHtml(paragraph, elem.text());
                 paragraph.setTypeface(Typeface.SERIF);
@@ -185,13 +182,13 @@ public class ArticleHtmlParser {
                 models.add(new Model(paragraph, Model.TEXT_TYPE));
             }
             // Paragraph
-            else if(elem.hasClass("article__paragraph") |
+            else if (elem.hasClass("article__paragraph") |
                     elem.hasClass("article__status") |
                     elem.hasClass("article__cite")) {
                 models.add(buildParagraph(elem));
             }
             // Tweets
-            else if(elem.hasClass("twitter-tweet")) {
+            else if (elem.hasClass("twitter-tweet")) {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                 boolean displayTweets = sharedPreferences.getBoolean("displayTweets", false);
 
@@ -201,7 +198,7 @@ public class ArticleHtmlParser {
                     Button link = new Button(context);
                     Elements links = elem.select("a[href]");
                     if (ArticleActivity.atLeastOneChild(links)) {
-                        link.setContentDescription("http://"+links.first().attr("href").replaceAll("^//",""));
+                        link.setContentDescription("http://" + links.first().attr("href").replaceAll("^//", ""));
                     }
                     CardView cardView = new CardView(context);
                     cardView.addView(t);
@@ -273,7 +270,7 @@ public class ArticleHtmlParser {
         model.setAuthorAvatar(elem.select(".creator-avatar img").attr("src"));
 
         Elements contents = elem.select(".content--live");
-        for(Element content : contents) {
+        for (Element content : contents) {
             ArrayList<LiveModel.SubModel> subModels = this.buildSubLive(content, model);
             model.addSubModels(subModels);
         }
@@ -284,19 +281,18 @@ public class ArticleHtmlParser {
     private ArrayList<LiveModel.SubModel> buildSubLive(Element elem, LiveModel model) {
         ArrayList<LiveModel.SubModel> subModels = new ArrayList<>();
 
-        if(elem.select("> div").size() == 0) {
-            if( ! elem.text().equals("")) {
+        if (elem.select("> div").size() == 0) {
+            if (!elem.text().equals("")) {
                 subModels.add(model.buildParagraph(elem.html()));
             }
-            if(elem.tagName() == "img") {
+            if (elem.tagName() == "img") {
                 subModels.add(model.buildImage(elem.attr("src")));
             }
-            if(elem.select("> strong img").size() == 1) {
+            if (elem.select("> strong img").size() == 1) {
                 subModels.add(model.buildImage(elem.select("> strong img").first().attr("src")));
             }
-        }
-        else {
-            for(Element subElem : elem.children()) {
+        } else {
+            for (Element subElem : elem.children()) {
                 subModels.addAll(this.buildSubLive(subElem, model));
             }
         }

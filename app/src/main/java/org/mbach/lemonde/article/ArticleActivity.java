@@ -9,26 +9,11 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-import android.text.Html;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -39,12 +24,24 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
@@ -85,11 +82,183 @@ public class ArticleActivity extends AppCompatActivity {
     private MenuItem toggleFavItem;
     @Nullable
     private String shareLink;
+    /**
+     * See @articleReceived field.
+     */
+    @Nullable
+    private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            findViewById(R.id.articleLoader).setVisibility(View.GONE);
+
+            ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()) {
+                    // Display icon
+                    findViewById(R.id.noNetwork).setVisibility(View.VISIBLE);
+                    // Display permanent message
+                    Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
+                            .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
+                                }
+                            }).show();
+                }
+            }
+        }
+    };
     private String commentsURI;
+    /**
+     * See @articleReceived field.
+     */
+    private final Response.Listener<String> commentsReceived = new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            Document commentDoc = Jsoup.parse(response);
+
+            ArrayList<Model> items = new ArrayList<>();
+            // Extract header
+            Elements header = commentDoc.select("[itemprop='InteractionCount']");
+            if (atLeastOneChild(header)) {
+                TextView commentHeader = new TextView(ArticleActivity.this);
+                commentHeader.setText(String.format("Commentaires %s", header.text()));
+                commentHeader.setTypeface(null, Typeface.BOLD);
+                commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
+                items.add(new Model(commentHeader, 0));
+            }
+
+            // Extract comments
+            Elements comments = commentDoc.select("[itemprop='commentText']");
+            for (Element comment : comments) {
+                Elements refs = comment.select("p.references");
+                if (atLeastOneChild(refs)) {
+                    // Clear date
+                    refs.select("span").remove();
+                    TextView author = new TextView(ArticleActivity.this);
+                    author.setTypeface(null, Typeface.BOLD);
+                    author.setText(refs.text());
+
+                    Elements commentComment = refs.next();
+                    if (atLeastOneChild(commentComment)) {
+                        TextView content = new TextView(ArticleActivity.this);
+                        content.setText(commentComment.first().text());
+                        if (comment.hasClass("reponse")) {
+                            author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
+                            content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
+                        } else {
+                            author.setPadding(0, 0, 0, 12);
+                            content.setPadding(0, 0, 0, 16);
+                        }
+                        int commentId = Integer.parseInt(comment.attr("data-reaction_id"));
+                        items.add(new Model(author, commentId));
+                        items.add(new Model(content, commentId));
+                    }
+                }
+            }
+            // Extract full comments page URI
+            Elements div = commentDoc.select("div.reactions");
+
+            if (atLeastOneChild(div)) {
+                Element fullComments = div.first().nextElementSibling();
+                Elements next = fullComments.select("a");
+                if (atLeastOneChild(next)) {
+                    commentsURI = Constants.BASE_URL2 + next.first().attr("href");
+                }
+            }
+            articleAdapter.addItems(items);
+        }
+    };
     private String shareSubject;
     private String shareText;
     private boolean isRestricted = false;
     private int articleId = 0;
+    /**
+     * This listener is a callback which can parse and extract the HTML page that has been received after
+     * an asynchronous call to the web. Jsoup library is used to parse the response and not to make the call.
+     * Otherwise, a NetworkOnMainThreadException will be fired by the system.
+     */
+    @Nullable
+    private final Response.Listener<String> articleReceived = new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            // Hide icon
+            findViewById(R.id.noNetwork).setVisibility(View.INVISIBLE);
+
+            Document doc = Jsoup.parse(response);
+
+            // If article was loaded from an external App, no image was passed from MainActivity,
+            // so it must be fetched in the Collapsing Toolbar
+            if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+                Elements image = doc.select("meta[property=og:image]");
+                if (atLeastOneChild(image)) {
+                    Picasso.with(ArticleActivity.this)
+                            .load(image.first().attr("content"))
+                            .into((ImageView) findViewById(R.id.imageArticle));
+                }
+            }
+
+            // Article is from a hosted blog
+            ArrayList<Model> items;
+
+            // Full article is restricted to paid members
+            Elements articleStatus = doc.select(".article__status");
+            if (!articleStatus.select(".icon__premium").isEmpty()) {
+                isRestricted = true;
+                articleStatus.remove();
+            }
+
+            // Standard article
+            items = extractDataFromHtml(doc);
+            LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
+            Log.d(TAG, "articleId " + articleId);
+            boolean hasArticle = leMondeDB.hasArticle(articleId);
+            toggleFavIcon(hasArticle);
+            if (isRestricted) {
+                if (shareItem != null) {
+                    shareItem.setIcon(getResources().getDrawable(R.drawable.ic_share_black));
+                }
+                CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
+                collapsingToolbar.setContentScrimResource(R.color.accent);
+                collapsingToolbar.setCollapsedTitleTextColor(getResources().getColor(R.color.primary_dark));
+                setTagInHeader(R.string.paid_article, R.color.accent, Color.BLACK);
+
+                if (getSupportActionBar() != null) {
+                    final Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp);
+                    getSupportActionBar().setHomeAsUpIndicator(upArrow);
+                }
+
+                // Add a button before comments where the user can connect
+                CardView connectButton = new CardView(ArticleActivity.this);
+                items.add(new Model(Model.BUTTON_TYPE, connectButton));
+            }
+            // After parsing the article, start a new request for comments
+            Element react = doc.getElementById("liste_reactions");
+            if (react != null) {
+                Elements dataAjURI = react.select("[^data-aj-uri]");
+                if (atLeastOneChild(dataAjURI)) {
+                    String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
+                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
+                }
+            }
+            //}
+            //}
+            articleAdapter.addItems(items);
+            findViewById(R.id.articleLoader).setVisibility(View.GONE);
+        }
+    };
+
+    /**
+     * Check if elements has at least one child.
+     * This helper is useful because Elements.select() returns a collection of nodes.
+     *
+     * @param elements nodes to check
+     * @return true if elements can be safely called with first()
+     */
+    public static boolean atLeastOneChild(@Nullable Elements elements) {
+        return elements != null && !elements.isEmpty();
+    }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent motionEvent) {
@@ -321,81 +490,6 @@ public class ArticleActivity extends AppCompatActivity {
         startActivity(new Intent(Intent.ACTION_VIEW, uri));
     }
 
-    /**
-     * This listener is a callback which can parse and extract the HTML page that has been received after
-     * an asynchronous call to the web. Jsoup library is used to parse the response and not to make the call.
-     * Otherwise, a NetworkOnMainThreadException will be fired by the system.
-     */
-    @Nullable
-    private final Response.Listener<String> articleReceived = new Response.Listener<String>() {
-        @Override
-        public void onResponse(String response) {
-            // Hide icon
-            findViewById(R.id.noNetwork).setVisibility(View.INVISIBLE);
-
-            Document doc = Jsoup.parse(response);
-
-            // If article was loaded from an external App, no image was passed from MainActivity,
-            // so it must be fetched in the Collapsing Toolbar
-            if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-                Elements image = doc.select("meta[property=og:image]");
-                if (atLeastOneChild(image)) {
-                    Picasso.with(ArticleActivity.this)
-                            .load(image.first().attr("content"))
-                            .into((ImageView) findViewById(R.id.imageArticle));
-                }
-            }
-
-            // Article is from a hosted blog
-            ArrayList<Model> items;
-
-            // Full article is restricted to paid members
-            Elements articleStatus = doc.select(".article__status");
-            if (!articleStatus.select(".icon__premium").isEmpty()) {
-                isRestricted = true;
-                articleStatus.remove();
-            }
-
-            // Standard article
-            items = extractDataFromHtml(doc);
-            LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
-            Log.d(TAG, "articleId " + articleId);
-            boolean hasArticle = leMondeDB.hasArticle(articleId);
-            toggleFavIcon(hasArticle);
-            if (isRestricted) {
-                if (shareItem != null) {
-                    shareItem.setIcon(getResources().getDrawable(R.drawable.ic_share_black));
-                }
-                CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
-                collapsingToolbar.setContentScrimResource(R.color.accent);
-                collapsingToolbar.setCollapsedTitleTextColor(getResources().getColor(R.color.primary_dark));
-                setTagInHeader(R.string.paid_article, R.color.accent, Color.BLACK);
-
-                if (getSupportActionBar() != null) {
-                    final Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp);
-                    getSupportActionBar().setHomeAsUpIndicator(upArrow);
-                }
-
-                // Add a button before comments where the user can connect
-                CardView connectButton = new CardView(ArticleActivity.this);
-                items.add(new Model(Model.BUTTON_TYPE, connectButton));
-            }
-            // After parsing the article, start a new request for comments
-            Element react = doc.getElementById("liste_reactions");
-            if (react != null) {
-                Elements dataAjURI = react.select("[^data-aj-uri]");
-                if (atLeastOneChild(dataAjURI)) {
-                    String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
-                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
-                }
-            }
-            //}
-            //}
-            articleAdapter.addItems(items);
-            findViewById(R.id.articleLoader).setVisibility(View.GONE);
-        }
-    };
-
     private void toggleFavIcon(boolean hasArticle) {
         if (isRestricted && toggleFavItem != null) {
             if (hasArticle) {
@@ -436,106 +530,6 @@ public class ArticleActivity extends AppCompatActivity {
         tagArticle.setBackgroundColor(ContextCompat.getColor(getBaseContext(), backgroundColor));
         tagArticle.setTextColor(textColor);
         tagArticle.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * See @articleReceived field.
-     */
-    private final Response.Listener<String> commentsReceived = new Response.Listener<String>() {
-        @Override
-        public void onResponse(String response) {
-            Document commentDoc = Jsoup.parse(response);
-
-            ArrayList<Model> items = new ArrayList<>();
-            // Extract header
-            Elements header = commentDoc.select("[itemprop='InteractionCount']");
-            if (atLeastOneChild(header)) {
-                TextView commentHeader = new TextView(ArticleActivity.this);
-                commentHeader.setText(String.format("Commentaires %s", header.text()));
-                commentHeader.setTypeface(null, Typeface.BOLD);
-                commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
-                items.add(new Model(commentHeader, 0));
-            }
-
-            // Extract comments
-            Elements comments = commentDoc.select("[itemprop='commentText']");
-            for (Element comment : comments) {
-                Elements refs = comment.select("p.references");
-                if (atLeastOneChild(refs)) {
-                    // Clear date
-                    refs.select("span").remove();
-                    TextView author = new TextView(ArticleActivity.this);
-                    author.setTypeface(null, Typeface.BOLD);
-                    author.setText(refs.text());
-
-                    Elements commentComment = refs.next();
-                    if (atLeastOneChild(commentComment)) {
-                        TextView content = new TextView(ArticleActivity.this);
-                        content.setText(commentComment.first().text());
-                        if (comment.hasClass("reponse")) {
-                            author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
-                            content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
-                        } else {
-                            author.setPadding(0, 0, 0, 12);
-                            content.setPadding(0, 0, 0, 16);
-                        }
-                        int commentId = Integer.parseInt(comment.attr("data-reaction_id"));
-                        items.add(new Model(author, commentId));
-                        items.add(new Model(content, commentId));
-                    }
-                }
-            }
-            // Extract full comments page URI
-            Elements div = commentDoc.select("div.reactions");
-
-            if (atLeastOneChild(div)) {
-                Element fullComments = div.first().nextElementSibling();
-                Elements next = fullComments.select("a");
-                if (atLeastOneChild(next)) {
-                    commentsURI = Constants.BASE_URL2 + next.first().attr("href");
-                }
-            }
-            articleAdapter.addItems(items);
-        }
-    };
-
-    /**
-     * See @articleReceived field.
-     */
-    @Nullable
-    private final Response.ErrorListener errorResponse = new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            findViewById(R.id.articleLoader).setVisibility(View.GONE);
-
-            ConnectivityManager cm = (ConnectivityManager) getBaseContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (cm != null) {
-                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()) {
-                    // Display icon
-                    findViewById(R.id.noNetwork).setVisibility(View.VISIBLE);
-                    // Display permanent message
-                    Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.error_no_connection), Snackbar.LENGTH_INDEFINITE)
-                            .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
-                                }
-                            }).show();
-                }
-            }
-        }
-    };
-
-    /**
-     * Check if elements has at least one child.
-     * This helper is useful because Elements.select() returns a collection of nodes.
-     *
-     * @param elements nodes to check
-     * @return true if elements can be safely called with first()
-     */
-    public static boolean atLeastOneChild(@Nullable Elements elements) {
-        return elements != null && !elements.isEmpty();
     }
 
     /**

@@ -1,6 +1,5 @@
 package org.mbach.lemonde.article;
 
-import android.util.Log;
 import android.widget.TextView;
 
 import androidx.test.core.app.ApplicationProvider;

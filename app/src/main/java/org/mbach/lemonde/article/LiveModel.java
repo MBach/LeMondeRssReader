@@ -14,12 +14,12 @@ public class LiveModel extends Model {
         this.subModels = new ArrayList<>();
     }
 
-    public void setAuthorName(String authorName) {
-        this.authorName = authorName;
-    }
-
     public String getAuthorName() {
         return this.authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
     public String getAuthorAvatar() {
@@ -66,7 +66,6 @@ public class LiveModel extends Model {
 
         return quote;
     }
-
 
 
     public class SubModel {

@@ -5,8 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
-import androidx.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import org.mbach.lemonde.home.RssItem;
 
@@ -20,43 +21,10 @@ import java.util.List;
  * @since 2017-07
  */
 public class LeMondeDB {
-    private SQLiteDatabase sqLiteDatabase;
     @NonNull
     private final LeMondeSQLiteOpenHelper statisticSQLiteOpenHelper;
+    private SQLiteDatabase sqLiteDatabase;
 
-
-    /**
-     * StatEntry inner class.
-     */
-    static class StatEntry implements BaseColumns {
-        static final String TABLE = "table_stats";
-        static final String COL_CATEGORY = "CATEGORY";
-        static final String COL_TIMES_OPENED = "TIMES_OPENED";
-        static final String COL_LAST_OPENED = "LAST_OPENED";
-        static final String CREATE_TABLE = "CREATE TABLE " + TABLE + " ("
-                + COL_CATEGORY + " INTEGER PRIMARY KEY, "
-                + COL_TIMES_OPENED + " INTEGER NOT NULL, "
-                + COL_LAST_OPENED + " INTEGER NOT NULL);";
-    }
-
-    /**
-     * FavEntry inner class.
-     */
-    static class FavEntry implements BaseColumns {
-        static final String TABLE = "table_fav";
-        static final String COL_CATEGORY = "CATEGORY";
-        static final String COL_TITLE = "TITLE";
-        static final String COL_LINK = "LINK";
-        static final String COL_ENCLOSURE = "ENCLOSURE";
-        static final String COL_DATE = "DATE";
-        static final String CREATE_TABLE = "CREATE TABLE " + TABLE + " ("
-                + _ID + " INTEGER PRIMARY KEY, "
-                + COL_CATEGORY + " TEXT, "
-                + COL_TITLE + " TEXT NOT NULL, "
-                + COL_LINK + " TEXT NOT NULL, "
-                + COL_ENCLOSURE + " TEXT NOT NULL, "
-                + COL_DATE + " INTEGER NOT NULL);";
-    }
 
     /**
      * Constructor.
@@ -74,8 +42,6 @@ public class LeMondeDB {
     private void close() {
         sqLiteDatabase.close();
     }
-
-    // STATISTICS ON MENU
 
     /**
      * Update statistics when one has selected an entry in the menu.
@@ -106,7 +72,6 @@ public class LeMondeDB {
         close();
     }
 
-
     /**
      * Get the list of entries, ordered by frequency.
      *
@@ -132,7 +97,7 @@ public class LeMondeDB {
         return results;
     }
 
-    // MANAGE FAVORITES
+    // STATISTICS ON MENU
 
     /**
      * Check if article was saved.
@@ -143,9 +108,9 @@ public class LeMondeDB {
     public boolean hasArticle(int articleId) {
         open();
         Cursor entry = sqLiteDatabase.query(FavEntry.TABLE,
-                new String[] { FavEntry._ID },
+                new String[]{FavEntry._ID},
                 FavEntry._ID + " = ?",
-                new String[] { String.valueOf(articleId) }, null,null, null);
+                new String[]{String.valueOf(articleId)}, null, null, null);
         long id = 0;
         if (entry.getCount() > 0) {
             entry.moveToFirst();
@@ -179,6 +144,8 @@ public class LeMondeDB {
         return id != -1;
     }
 
+    // MANAGE FAVORITES
+
     /**
      * Delete a favorite.
      *
@@ -191,7 +158,7 @@ public class LeMondeDB {
         }
         open();
         String selection = FavEntry._ID + " = ?";
-        String[] selectionArgs = { String.valueOf(articleId) };
+        String[] selectionArgs = {String.valueOf(articleId)};
         long count = sqLiteDatabase.delete(FavEntry.TABLE, selection, selectionArgs);
         close();
         return count > 0;
@@ -207,7 +174,7 @@ public class LeMondeDB {
         open();
         Cursor entries = sqLiteDatabase.query(FavEntry.TABLE,
                 new String[]{FavEntry._ID, FavEntry.COL_TITLE, FavEntry.COL_CATEGORY, FavEntry.COL_LINK, FavEntry.COL_ENCLOSURE, FavEntry.COL_DATE},
-                null,null, null, null, FavEntry.COL_DATE + " DESC", null);
+                null, null, null, null, FavEntry.COL_DATE + " DESC", null);
         List<RssItem> results = new ArrayList<>();
         if (entries.getCount() != 0) {
             while (entries.moveToNext()) {
@@ -226,5 +193,38 @@ public class LeMondeDB {
         entries.close();
         close();
         return results;
+    }
+
+    /**
+     * StatEntry inner class.
+     */
+    static class StatEntry implements BaseColumns {
+        static final String TABLE = "table_stats";
+        static final String COL_CATEGORY = "CATEGORY";
+        static final String COL_TIMES_OPENED = "TIMES_OPENED";
+        static final String COL_LAST_OPENED = "LAST_OPENED";
+        static final String CREATE_TABLE = "CREATE TABLE " + TABLE + " ("
+                + COL_CATEGORY + " INTEGER PRIMARY KEY, "
+                + COL_TIMES_OPENED + " INTEGER NOT NULL, "
+                + COL_LAST_OPENED + " INTEGER NOT NULL);";
+    }
+
+    /**
+     * FavEntry inner class.
+     */
+    static class FavEntry implements BaseColumns {
+        static final String TABLE = "table_fav";
+        static final String COL_CATEGORY = "CATEGORY";
+        static final String COL_TITLE = "TITLE";
+        static final String COL_LINK = "LINK";
+        static final String COL_ENCLOSURE = "ENCLOSURE";
+        static final String COL_DATE = "DATE";
+        static final String CREATE_TABLE = "CREATE TABLE " + TABLE + " ("
+                + _ID + " INTEGER PRIMARY KEY, "
+                + COL_CATEGORY + " TEXT, "
+                + COL_TITLE + " TEXT NOT NULL, "
+                + COL_LINK + " TEXT NOT NULL, "
+                + COL_ENCLOSURE + " TEXT NOT NULL, "
+                + COL_DATE + " INTEGER NOT NULL);";
     }
 }

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
+
 import androidx.annotation.NonNull;
 
 /**

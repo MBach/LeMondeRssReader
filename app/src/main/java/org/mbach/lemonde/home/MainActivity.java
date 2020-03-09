@@ -17,30 +17,32 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.LeMondeDB;
@@ -64,13 +66,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final int GET_LATEST_RSS_FEED = 0;
     private static final int FROM_SETTINGS_ACTIVITY = 1;
-
-    private DrawerLayout drawerLayout;
-    private RecyclerView mainActivityRecyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private final RecyclerRssItemAdapter adapter = new RecyclerRssItemAdapter();
     private final SparseArray<String> rssCats = new SparseArray<>();
     private final SparseIntArray colorCats = new SparseIntArray();
+    private DrawerLayout drawerLayout;
+    private RecyclerView mainActivityRecyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private MenuItem selectedMenuItem;
     private Snackbar snackbar;
 

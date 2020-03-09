@@ -32,20 +32,20 @@ class GraphModel extends Model {
         return this.title;
     }
 
-    String getSubtitle() {
-        return this.subtitle;
-    }
-
-    String getSource() {
-        return this.source;
-    }
-
     void setTitle(String title) {
         this.title = title;
     }
 
+    String getSubtitle() {
+        return this.subtitle;
+    }
+
     void setSubtitle(String subtitle) {
         this.subtitle = subtitle;
+    }
+
+    String getSource() {
+        return this.source;
     }
 
     void setSource(String source) {

@@ -2,9 +2,10 @@ package org.mbach.lemonde.article;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.widget.TextView;
 
 /**
  * Model class.
@@ -13,21 +14,6 @@ import android.widget.TextView;
  * @since 2017-05
  */
 class Model implements Parcelable {
-
-    static final int UNKNOWN_TYPE = -1;
-    static final int TEXT_TYPE = 0;
-    static final int IMAGE_TYPE = 1;
-    static final int TWEET_TYPE = 2;
-    static final int FACTS_TYPE = 3;
-    static final int COMMENT_TYPE = 4;
-    static final int BUTTON_TYPE = 5;
-    static final int VIDEO_TYPE = 6;
-    static final int LIVE_TYPE = 7;
-
-    private final int id;
-    private final int type;
-    @NonNull
-    private final Object theContent;
 
     public static final Parcelable.Creator<Model> CREATOR = new Parcelable.Creator<Model>() {
         public Model createFromParcel(@NonNull Parcel in) {
@@ -38,6 +24,19 @@ class Model implements Parcelable {
             return new Model[size];
         }
     };
+    static final int UNKNOWN_TYPE = -1;
+    static final int TEXT_TYPE = 0;
+    static final int IMAGE_TYPE = 1;
+    static final int TWEET_TYPE = 2;
+    static final int FACTS_TYPE = 3;
+    static final int COMMENT_TYPE = 4;
+    static final int BUTTON_TYPE = 5;
+    static final int VIDEO_TYPE = 6;
+    static final int LIVE_TYPE = 7;
+    private final int id;
+    private final int type;
+    @NonNull
+    private final Object theContent;
 
     private Model(Parcel in) {
         id = in.readInt();

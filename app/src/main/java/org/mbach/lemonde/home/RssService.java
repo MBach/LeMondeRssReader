@@ -3,9 +3,10 @@ package org.mbach.lemonde.home;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,8 +18,6 @@ import com.android.volley.toolbox.Volley;
 
 import org.mbach.lemonde.Constants;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -29,34 +28,16 @@ import java.util.ArrayList;
  */
 public class RssService extends IntentService {
 
-    private static final String TAG = "RssService";
-    @Nullable
-    private static RequestQueue REQUEST_QUEUE = null;
-
     public static final int FETCH_SUCCESS = 0;
     public static final int FETCH_TIMEOUT = 1;
     public static final String CATEGORY = "CATEGORY";
     public static final String PENDING_RESULT = "RSS_SERVICE_PENDING_RESULT";
     public static final String PARCELABLE_EXTRAS = "PARCELABLE_EXTRAS";
-
+    private static final String TAG = "RssService";
+    @Nullable
+    private static RequestQueue REQUEST_QUEUE = null;
     private final RssParser parser = new RssParser();
     private PendingIntent reply;
-
-    public RssService() {
-        super("RssService");
-    }
-
-    @Override
-    protected void onHandleIntent(@Nullable final Intent intent) {
-        if (REQUEST_QUEUE == null) {
-            REQUEST_QUEUE = Volley.newRequestQueue(this);
-        }
-        if (intent != null) {
-            reply = intent.getParcelableExtra(PENDING_RESULT);
-            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, Constants.BASE_URL + intent.getStringExtra(CATEGORY), onFeedReceived, onErrorResponse));
-        }
-    }
-
     /**
      *
      */
@@ -73,7 +54,6 @@ public class RssService extends IntentService {
             }
         }
     };
-
     /**
      *
      */
@@ -91,4 +71,19 @@ public class RssService extends IntentService {
             }
         }
     };
+
+    public RssService() {
+        super("RssService");
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable final Intent intent) {
+        if (REQUEST_QUEUE == null) {
+            REQUEST_QUEUE = Volley.newRequestQueue(this);
+        }
+        if (intent != null) {
+            reply = intent.getParcelableExtra(PENDING_RESULT);
+            REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, Constants.BASE_URL + intent.getStringExtra(CATEGORY), onFeedReceived, onErrorResponse));
+        }
+    }
 }

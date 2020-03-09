@@ -2,6 +2,7 @@ package org.mbach.lemonde.home;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -15,7 +16,16 @@ public class RssItem implements Parcelable {
 
     public static final int ARTICLE_TYPE = 0;
     public static final int DATE_GROUP_TYPE = 1;
+    public static final Parcelable.Creator<RssItem> CREATOR = new Parcelable.Creator<RssItem>() {
+        public RssItem createFromParcel(@NonNull Parcel in) {
+            return new RssItem(in);
+        }
 
+        public RssItem[] newArray(int size) {
+            return new RssItem[size];
+        }
+    };
+    private final int type;
     @Nullable
     private String link = null;
     @Nullable
@@ -29,17 +39,6 @@ public class RssItem implements Parcelable {
     @Nullable
     private String category = null;
     private long pubDate;
-    private final int type;
-
-    public static final Parcelable.Creator<RssItem> CREATOR = new Parcelable.Creator<RssItem>() {
-        public RssItem createFromParcel(@NonNull Parcel in) {
-            return new RssItem(in);
-        }
-
-        public RssItem[] newArray(int size) {
-            return new RssItem[size];
-        }
-    };
 
     private RssItem(Parcel in) {
         link = in.readString();

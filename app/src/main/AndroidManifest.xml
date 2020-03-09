@@ -71,11 +71,6 @@
             android:label="@string/action_settings"
             android:parentActivityName=".home.MainActivity"
             tools:targetApi="JELLY_BEAN" />
-
-        <!-- Account page -->
-        <activity
-            android:name=".account.LoginActivity"
-            android:label="@string/login_activity_title" />
     </application>
 
 </manifest>

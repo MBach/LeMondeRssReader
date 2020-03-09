@@ -70,16 +70,5 @@
     <string name="preference_share_icons">Icône de partage</string>
     <string name="preference_share_description">Activer le partage d’un article (email, réseaux sociaux, etc.)</string>
 
-    <string name="login_activity_title">Connexion</string>
-
-    <!-- Strings related to login -->
-    <string name="snackbar_not_implemented">Non implémenté</string>
-    <string name="snackbar_error_when_auth">Impossible de se connecter</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Mot de passe</string>
-    <string name="action_sign_in">Connexion</string>
-    <string name="error_invalid_email">Cette adresse email est invalide</string>
-    <string name="error_invalid_password">Le mot de passe est trop court</string>
-    <string name="error_field_required">Champ obligatoire</string>
     <string name="user_avatar">User avatar</string>
 </resources>

@@ -25,20 +25,6 @@
         android:padding="0dp">
 
         <Button
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="0dp"
-            android:autoLink="web"
-            android:linksClickable="true"
-            android:onClick="goToAccount"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:text="@string/login_activity_title"
-            android:textSize="12sp"
-            android:typeface="normal" />
-
-        <Button
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

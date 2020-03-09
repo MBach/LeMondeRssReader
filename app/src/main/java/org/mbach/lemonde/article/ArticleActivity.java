@@ -52,7 +52,6 @@ import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.LeMondeDB;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
-import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.home.MainActivity;
 import org.mbach.lemonde.home.RssItem;
 
@@ -479,10 +478,6 @@ public class ArticleActivity extends AppCompatActivity {
             uri = Uri.parse(link);
             startActivity(new Intent(Intent.ACTION_VIEW, uri));
         }
-    }
-
-    public void goToAccount(@SuppressWarnings("unused") View view) {
-        startActivity(new Intent(this, LoginActivity.class));
     }
 
     public void register(@SuppressWarnings("unused") View view) {

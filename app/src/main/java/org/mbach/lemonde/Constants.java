@@ -10,7 +10,6 @@ public final class Constants {
 
     public static final String BASE_URL = "https://www.lemonde.fr/";
     public static final String BASE_URL2 = "https://www.lemonde.fr";
-    public static final String LOGIN_URI = "https://secure.lemonde.fr/sfuser/connexion";
     public static final String CAT_NEWS = "rss/une.xml";
     public static final String EXTRA_RSS_ARTICLE_ID = "RSS_ARTICLE_ID";
     public static final String EXTRA_RSS_LINK = "RSS_LINK";

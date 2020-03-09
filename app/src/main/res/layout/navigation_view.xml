@@ -7,5 +7,4 @@
     android:layout_gravity="start"
     android:fitsSystemWindows="true"
     app:itemTextColor="@color/drawer_item"
-    app:headerLayout="@layout/drawer_header"
     app:menu="@menu/drawer_menu_items" />

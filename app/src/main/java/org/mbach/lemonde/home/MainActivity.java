@@ -48,7 +48,6 @@ import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.LeMondeDB;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
-import org.mbach.lemonde.account.LoginActivity;
 import org.mbach.lemonde.article.ArticleActivity;
 import org.mbach.lemonde.favorites.FavoritesActivity;
 import org.mbach.lemonde.settings.SettingsActivity;
@@ -220,9 +219,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_account:
-                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                return true;
             case R.id.action_settings:
                 startActivityForResult(new Intent(getApplicationContext(), SettingsActivity.class), FROM_SETTINGS_ACTIVITY);
                 return true;
@@ -393,14 +389,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.navigation_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
-        View header = navigationView.getHeaderView(0);
-        header.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                drawerLayout.closeDrawers();
-            }
-        });
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(

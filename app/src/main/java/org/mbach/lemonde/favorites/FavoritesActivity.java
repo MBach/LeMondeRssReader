@@ -102,23 +102,22 @@ public class FavoritesActivity extends AppCompatActivity {
      * @param view the favorite which was touched
      */
     public void openArticle(@NonNull View view) {
-        RssItem favoritesModel = null;
+        RssItem fav = null;
         for (RssItem favorite : this.favorites) {
-            if (favorite.getArticleId() == view.getId()) {
-                favoritesModel = favorite;
+            if (favorite.getLink() != null && favorite.getLink().hashCode() == view.getId()) {
+                fav = favorite;
                 break;
             }
         }
-        if (favoritesModel == null) {
+        if (fav == null) {
             return;
         }
         Intent intent = new Intent(this, ArticleActivity.class);
         Bundle extras = new Bundle();
-        extras.putInt(Constants.EXTRA_RSS_ARTICLE_ID, view.getId());
-        extras.putString(Constants.EXTRA_RSS_LINK, favoritesModel.getLink());
-        extras.putString(Constants.EXTRA_RSS_IMAGE, favoritesModel.getMediaContent());
-        extras.putString(Constants.EXTRA_RSS_TITLE, favoritesModel.getTitle());
-        extras.putLong(Constants.EXTRA_RSS_DATE, favoritesModel.getPubDate());
+        extras.putString(Constants.EXTRA_RSS_LINK, fav.getLink());
+        extras.putString(Constants.EXTRA_RSS_IMAGE, fav.getMediaContent());
+        extras.putString(Constants.EXTRA_RSS_TITLE, fav.getTitle());
+        extras.putLong(Constants.EXTRA_RSS_DATE, fav.getPubDate());
         intent.putExtras(extras);
         startActivity(intent);
     }
@@ -129,7 +128,7 @@ public class FavoritesActivity extends AppCompatActivity {
      * @param view the favorite which was touched
      */
     public void deleteFavorite(@NonNull View view) {
-        int id = 0;
+        /*int id = 0;
         View p = (View) view.getParent();
         for (RssItem favorite : this.favorites) {
             if (favorite.getArticleId() == p.getId()) {
@@ -139,9 +138,9 @@ public class FavoritesActivity extends AppCompatActivity {
         }
         if (id == 0) {
             return;
-        }
+        }*/
         LeMondeDB leMondeDB = new LeMondeDB(this);
-        if (leMondeDB.deleteArticle(id)) {
+        if (leMondeDB.deleteArticle("")) {
             Snackbar.make(findViewById(R.id.constraintFavorites), getString(R.string.favorites_article_removed), Snackbar.LENGTH_SHORT).show();
             loadFavorites();
         }

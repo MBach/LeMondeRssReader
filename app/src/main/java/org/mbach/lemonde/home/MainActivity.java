@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Intent intent = new Intent(MainActivity.this, ArticleActivity.class);
                     Bundle extras = new Bundle();
 
-                    extras.putInt(Constants.EXTRA_RSS_ARTICLE_ID, rssItem.getArticleId());
                     extras.putString(Constants.EXTRA_RSS_LINK, rssItem.getLink());
                     extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getMediaContent());
                     extras.putString(Constants.EXTRA_RSS_TITLE, rssItem.getTitle());

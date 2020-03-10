@@ -102,23 +102,23 @@ public class LeMondeDB {
     /**
      * Check if article was saved.
      *
-     * @param articleId article to search
+     * @param link article to search
      * @return true if article was found
      */
-    public boolean hasArticle(int articleId) {
+    public boolean hasArticle(String link) {
         open();
         Cursor entry = sqLiteDatabase.query(FavEntry.TABLE,
-                new String[]{FavEntry._ID},
-                FavEntry._ID + " = ?",
-                new String[]{String.valueOf(articleId)}, null, null, null);
-        long id = 0;
+                new String[]{FavEntry.COL_LINK},
+                FavEntry.COL_LINK + " = ?",
+                new String[]{link}, null, null, null);
+        String id = "";
         if (entry.getCount() > 0) {
             entry.moveToFirst();
-            id = entry.getLong(0);
+            id = entry.getString(0);
         }
         entry.close();
         close();
-        return id == articleId;
+        return id.equals(link);
     }
 
     /**
@@ -128,19 +128,16 @@ public class LeMondeDB {
      * @return true if successfully saved
      */
     public boolean saveArticle(@NonNull RssItem favorite) {
-        if (favorite.getArticleId() <= 0) {
-            return false;
-        }
         open();
         ContentValues values = new ContentValues();
-        values.put(FavEntry._ID, favorite.getArticleId());
+        values.put(FavEntry.COL_LINK, favorite.getLink());
         values.put(FavEntry.COL_TITLE, favorite.getTitle());
         values.put(FavEntry.COL_CATEGORY, favorite.getCategory());
-        values.put(FavEntry.COL_LINK, favorite.getLink());
         values.put(FavEntry.COL_ENCLOSURE, favorite.getMediaContent());
         values.put(FavEntry.COL_DATE, favorite.getPubDate());
         long id = sqLiteDatabase.insert(FavEntry.TABLE, null, values);
         close();
+        Log.d("LeMondeDB", "id : " + id);
         return id != -1;
     }
 
@@ -149,16 +146,16 @@ public class LeMondeDB {
     /**
      * Delete a favorite.
      *
-     * @param articleId article to remove from favorites
+     * @param link article to remove from favorites
      * @return true if deleted
      */
-    public boolean deleteArticle(int articleId) {
-        if (articleId <= 0) {
+    public boolean deleteArticle(String link) {
+        if ("".equals(link)) {
             return false;
         }
         open();
-        String selection = FavEntry._ID + " = ?";
-        String[] selectionArgs = {String.valueOf(articleId)};
+        String selection = FavEntry.COL_LINK + " = ?";
+        String[] selectionArgs = {link};
         long count = sqLiteDatabase.delete(FavEntry.TABLE, selection, selectionArgs);
         close();
         return count > 0;
@@ -173,21 +170,19 @@ public class LeMondeDB {
     public List<RssItem> getFavorites() {
         open();
         Cursor entries = sqLiteDatabase.query(FavEntry.TABLE,
-                new String[]{FavEntry._ID, FavEntry.COL_TITLE, FavEntry.COL_CATEGORY, FavEntry.COL_LINK, FavEntry.COL_ENCLOSURE, FavEntry.COL_DATE},
+                new String[]{FavEntry.COL_LINK,  FavEntry.COL_CATEGORY, FavEntry.COL_TITLE, FavEntry.COL_ENCLOSURE, FavEntry.COL_DATE},
                 null, null, null, null, FavEntry.COL_DATE + " DESC", null);
         List<RssItem> results = new ArrayList<>();
         if (entries.getCount() != 0) {
             while (entries.moveToNext()) {
                 int i = -1;
                 RssItem favorite = new RssItem(RssItem.ARTICLE_TYPE);
-                favorite.setArticleId(entries.getInt(++i));
-                favorite.setTitle(entries.getString(++i));
-                favorite.setCategory(entries.getString(++i));
                 favorite.setLink(entries.getString(++i));
+                favorite.setCategory(entries.getString(++i));
+                favorite.setTitle(entries.getString(++i));
                 favorite.setEnclosure(entries.getString(++i));
                 favorite.setPubDate(entries.getLong(++i));
                 results.add(favorite);
-                Log.d("LeMondeDB", "id = " + favorite.getArticleId());
             }
         }
         entries.close();
@@ -220,11 +215,11 @@ public class LeMondeDB {
         static final String COL_ENCLOSURE = "ENCLOSURE";
         static final String COL_DATE = "DATE";
         static final String CREATE_TABLE = "CREATE TABLE " + TABLE + " ("
-                + _ID + " INTEGER PRIMARY KEY, "
+                + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                + COL_LINK + " TEXT NOT NULL, "
                 + COL_CATEGORY + " TEXT, "
                 + COL_TITLE + " TEXT NOT NULL, "
-                + COL_LINK + " TEXT NOT NULL, "
-                + COL_ENCLOSURE + " TEXT NOT NULL, "
+                + COL_ENCLOSURE + " TEXT, "
                 + COL_DATE + " INTEGER NOT NULL);";
     }
 }

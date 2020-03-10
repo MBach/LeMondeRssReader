@@ -27,6 +27,7 @@
             android:layout_marginEnd="8dp"
             android:textColor="?attr/defaultText" />
 
+        <!--
         <TextView
             android:id="@+id/favorite_category"
             android:layout_width="match_parent"
@@ -35,6 +36,7 @@
             android:layout_marginEnd="8dp"
             android:textColor="?attr/authorDateText"
             android:textStyle="italic" />
+            -->
 
     </LinearLayout>
 

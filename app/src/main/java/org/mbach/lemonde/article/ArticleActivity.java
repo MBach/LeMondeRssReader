@@ -70,6 +70,11 @@ public class ArticleActivity extends AppCompatActivity {
     private static final String STATE_RECYCLER_VIEW = "STATE_RECYCLER_VIEW";
     private static final String STATE_ADAPTER_ITEM = "STATE_ADAPTER_ITEM";
 
+    private String commentsURI;
+    private String shareSubject;
+    private String shareText;
+    private boolean isRestricted = false;
+
     @Nullable
     static RequestQueue REQUEST_QUEUE = null;
 
@@ -79,8 +84,10 @@ public class ArticleActivity extends AppCompatActivity {
     private ProgressBar autoLoader;
     private MenuItem shareItem;
     private MenuItem toggleFavItem;
+
     @Nullable
     private String shareLink;
+
     /**
      * See @articleReceived field.
      */
@@ -108,7 +115,6 @@ public class ArticleActivity extends AppCompatActivity {
             }
         }
     };
-    private String commentsURI;
     /**
      * See @articleReceived field.
      */
@@ -169,10 +175,7 @@ public class ArticleActivity extends AppCompatActivity {
             articleAdapter.addItems(items);
         }
     };
-    private String shareSubject;
-    private String shareText;
-    private boolean isRestricted = false;
-    private int articleId = 0;
+
     /**
      * This listener is a callback which can parse and extract the HTML page that has been received after
      * an asynchronous call to the web. Jsoup library is used to parse the response and not to make the call.
@@ -211,8 +214,8 @@ public class ArticleActivity extends AppCompatActivity {
             // Standard article
             items = extractDataFromHtml(doc);
             LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
-            Log.d(TAG, "articleId " + articleId);
-            boolean hasArticle = leMondeDB.hasArticle(articleId);
+            Log.d(TAG, "shareLink " + shareLink);
+            boolean hasArticle = leMondeDB.hasArticle(shareLink);
             toggleFavIcon(hasArticle);
             if (isRestricted) {
                 if (shareItem != null) {
@@ -285,6 +288,9 @@ public class ArticleActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean shareContent = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
+
         final CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
         AppBarLayout appBarLayout = findViewById(R.id.articleAppBarLayout);
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
@@ -298,7 +304,7 @@ public class ArticleActivity extends AppCompatActivity {
                 //Log.d(TAG, "verticalOffset = " + verticalOffset);
                 View share = findViewById(R.id.action_share);
 
-                if (Math.abs(verticalOffset) - appBarLayout.getTotalScrollRange() == 0) {
+                if (shareContent && Math.abs(verticalOffset) - appBarLayout.getTotalScrollRange() == 0) {
                     shareItem.setVisible(true);
                     if (share != null) {
                         share.startAnimation(animationFadeIn);
@@ -343,10 +349,9 @@ public class ArticleActivity extends AppCompatActivity {
                     .load(intent.getExtras().getString(Constants.EXTRA_RSS_IMAGE))
                     .into((ImageView) findViewById(R.id.imageArticle));
             shareLink = intent.getExtras().getString(Constants.EXTRA_RSS_LINK);
-            int articleId = intent.getExtras().getInt(Constants.EXTRA_RSS_ARTICLE_ID);
-            if (articleId > 0) {
+            /*if (articleId > 0) {
                 this.articleId = articleId;
-            }
+            }*/
         }
 
         // Start async job
@@ -403,9 +408,9 @@ public class ArticleActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean shareContent = sharedPreferences.getBoolean("shareOnSocialNetworks", true);
+        getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
+        shareItem = menu.findItem(R.id.action_share);
         if (shareContent) {
-            getMenuInflater().inflate(R.menu.articleactivity_right_menu, menu);
-            shareItem = menu.findItem(R.id.action_share);
             /// FIXME
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -426,35 +431,39 @@ public class ArticleActivity extends AppCompatActivity {
                     return false;
                 }
             });
-            toggleFavItem = menu.findItem(R.id.action_toggle_fav);
-            toggleFavItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    final LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
-                    boolean hasArticle = leMondeDB.hasArticle(articleId);
-                    if (hasArticle && leMondeDB.deleteArticle(articleId)) {
-                        hasArticle = false;
-                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_removed), Snackbar.LENGTH_SHORT).show();
-                    } else {
-                        RssItem favorite = new RssItem(RssItem.ARTICLE_TYPE);
-                        favorite.setArticleId(articleId);
-                        if (getIntent().getExtras() != null) {
-                            favorite.setTitle(getIntent().getExtras().getString(Constants.EXTRA_RSS_TITLE));
-                            favorite.setPubDate(getIntent().getExtras().getLong(Constants.EXTRA_RSS_DATE));
-                            favorite.setEnclosure(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE));
-                        }
-                        favorite.setLink(shareLink);
-                        favorite.setCategory(getTitle().toString());
-                        if (leMondeDB.saveArticle(favorite)) {
-                            hasArticle = true;
-                            Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_added), Snackbar.LENGTH_SHORT).show();
-                        }
-                    }
-                    toggleFavIcon(hasArticle);
-                    return false;
-                }
-            });
+        } else {
+            shareItem.setVisible(false);
         }
+        toggleFavItem = menu.findItem(R.id.action_toggle_fav);
+        toggleFavItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                final LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
+                boolean hasArticle = leMondeDB.hasArticle(shareLink);
+                Log.d(TAG,"hasArticle : " + hasArticle + ", link : " + shareLink);
+                if (hasArticle && leMondeDB.deleteArticle(shareLink)) {
+                    hasArticle = false;
+                    Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_removed), Snackbar.LENGTH_SHORT).show();
+                } else {
+                    RssItem favorite = new RssItem(RssItem.ARTICLE_TYPE);
+                    //favorite.setArticleId(link);
+                    if (getIntent().getExtras() != null) {
+                        favorite.setTitle(getIntent().getExtras().getString(Constants.EXTRA_RSS_TITLE));
+                        favorite.setPubDate(getIntent().getExtras().getLong(Constants.EXTRA_RSS_DATE));
+                        favorite.setEnclosure(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE));
+                    }
+                    favorite.setLink(shareLink);
+                    favorite.setCategory(getTitle().toString());
+                    if (leMondeDB.saveArticle(favorite)) {
+                        hasArticle = true;
+                        Log.d(TAG,"hasArticle saveArticle");
+                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_added), Snackbar.LENGTH_SHORT).show();
+                    }
+                }
+                toggleFavIcon(hasArticle);
+                return false;
+            }
+        });
         return true;
     }
 

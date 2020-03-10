@@ -69,9 +69,9 @@ class FavoritesAdapter extends RecyclerView.Adapter {
         }
         switch (model.getType()) {
             case RssItem.ARTICLE_TYPE:
-                ((ViewHolderArticle) holder).setId(model.getArticleId());
+                ((ViewHolderArticle) holder).setId(model.getLink().hashCode());
                 ((ViewHolderArticle) holder).getTitle().setText(model.getTitle());
-                ((ViewHolderArticle) holder).getCategory().setText(model.getCategory());
+               //((ViewHolderArticle) holder).getCategory().setText("");
                 break;
             case RssItem.DATE_GROUP_TYPE:
                 SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMM yyyy", Locale.FRENCH);
@@ -120,10 +120,6 @@ class FavoritesAdapter extends RecyclerView.Adapter {
             this.view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
         }
 
-        /*int getId() {
-            return view.getId();
-        }*/
-
         void setId(int id) {
             view.setId(id);
         }
@@ -132,8 +128,8 @@ class FavoritesAdapter extends RecyclerView.Adapter {
             return view.findViewById(R.id.favorite_title);
         }
 
-        TextView getCategory() {
+        /*TextView getCategory() {
             return view.findViewById(R.id.favorite_category);
-        }
+        }*/
     }
 }

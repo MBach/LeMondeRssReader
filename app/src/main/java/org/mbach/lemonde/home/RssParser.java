@@ -108,13 +108,13 @@ class RssParser {
                             } catch (ParseException e) {
                                 Log.d(TAG, "cannot parse date: " + text);
                             }
-                        } else if (tagName.equalsIgnoreCase(TAG_GUID) && text != null) {
+                        /*} else if (tagName.equalsIgnoreCase(TAG_GUID) && text != null) {
                             Matcher matcher = ARTICLE_ID_PATTERN.matcher(text);
                             if (matcher.find()) {
                                 item.setArticleId(Integer.valueOf(matcher.group(1)));
                             } else {
                                 item.setArticleId(0);
-                            }
+                            }*/
                         } else if (tagName.equalsIgnoreCase(TAG_ENCLOSURE)) {
                             text = parser.getAttributeValue(null, "url");
                             item.setEnclosure(text);

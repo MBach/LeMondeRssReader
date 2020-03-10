@@ -26,24 +26,27 @@ public class RssItem implements Parcelable {
         }
     };
     private final int type;
+
     @Nullable
     private String link = null;
+
     @Nullable
     private String title = null;
-    @Nullable
-    private Integer articleId = null;
+
     @Nullable
     private String enclosure = null;
+
     @Nullable
     private String mediaContent = null;
+
     @Nullable
     private String category = null;
+
     private long pubDate;
 
     private RssItem(Parcel in) {
         link = in.readString();
         title = in.readString();
-        articleId = in.readInt();
         enclosure = in.readString();
         pubDate = in.readLong();
         mediaContent = in.readString();
@@ -90,14 +93,6 @@ public class RssItem implements Parcelable {
         this.mediaContent = mediaContent;
     }
 
-    public int getArticleId() {
-        return articleId;
-    }
-
-    public void setArticleId(int articleId) {
-        this.articleId = articleId;
-    }
-
     public long getPubDate() {
         return pubDate;
     }
@@ -128,7 +123,6 @@ public class RssItem implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(link);
         dest.writeString(title);
-        dest.writeInt(articleId);
         dest.writeString(enclosure);
         dest.writeLong(pubDate);
         dest.writeString(mediaContent);

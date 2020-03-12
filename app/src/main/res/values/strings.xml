@@ -49,6 +49,7 @@
     <string name="blog_article">Article de blog</string>
     <string name="large_article">Grands Formats</string>
     <string name="image_from_article">Image de l’article</string>
+    <string name="type_article">Type d’article</string>
 
     <!-- Favorites -->
     <string name="favorites_title_activity">Favoris</string>

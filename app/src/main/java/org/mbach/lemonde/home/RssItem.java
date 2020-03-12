@@ -27,7 +27,6 @@ public class RssItem implements Parcelable {
     };
     private final int type;
 
-    @Nullable
     private String link = null;
 
     @Nullable
@@ -57,7 +56,6 @@ public class RssItem implements Parcelable {
         this.type = type;
     }
 
-    @Nullable
     public String getLink() {
         return link;
     }

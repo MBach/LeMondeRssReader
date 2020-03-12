@@ -363,7 +363,9 @@ public class ArticleActivity extends AppCompatActivity {
                 recyclerView.getLayoutManager().onRestoreInstanceState(parcelable);
             }
             ArrayList<Model> items = getIntent().getParcelableArrayListExtra(STATE_ADAPTER_ITEM);
-            articleAdapter.addItems(items);
+            if (items != null) {
+                articleAdapter.addItems(items);
+            }
             recyclerView.getLayoutManager().scrollToPosition(lastFirstVisiblePosition);
         } else {
             REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));

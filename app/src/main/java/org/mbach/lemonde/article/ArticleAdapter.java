@@ -216,8 +216,9 @@ class ArticleAdapter extends RecyclerView.Adapter {
                     LiveModel liveModel = (LiveModel) model;
                     viewHolder.setAuthorText(liveModel.getAuthorName());
                     viewHolder.setDateText(liveModel.getDate());
-                    Picasso.with((viewHolder.avatarView.getContext())).load(liveModel.getAuthorAvatar()).into(viewHolder.avatarView);
-
+                    if (!liveModel.getAuthorAvatar().isEmpty()) {
+                        Picasso.with((viewHolder.avatarView.getContext())).load(liveModel.getAuthorAvatar()).into(viewHolder.avatarView);
+                    }
                     ArrayList<LiveModel.SubModel> subModels = liveModel.getSubModels();
                     Context context = viewHolder.authorView.getContext();
                     viewHolder.clearContent();

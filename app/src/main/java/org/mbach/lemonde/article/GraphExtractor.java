@@ -162,13 +162,13 @@ class GraphExtractor {
                         if (value == null || value.equals("null")) {
                             values.add(new BarEntry(i, 0));
                         } else {
-                            values.add(new BarEntry(i, Float.valueOf(value)));
+                            values.add(new BarEntry(i, Float.parseFloat(value)));
                         }
                     }
                 } else if (objectData instanceof JSONObject) {
                     Log.d(TAG, "received data is malformed");
                     JSONObject object = (JSONObject) objectData;
-                    values.add(new BarEntry(i, Float.valueOf(object.getString("y"))));
+                    values.add(new BarEntry(i, Float.parseFloat(object.getString("y"))));
                 } else {
                     throw new JSONException("Value " + objectData + " at " + i + " of type " + objectData.getClass().getName() + " cannot be converted to JSONArray");
                 }
@@ -219,13 +219,13 @@ class GraphExtractor {
                         if (value == null) {
                             values.add(new BarEntry(i, 0));
                         } else {
-                            values.add(new BarEntry(i, Float.valueOf(value)));
+                            values.add(new BarEntry(i, Float.parseFloat(value)));
                         }
                     }
                 } else if (objectData instanceof JSONObject) {
                     Log.d(TAG, "received data is malformed");
                     JSONObject object = (JSONObject) objectData;
-                    values.add(new BarEntry(i, Float.valueOf(object.getString("y"))));
+                    values.add(new BarEntry(i, Float.parseFloat(object.getString("y"))));
                 } else {
                     throw new JSONException("Value " + objectData + " at " + i + " of type " + objectData.getClass().getName() + " cannot be converted to JSONArray");
                 }
@@ -273,7 +273,7 @@ class GraphExtractor {
                     if (value == null) {
                         values.add(new Entry(i, 0));
                     } else {
-                        values.add(new Entry(i, Float.valueOf(value)));
+                        values.add(new Entry(i, Float.parseFloat(value)));
                     }
                 }
             }

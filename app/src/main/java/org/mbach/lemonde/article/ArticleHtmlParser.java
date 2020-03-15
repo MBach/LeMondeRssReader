@@ -32,7 +32,7 @@ public class ArticleHtmlParser {
     /**
      * Parse an article from an HTML Document.
      *
-     * @param doc
+     * @param doc the document
      * @return ArrayList<Model>
      */
     public ArrayList<Model> parse(Document doc) {
@@ -285,7 +285,7 @@ public class ArticleHtmlParser {
             if (!elem.text().equals("")) {
                 subModels.add(model.buildParagraph(elem.html()));
             }
-            if (elem.tagName() == "img") {
+            if ("img".equals(elem.tagName())) {
                 subModels.add(model.buildImage(elem.attr("src")));
             }
             if (elem.select("> strong img").size() == 1) {

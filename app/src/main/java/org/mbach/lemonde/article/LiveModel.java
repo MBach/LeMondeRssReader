@@ -68,11 +68,11 @@ public class LiveModel extends Model {
     }
 
 
-    public class SubModel {
+    public static class SubModel {
 
     }
 
-    public class Quote extends SubModel {
+    public static class Quote extends SubModel {
         private String html;
 
         public String getHtml() {
@@ -84,7 +84,7 @@ public class LiveModel extends Model {
         }
     }
 
-    public class Image extends SubModel {
+    public static class Image extends SubModel {
         private String url;
 
         public String getUrl() {
@@ -96,11 +96,11 @@ public class LiveModel extends Model {
         }
     }
 
-    public class Video extends SubModel {
+    public static class Video extends SubModel {
 
     }
 
-    public class Paragraph extends SubModel {
+    public static class Paragraph extends SubModel {
         private String html;
 
         public String getHtml() {

@@ -1,23 +1,32 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="@string/preference_article_layout">
+    <PreferenceCategory
+        android:title="@string/preference_article_layout"
+        app:iconSpaceReserved="false">
         <SwitchPreference
             android:defaultValue="false"
             android:key="displayTweets"
             android:summary="@string/preference_article_display_tweets"
-            android:title="@string/preference_article_content" />
+            android:title="@string/preference_article_content"
+            app:allowDividerBelow="true"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/preference_general_display">
+    <PreferenceCategory
+        android:title="@string/preference_general_display"
+        app:iconSpaceReserved="false">
         <SwitchPreference
             android:defaultValue="true"
             android:key="mainTheme"
             android:summary="@string/preference_app_dark_theme"
-            android:title="@string/preference_app_style" />
+            android:title="@string/preference_app_style"
+            app:iconSpaceReserved="false" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="shareOnSocialNetworks"
             android:summary="@string/preference_share_description"
-            android:title="@string/preference_share_icons" />
+            android:title="@string/preference_share_icons"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -88,7 +88,7 @@ class LiveFeedParser {
                         lp.setMargins(0, 24, 0, 0);
 
                         TextView factHeader = new TextView(context);
-                        factHeader.setText(sdf.format(new Date(Long.valueOf(dateMatcher.group(1)))));
+                        factHeader.setText(sdf.format(new Date(Long.parseLong(dateMatcher.group(1)))));
                         factHeader.setLayoutParams(lp);
                         facts.add(new Model(factHeader));
                     }
@@ -112,12 +112,12 @@ class LiveFeedParser {
 
                     // Extract main content
                     TextView factContent = new TextView(context);
-                    factContent.setId(Integer.valueOf(post.getString("Id")));
+                    factContent.setId(Integer.parseInt(post.getString("Id")));
                     String content = post.getString("Content");
                     Matcher quoteMatcher = quotePattern.matcher(content);
                     if (quoteMatcher.find()) {
                         String firstGroup = quoteMatcher.group(1);
-                        if (!firstGroup.isEmpty()) {
+                        if (firstGroup != null && !firstGroup.isEmpty()) {
                             TextView textViewG1 = new TextView(context);
                             textViewG1.setText(Jsoup.parse(firstGroup).text());
                             facts.add(new Model(textViewG1));

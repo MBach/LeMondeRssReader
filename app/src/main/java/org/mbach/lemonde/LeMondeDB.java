@@ -133,8 +133,8 @@ public class LeMondeDB {
         values.put(FavEntry.COL_LINK, favorite.getLink());
         values.put(FavEntry.COL_TITLE, favorite.getTitle());
         values.put(FavEntry.COL_CATEGORY, favorite.getCategory());
-        values.put(FavEntry.COL_ENCLOSURE, favorite.getMediaContent());
         values.put(FavEntry.COL_DATE, favorite.getPubDate());
+        values.put(FavEntry.COL_MEDIA_CONTENT, favorite.getMediaContent());
         long id = sqLiteDatabase.insert(FavEntry.TABLE, null, values);
         close();
         Log.d("LeMondeDB", "id : " + id);
@@ -170,7 +170,7 @@ public class LeMondeDB {
     public List<RssItem> getFavorites() {
         open();
         Cursor entries = sqLiteDatabase.query(FavEntry.TABLE,
-                new String[]{FavEntry.COL_LINK,  FavEntry.COL_CATEGORY, FavEntry.COL_TITLE, FavEntry.COL_ENCLOSURE, FavEntry.COL_DATE},
+                new String[]{FavEntry.COL_LINK,  FavEntry.COL_CATEGORY, FavEntry.COL_TITLE, FavEntry.COL_DATE, FavEntry.COL_MEDIA_CONTENT},
                 null, null, null, null, FavEntry.COL_DATE + " DESC", null);
         List<RssItem> results = new ArrayList<>();
         if (entries.getCount() != 0) {
@@ -180,8 +180,8 @@ public class LeMondeDB {
                 favorite.setLink(entries.getString(++i));
                 favorite.setCategory(entries.getString(++i));
                 favorite.setTitle(entries.getString(++i));
-                favorite.setEnclosure(entries.getString(++i));
                 favorite.setPubDate(entries.getLong(++i));
+                favorite.setMediaContent(entries.getString(++i));
                 results.add(favorite);
             }
         }
@@ -212,14 +212,14 @@ public class LeMondeDB {
         static final String COL_CATEGORY = "CATEGORY";
         static final String COL_TITLE = "TITLE";
         static final String COL_LINK = "LINK";
-        static final String COL_ENCLOSURE = "ENCLOSURE";
         static final String COL_DATE = "DATE";
+        static final String COL_MEDIA_CONTENT = "MEDIA_CONTENT";
         static final String CREATE_TABLE = "CREATE TABLE " + TABLE + " ("
                 + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
                 + COL_LINK + " TEXT NOT NULL, "
                 + COL_CATEGORY + " TEXT, "
                 + COL_TITLE + " TEXT NOT NULL, "
-                + COL_ENCLOSURE + " TEXT, "
-                + COL_DATE + " INTEGER NOT NULL);";
+                + COL_DATE + " INTEGER NOT NULL, "
+                + COL_MEDIA_CONTENT + " TEXT )";
     }
 }

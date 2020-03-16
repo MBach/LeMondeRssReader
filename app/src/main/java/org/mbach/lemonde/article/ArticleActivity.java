@@ -108,7 +108,9 @@ public class ArticleActivity extends AppCompatActivity {
                             .setAction(getString(R.string.error_no_connection_retry), new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
+                                    if (REQUEST_QUEUE != null) {
+                                        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, shareLink, articleReceived, errorResponse));
+                                    }
                                 }
                             }).show();
                 }
@@ -201,8 +203,6 @@ public class ArticleActivity extends AppCompatActivity {
                 }
             }
 
-            // Article is from a hosted blog
-            ArrayList<Model> items;
 
             // Full article is restricted to paid members
             Elements articleStatus = doc.select(".article__status");
@@ -212,7 +212,7 @@ public class ArticleActivity extends AppCompatActivity {
             }
 
             // Standard article
-            items = extractDataFromHtml(doc);
+            ArrayList<Model> items = extractDataFromHtml(doc);
             LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
             Log.d(TAG, "shareLink " + shareLink);
             boolean hasArticle = leMondeDB.hasArticle(shareLink);
@@ -233,7 +233,14 @@ public class ArticleActivity extends AppCompatActivity {
 
                 // Add a button before comments where the user can connect
                 CardView connectButton = new CardView(ArticleActivity.this);
-                items.add(new Model(Model.BUTTON_TYPE, connectButton));
+                items.add(new Model(Model.BUTTON_TYPE, connectButton, 0));
+            } else if (getIntent().getExtras() != null) {
+                String subtype = getIntent().getStringExtra(Constants.EXTRA_RSS_SUBTYPE);
+                if ("live".equals(subtype)) {
+                    setTagInHeader(R.string.live_article, R.color.accent_live, Color.WHITE);
+                } else if ("video".equals(subtype)) {
+                    setTagInHeader(R.string.video_article, R.color.accent_complementary, Color.WHITE);
+                }
             }
             // After parsing the article, start a new request for comments
             Element react = doc.getElementById("liste_reactions");
@@ -241,7 +248,9 @@ public class ArticleActivity extends AppCompatActivity {
                 Elements dataAjURI = react.select("[^data-aj-uri]");
                 if (atLeastOneChild(dataAjURI)) {
                     String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
-                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
+                    if (REQUEST_QUEUE != null) {
+                        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
+                    }
                 }
             }
             //}
@@ -349,9 +358,6 @@ public class ArticleActivity extends AppCompatActivity {
                     .load(intent.getExtras().getString(Constants.EXTRA_RSS_IMAGE))
                     .into((ImageView) findViewById(R.id.imageArticle));
             shareLink = intent.getExtras().getString(Constants.EXTRA_RSS_LINK);
-            /*if (articleId > 0) {
-                this.articleId = articleId;
-            }*/
         }
 
         // Start async job
@@ -448,11 +454,10 @@ public class ArticleActivity extends AppCompatActivity {
                     Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_removed), Snackbar.LENGTH_SHORT).show();
                 } else {
                     RssItem favorite = new RssItem(RssItem.ARTICLE_TYPE);
-                    //favorite.setArticleId(link);
                     if (getIntent().getExtras() != null) {
                         favorite.setTitle(getIntent().getExtras().getString(Constants.EXTRA_RSS_TITLE));
                         favorite.setPubDate(getIntent().getExtras().getLong(Constants.EXTRA_RSS_DATE));
-                        favorite.setEnclosure(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE));
+                        favorite.setMediaContent(getIntent().getExtras().getString(Constants.EXTRA_RSS_IMAGE));
                     }
                     favorite.setLink(shareLink);
                     favorite.setCategory(getTitle().toString());
@@ -524,7 +529,7 @@ public class ArticleActivity extends AppCompatActivity {
 
     /**
      * This helper method is used to customize the header (in the AppBar) to display a tag or a bubble when the current
-     * article comes from an hosted blog, or is restricted to paid members.
+     * article is restricted to paid members or is a video.
      *
      * @param stringId        string to display in the AppBar
      * @param backgroundColor color of the background
@@ -540,7 +545,7 @@ public class ArticleActivity extends AppCompatActivity {
 
     /**
      * Extract and parse a standard article from HTML. A standard article is published on the main page and by definition,
-     * is not: from a hosted blog, nor a video, nor a special multimedia content. It has some standardized fields like
+     * is not: a video nor a special multimedia content. It has some standardized fields like
      * one (or multiple) author(s), a date, a description, an headline, a description and a list of paragraphs.
      * Each paragraph is a block of text (comments included) or an image or an embedded tweet.
      *
@@ -548,9 +553,6 @@ public class ArticleActivity extends AppCompatActivity {
      * @return a list of formatted content that can be nicely displayed in the recycler view.
      */
     private ArrayList<Model> extractDataFromHtml(@NonNull Document doc) {
-        ArticleHtmlParser htmlParser = new ArticleHtmlParser(this);
-
-        return htmlParser.parse(doc);
+        return new ArticleHtmlParser(this).parse(doc);
     }
-
 }

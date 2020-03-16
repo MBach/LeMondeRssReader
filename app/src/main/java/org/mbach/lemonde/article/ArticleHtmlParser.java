@@ -18,12 +18,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
+import org.mbach.lemonde.ThemeUtils;
 
 import java.util.ArrayList;
 
 public class ArticleHtmlParser {
 
-    private Context context;
+    private final Context context;
 
     public ArticleHtmlParser(Context context) {
         this.context = context;
@@ -42,10 +43,6 @@ public class ArticleHtmlParser {
         if (this.isLongForm(doc)) {
             return this.parseLongForm(doc);
         }
-        if (this.isBlog(doc)) {
-            return this.parseBlog(doc);
-        }
-
         return this.parseArticle(doc);
     }
 
@@ -57,10 +54,6 @@ public class ArticleHtmlParser {
         return doc.select(".article--longform").size() > 0;
     }
 
-    private boolean isBlog(Document doc) {
-        return doc.select(".site-main").size() > 0;
-    }
-
     private ArrayList<Model> parseLive(Document doc) {
         ArrayList<Model> models = new ArrayList<>();
 
@@ -70,28 +63,6 @@ public class ArticleHtmlParser {
         Elements articleElems = doc.select("#post-container .post");
         for (Element elem : articleElems) {
             models.add(buildLive(elem));
-        }
-
-        return models;
-    }
-
-    private ArrayList<Model> parseBlog(Document doc) {
-        ArrayList<Model> models = new ArrayList<>();
-
-        models.add(buildHeadline(doc, ".entry-header .entry-title"));
-        models.add(buildDate(doc, ".entry-header .updated"));
-        models.add(buildDate(doc, ".entry-header .author"));
-
-        Elements elements = doc.select(".entry-content > p");
-        for (Element element : elements) {
-            if (element.select("img").size() > 0) {
-                String imgSrc = element.select("img").attr("src");
-                if (!imgSrc.equals("")) {
-                    models.add(new Model(Model.IMAGE_TYPE, imgSrc));
-                }
-            } else {
-                models.add(buildParagraph(element));
-            }
         }
 
         return models;
@@ -112,7 +83,7 @@ public class ArticleHtmlParser {
             if (elem.tagName().equals("figure")) {
                 String imgSrc = elem.select("img").attr("src");
                 if (!imgSrc.equals("")) {
-                    models.add(new Model(Model.IMAGE_TYPE, imgSrc));
+                    models.add(new Model(Model.IMAGE_TYPE, imgSrc, 0));
                 }
             }
             // Subtitle
@@ -146,7 +117,7 @@ public class ArticleHtmlParser {
                     CardView cardView = new CardView(context);
                     cardView.addView(t);
                     cardView.addView(link);
-                    models.add(new Model(Model.TWEET_TYPE, cardView));
+                    models.add(new Model(Model.TWEET_TYPE, cardView, 0));
                 }
             }
         }
@@ -169,7 +140,7 @@ public class ArticleHtmlParser {
             if (elem.tagName().equals("figure")) {
                 String imgSrc = elem.select("img").attr("src");
                 if (!imgSrc.equals("")) {
-                    models.add(new Model(Model.IMAGE_TYPE, imgSrc));
+                    models.add(new Model(Model.IMAGE_TYPE, imgSrc, 0));
                 }
             }
             // Subtitle
@@ -203,7 +174,7 @@ public class ArticleHtmlParser {
                     CardView cardView = new CardView(context);
                     cardView.addView(t);
                     cardView.addView(link);
-                    models.add(new Model(Model.TWEET_TYPE, cardView));
+                    models.add(new Model(Model.TWEET_TYPE, cardView, 0));
                 }
             }
         }
@@ -215,7 +186,6 @@ public class ArticleHtmlParser {
         TextView headLine = new TextView(context);
         headLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_headline));
         fromHtml(headLine, doc.select(cssQuery).html());
-
         return new Model(headLine);
     }
 
@@ -223,7 +193,6 @@ public class ArticleHtmlParser {
         TextView description = new TextView(context);
         description.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_description));
         fromHtml(description, doc.select(cssQuery).html());
-
         return new Model(description);
     }
 
@@ -231,7 +200,6 @@ public class ArticleHtmlParser {
         TextView authors = new TextView(context);
         authors.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_authors));
         authors.setText(doc.select(cssQuery).text());
-
         return new Model(authors);
     }
 
@@ -239,16 +207,15 @@ public class ArticleHtmlParser {
         TextView dates = new TextView(context);
         dates.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_authors));
         dates.setText(doc.select(cssQuery).text());
-
         return new Model(dates);
     }
 
     private Model buildReadTime(Document doc, String cssQuery) {
         TextView readTime = new TextView(context);
         readTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_description));
+        doc.select(cssQuery).select("span.sr-only").remove();
         readTime.setText(doc.select(cssQuery).text());
-
-        return new Model(readTime);
+        return new Model(Model.TEXT_AND_ICON_TYPE, readTime,  ThemeUtils.isDarkTheme(this.context) ? R.drawable.baseline_timer_white_24 : R.drawable.baseline_timer_black_24);
     }
 
     private Model buildParagraph(Element elem) {

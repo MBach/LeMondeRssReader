@@ -25,7 +25,7 @@ import java.util.Locale;
  * @author Matthieu BACHELIER
  * @since 2018-06
  */
-class FavoritesAdapter extends RecyclerView.Adapter {
+class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<RssItem> items;
 
@@ -71,7 +71,6 @@ class FavoritesAdapter extends RecyclerView.Adapter {
             case RssItem.ARTICLE_TYPE:
                 ((ViewHolderArticle) holder).setId(model.getLink().hashCode());
                 ((ViewHolderArticle) holder).getTitle().setText(model.getTitle());
-               //((ViewHolderArticle) holder).getCategory().setText("");
                 break;
             case RssItem.DATE_GROUP_TYPE:
                 SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMM yyyy", Locale.FRENCH);
@@ -127,9 +126,5 @@ class FavoritesAdapter extends RecyclerView.Adapter {
         TextView getTitle() {
             return view.findViewById(R.id.favorite_title);
         }
-
-        /*TextView getCategory() {
-            return view.findViewById(R.id.favorite_category);
-        }*/
     }
 }

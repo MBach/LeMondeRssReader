@@ -33,43 +33,51 @@ class Model implements Parcelable {
     static final int BUTTON_TYPE = 5;
     static final int VIDEO_TYPE = 6;
     static final int LIVE_TYPE = 7;
+    static final int TEXT_AND_ICON_TYPE = 8;
+
+
+
     private final int id;
     private final int type;
     @NonNull
     private final Object theContent;
 
     private Model(Parcel in) {
-        id = in.readInt();
-        type = in.readInt();
-        theContent = in.readValue(TextView.class.getClassLoader());
+        this.id = in.readInt();
+        this.type = in.readInt();
+        this.theContent = in.readValue(TextView.class.getClassLoader());
     }
 
     Model(@NonNull TextView textView) {
         this.type = TEXT_TYPE;
         this.id = 0;
-        theContent = textView;
+        this.theContent = textView;
     }
 
-    Model(int type, @NonNull Object view) {
+    Model(int type, @NonNull Object view, int id) {
         this.type = type;
-        this.id = 0;
-        theContent = view;
+        this.theContent = view;
+        this.id = id;
     }
 
     Model(@NonNull TextView textView, int id) {
         this.type = COMMENT_TYPE;
         this.id = id;
-        theContent = textView;
+        this.theContent = textView;
     }
 
     Model(int type) {
         this.id = 0;
         this.type = type;
-        this.theContent = null;
+        this.theContent = null; /// FIXME
     }
 
     int getType() {
         return type;
+    }
+
+    int getId() {
+        return id;
     }
 
     @NonNull

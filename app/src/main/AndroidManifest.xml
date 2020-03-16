@@ -48,10 +48,6 @@
                     android:pathPrefix="/" />
                 <data
                     android:scheme="https"
-                    android:host="*.blog.lemonde.fr"
-                    android:pathPrefix="/" />
-                <data
-                    android:scheme="https"
                     android:host="www.lemonde.fr"
                     android:pathPrefix="/" />
             </intent-filter>

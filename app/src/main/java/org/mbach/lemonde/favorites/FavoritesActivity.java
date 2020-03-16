@@ -30,6 +30,7 @@ import java.util.Set;
  *
  * @author Matthieu BACHELIER
  * @since 2018-06
+ * @version 2.0
  */
 public class FavoritesActivity extends AppCompatActivity {
     private final FavoritesAdapter favoritesAdapter = new FavoritesAdapter();

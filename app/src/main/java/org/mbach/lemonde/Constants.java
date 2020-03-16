@@ -15,13 +15,13 @@ public final class Constants {
     public static final String EXTRA_RSS_TITLE = "RSS_TITLE";
     public static final String EXTRA_RSS_DATE = "RSS_DATE";
     public static final String EXTRA_RSS_IMAGE = "org.mbach.lemonde.extraImage";
+    public static final String EXTRA_RSS_SUBTYPE = "RSS_SUBTYPE";
     public static final String EXTRA_NEWS_CATEGORY = "NEWS_CATEGORY";
     public static final String EXTRA_TITLE_CATEGORY = "TITLE_CATEGORY";
     public static final String EXTRA_INDEX_CATEGORY = "INDEX_CATEGORY";
     public static final int PADDING_BOTTOM = 16;
     public static final int PADDING_TOP_SUBTITLE = 30;
     public static final int PADDING_BOTTOM_SUBTITLE = 20;
-    public static final int PADDING_LEFT_RIGHT_TAG = 20;
     public static final int PADDING_COMMENT_ANSWER = 30;
     public static final int THEME_CHANGED = 0;
     private static final String RSS_FULL = "/rss_full.xml";
@@ -38,5 +38,6 @@ public final class Constants {
     public static final String CAT_CAMPUS = "campus" + RSS_FULL;
     public static final String CAT_DECODERS = "les-decodeurs" + RSS_FULL;
     public static final String CAT_VIDEOS = "videos" + RSS_FULL;
-
+    public static final String TAG_LIVE = "live";
+    public static final String TAG_VIDEO = "video";
 }

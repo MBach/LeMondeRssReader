@@ -19,8 +19,8 @@ class GraphModel extends Model {
     private String subtitle;
     private String source;
 
-    GraphModel(int type, Chart chart) {
-        super(type, chart);
+    GraphModel(int type, Chart chart, int id) {
+        super(type, chart, id);
         this.chart = chart;
     }
 

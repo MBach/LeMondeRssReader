@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     extras.putString(Constants.EXTRA_RSS_IMAGE, rssItem.getMediaContent());
                     extras.putString(Constants.EXTRA_RSS_TITLE, rssItem.getTitle());
                     extras.putLong(Constants.EXTRA_RSS_DATE, rssItem.getPubDate());
+                    extras.putString(Constants.EXTRA_RSS_SUBTYPE, rssItem.getSubtype());
 
                     AppCompatImageView rssImage = view.findViewById(R.id.rss_image);
                     intent.putExtras(extras);

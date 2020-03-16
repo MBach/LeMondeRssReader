@@ -5,6 +5,7 @@ import android.util.Xml;
 
 import androidx.annotation.NonNull;
 
+import org.mbach.lemonde.Constants;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -30,14 +32,13 @@ class RssParser {
 
     private static final String TAG_TITLE = "title";
     private static final String TAG_LINK = "link";
-    private static final String TAG_ENCLOSURE = "enclosure";
     private static final String TAG_MEDIA_CONTENT = "media:content";
     private static final String TAG_RSS = "rss";
     private static final String TAG_ITEM = "item";
-    private static final String TAG_GUID = "guid";
     private static final String TAG_PUBDATE = "pubDate";
-    private static final Pattern ARTICLE_ID_PATTERN = Pattern.compile("/(\\d{6,10})/");
     private static final SimpleDateFormat SDF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.UK);
+
+    private final Pattern itemTypePattern = Pattern.compile("^https://www.lemonde.fr/[\\w]+/([\\w]+)/.*$");
 
     @NonNull
     ArrayList<RssItem> parse(@NonNull String stream) {
@@ -92,6 +93,14 @@ class RssParser {
                             items.add(item);
                         } else if (tagName.equalsIgnoreCase(TAG_LINK)) {
                             item.setLink(text);
+                            Matcher itemType = itemTypePattern.matcher(item.getLink());
+                            if (itemType.find()) {
+                                if ("live".equals(itemType.group(1))) {
+                                    item.setSubtype(Constants.TAG_LIVE);
+                                } else if ("video".equals(itemType.group(1))) {
+                                    item.setSubtype(Constants.TAG_VIDEO);
+                                }
+                            }
                         } else if (tagName.equalsIgnoreCase(TAG_TITLE)) {
                             item.setTitle(text);
                         } else if (tagName.equalsIgnoreCase(TAG_PUBDATE)) {
@@ -107,16 +116,6 @@ class RssParser {
                             } catch (ParseException e) {
                                 Log.d(TAG, "cannot parse date: " + text);
                             }
-                        /*} else if (tagName.equalsIgnoreCase(TAG_GUID) && text != null) {
-                            Matcher matcher = ARTICLE_ID_PATTERN.matcher(text);
-                            if (matcher.find()) {
-                                item.setArticleId(Integer.valueOf(matcher.group(1)));
-                            } else {
-                                item.setArticleId(0);
-                            }*/
-                        } else if (tagName.equalsIgnoreCase(TAG_ENCLOSURE)) {
-                            text = parser.getAttributeValue(null, "url");
-                            item.setEnclosure(text);
                         }
                         break;
                     default:

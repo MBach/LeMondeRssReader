@@ -15,8 +15,6 @@ import org.mbach.lemonde.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * RecyclerRssItemAdapter class.
@@ -29,8 +27,6 @@ public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItem
     @NonNull
     private final List<RssItem> items;
     private OnItemClickListener onItemClickListener;
-
-    private final Pattern itemTypePattern = Pattern.compile("^https://www.lemonde.fr/[\\w]+/([\\w]+)/.*$");
 
     RecyclerRssItemAdapter(@NonNull List<RssItem> items) {
         this.items = items;
@@ -59,12 +55,11 @@ public class RecyclerRssItemAdapter extends RecyclerView.Adapter<RecyclerRssItem
         holder.image.setImageBitmap(null);
         Picasso.with(holder.image.getContext()).load(item.getMediaContent()).into(holder.image);
         holder.itemView.setTag(item);
-        Matcher itemType = itemTypePattern.matcher(item.getLink());
-        if (itemType.find()) {
-            if ("live".equals(itemType.group(1))) {
+        if (item.getSubtype() != null) {
+            if ("live".equals(item.getSubtype())) {
                 holder.itemType.setImageResource(R.drawable.ic_live_48dp);
                 holder.itemType.setVisibility(View.VISIBLE);
-            } else if ("video".equals(itemType.group(1))) {
+            } else if ("video".equals(item.getSubtype())) {
                 holder.itemType.setImageResource(R.drawable.baseline_play_circle_outline_white_48dp);
                 holder.itemType.setVisibility(View.VISIBLE);
             } else {

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class LiveModel extends Model {
 
+    private final ArrayList<SubModel> subModels;
     private String authorName;
     private String authorAvatar;
     private String date;
-    private ArrayList<SubModel> subModels;
 
     public LiveModel() {
         super(Model.LIVE_TYPE);
@@ -60,13 +60,13 @@ public class LiveModel extends Model {
         return image;
     }
 
+    /*
     public Quote buildQuote(String html) {
         Quote quote = new Quote();
         quote.setHtml(html);
-
         return quote;
     }
-
+    */
 
     public static class SubModel {
 
@@ -96,9 +96,11 @@ public class LiveModel extends Model {
         }
     }
 
+    /*
     public static class Video extends SubModel {
 
     }
+    */
 
     public static class Paragraph extends SubModel {
         private String html;
@@ -111,6 +113,4 @@ public class LiveModel extends Model {
             this.html = html;
         }
     }
-
-
 }

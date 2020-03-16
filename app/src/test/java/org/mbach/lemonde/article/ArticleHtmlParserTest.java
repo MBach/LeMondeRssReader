@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("ALL")
 @RunWith(RobolectricTestRunner.class)
 public class ArticleHtmlParserTest
 {

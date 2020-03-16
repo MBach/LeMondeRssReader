@@ -1,49 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="DarkTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowExitTransition">@transition/main_exit</item>
-        <item name="android:windowReenterTransition">@transition/main_reenter</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowEnterTransition">@transition/detail_enter</item>
+        <item name="android:windowExitTransition">@transition/main_exit</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowReenterTransition">@transition/main_reenter</item>
         <item name="android:windowSharedElementsUseOverlay">true</item>
-
-        <item name="colorControlHighlight">@color/accent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="articleHeaderGradient">@color/article_header_gradient_dark</item>
+        <item name="authorDateText">#e0e0e0</item>
+        <item name="background">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
+        <item name="colorBackgroundDrawer">@color/primary</item>
+        <item name="colorControlHighlight">@color/accent</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
-        <item name="background">@color/primary_dark</item>
         <item name="defaultText">@android:color/white</item>
-        <item name="authorDateText">#e0e0e0</item>
-        <item name="articleHeaderGradient">#88333333</item>
-        <item name="colorBackgroundDrawer">@color/primary</item>
         <item name="selectableItemBackground">@drawable/selectable_item_background</item>
-        <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:navigationBarColor">@android:color/black</item>
     </style>
-
-    <!-- Alternate theme is light -->
     <style name="LightTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- custom v21 -->
-        <item name="android:windowExitTransition">@transition/main_exit</item>
-        <item name="android:windowReenterTransition">@transition/main_reenter</item>
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowEnterTransition">@transition/detail_enter</item>
+        <item name="android:windowExitTransition">@transition/main_exit</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowReenterTransition">@transition/main_reenter</item>
         <item name="android:windowSharedElementsUseOverlay">true</item>
-
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="articleHeaderGradient">@color/article_header_gradient</item>
+        <item name="authorDateText">#212121</item>
+        <item name="background">@color/primary_light_dark</item>
+        <item name="colorAccent">#ffab00</item>
+        <item name="colorBackgroundDrawer">@color/primary_light_dark</item>
+        <item name="colorControlHighlight">#ffab00</item>
         <item name="colorPrimary">@color/primary_light</item>
         <item name="colorPrimaryDark">@color/primary_light_dark</item>
-        <item name="background">@color/primary_light_dark</item>
         <item name="defaultText">@android:color/black</item>
-        <item name="authorDateText">#212121</item>
-        <item name="colorControlHighlight">#ffab00</item>
-        <item name="colorAccent">#ffab00</item>
-        <item name="articleHeaderGradient">#88eeeeee</item>
-        <item name="colorBackgroundDrawer">@color/primary_light_dark</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">@android:color/white</item>
     </style>
-
 </resources>

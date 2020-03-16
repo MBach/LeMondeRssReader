@@ -1,6 +1,6 @@
 ## Introduction
 
-This App for Android 4.0.3 Ice Cream Sandwich and later (Android 10) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping). It renders the items in the feed directly in native Android components, such as [TextView](https://developer.android.com/reference/android/widget/TextView.html), [ImageView](https://developer.android.com/reference/android/widget/ImageView.html)
+This App for Android 4.2 Jelly Bean and later (Android 11) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping). It renders the items in the feed directly in native Android components, such as [TextView](https://developer.android.com/reference/android/widget/TextView.html), [ImageView](https://developer.android.com/reference/android/widget/ImageView.html)
 
 This App was also built to be as fastest and simple as possible. Material design guidelines were applied so you'll find:
 
@@ -66,7 +66,7 @@ Another small class has only 2 methods in order to track just what is useful for
 
 ## Requirements
 
-A smartphone at least on Android 4.0.3 (API 15) ! That should not be a real problem...
+A smartphone at least on Android 4.2
 
 ## Download
 

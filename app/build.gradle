@@ -4,7 +4,7 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "org.mbach.lemonde"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 29
         versionCode 19
         versionName '1.19'

@@ -41,7 +41,7 @@ import java.util.List;
  * @author Matthieu BACHELIER
  * @since 2017-05
  */
-class ArticleAdapter extends RecyclerView.Adapter {
+class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "ArticleAdapter";
 
@@ -100,6 +100,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
         switch (viewType) {
             default:
             case Model.TEXT_TYPE:
+            case Model.TEXT_AND_ICON_TYPE:
             case Model.COMMENT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.IMAGE_TYPE:
@@ -162,6 +163,7 @@ class ArticleAdapter extends RecyclerView.Adapter {
             int defaultTextColor = ThemeUtils.getStyleableColor(holder.itemView.getContext(), R.styleable.CustomTheme_defaultText);
             switch (model.getType()) {
                 case Model.TEXT_TYPE:
+                case Model.TEXT_AND_ICON_TYPE:
                 case Model.COMMENT_TYPE:
                     TextView textView = (TextView) model.getTheContent();
                     ViewHolderText vh = (ViewHolderText) holder;
@@ -170,6 +172,9 @@ class ArticleAdapter extends RecyclerView.Adapter {
                     vh.text.setTextColor(defaultTextColor);
                     vh.text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
                     vh.text.setBackground(textView.getBackground());
+                    if (model.getType() == Model.TEXT_AND_ICON_TYPE) {
+                        vh.text.setCompoundDrawablesRelativeWithIntrinsicBounds(model.getId(),0,0,0);
+                    }
 
                     // Tag doesn't expand horizontally to the max
                     if (textView.getLayoutParams() == null) {

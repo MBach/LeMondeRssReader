@@ -1,6 +1,7 @@
 package org.mbach.lemonde.article;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.text.Html;
@@ -55,6 +56,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     void addItems(@NonNull ArrayList<Model> items) {
         if (this.items == null) {
             this.items = items;
+            Log.d(TAG, items.toString());
         } else {
             List<Model> previousComments = new ArrayList<>();
             for (Model model : this.items) {
@@ -248,6 +250,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             fromHtml(paragraph, par);
                             paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
                             paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.live_body));
+                            paragraph.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
                             viewHolder.addContent(paragraph);
                         }
                         if (subModel instanceof LiveModel.Image) {
@@ -255,10 +258,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             Picasso.with(context).load(((LiveModel.Image) subModel).getUrl()).into(image);
                             viewHolder.addContent(image);
                         }
-
-
                     }
-
                     break;
             }
         }

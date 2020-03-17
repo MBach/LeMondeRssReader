@@ -127,18 +127,16 @@ public class ArticleActivity extends AppCompatActivity {
 
             ArrayList<Model> items = new ArrayList<>();
             // Extract header
-            Elements header = commentDoc.select("[itemprop='InteractionCount']");
-            if (atLeastOneChild(header)) {
-                TextView commentHeader = new TextView(ArticleActivity.this);
-                commentHeader.setText(String.format("Commentaires %s", header.text()));
-                commentHeader.setTypeface(null, Typeface.BOLD);
-                commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
-                items.add(new Model(commentHeader, 0));
-            }
+            Element header = commentDoc.getElementById("comments-header");
+            TextView commentHeader = new TextView(ArticleActivity.this);
+            commentHeader.setText(header.text());
+            commentHeader.setTypeface(null, Typeface.BOLD);
+            commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
+            items.add(new Model(Model.TEXT_TYPE, commentHeader, 0));
 
             // Extract comments
-            Elements comments = commentDoc.select("[itemprop='commentText']");
-            for (Element comment : comments) {
+            Element comments = commentDoc.getElementById("comments-river");
+            for (Element comment : comments.getAllElements()) {
                 Elements refs = comment.select("p.references");
                 if (atLeastOneChild(refs)) {
                     // Clear date
@@ -159,8 +157,8 @@ public class ArticleActivity extends AppCompatActivity {
                             content.setPadding(0, 0, 0, 16);
                         }
                         int commentId = Integer.parseInt(comment.attr("data-reaction_id"));
-                        items.add(new Model(author, commentId));
-                        items.add(new Model(content, commentId));
+                        items.add(new Model(Model.COMMENT_TYPE, author, commentId));
+                        items.add(new Model(Model.COMMENT_TYPE, content, commentId));
                     }
                 }
             }
@@ -174,6 +172,9 @@ public class ArticleActivity extends AppCompatActivity {
                     commentsURI = Constants.BASE_URL2 + next.first().attr("href");
                 }
             }
+
+            Log.d(TAG, "header : " + commentHeader.getText());
+
             articleAdapter.addItems(items);
         }
     };
@@ -203,7 +204,6 @@ public class ArticleActivity extends AppCompatActivity {
                 }
             }
 
-
             // Full article is restricted to paid members
             Elements articleStatus = doc.select(".article__status");
             if (!articleStatus.select(".icon__premium").isEmpty()) {
@@ -214,7 +214,7 @@ public class ArticleActivity extends AppCompatActivity {
             // Standard article
             ArrayList<Model> items = extractDataFromHtml(doc);
             LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
-            Log.d(TAG, "shareLink " + shareLink);
+            //Log.d(TAG, "shareLink " + shareLink);
             boolean hasArticle = leMondeDB.hasArticle(shareLink);
             toggleFavIcon(hasArticle);
             if (isRestricted) {
@@ -243,18 +243,14 @@ public class ArticleActivity extends AppCompatActivity {
                 }
             }
             // After parsing the article, start a new request for comments
-            Element react = doc.getElementById("liste_reactions");
-            if (react != null) {
-                Elements dataAjURI = react.select("[^data-aj-uri]");
-                if (atLeastOneChild(dataAjURI)) {
-                    String commentPreviewURI = Constants.BASE_URL2 + dataAjURI.first().attr("data-aj-uri");
-                    if (REQUEST_QUEUE != null) {
-                        REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentPreviewURI, commentsReceived, errorResponse));
-                    }
+            Elements commentsElements = doc.select(".article__reactions .comments__active");
+            if (atLeastOneChild(commentsElements)) {
+                commentsURI = commentsElements.first().attr("href");
+                Log.d(TAG, commentsURI);
+                if (REQUEST_QUEUE != null) {
+                    REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
                 }
             }
-            //}
-            //}
             articleAdapter.addItems(items);
             findViewById(R.id.articleLoader).setVisibility(View.GONE);
         }

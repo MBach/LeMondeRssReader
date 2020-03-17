@@ -10,7 +10,7 @@ public class LiveModel extends Model {
     private String date;
 
     public LiveModel() {
-        super(Model.LIVE_TYPE);
+        super(Model.LIVE_TYPE, null, 0);
         this.subModels = new ArrayList<>();
     }
 
@@ -49,7 +49,6 @@ public class LiveModel extends Model {
     public Paragraph buildParagraph(String html) {
         Paragraph paragraph = new Paragraph();
         paragraph.setHtml(html);
-
         return paragraph;
     }
 

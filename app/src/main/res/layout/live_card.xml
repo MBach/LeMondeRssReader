@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -15,11 +16,20 @@
         android:layout_height="wrap_content"
         tools:ignore="UselessParent">
 
-        <ImageView
-            android:id="@+id/live_avatar"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/user_avatar" />
+            app:cardCornerRadius="12dp">
+
+            <ImageView
+                android:id="@+id/live_avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/user_avatar"
+                android:scaleType="fitXY" />
+
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/live_author"
@@ -27,9 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:textStyle="bold"
-            android:layout_toRightOf="@+id/live_avatar"
-            android:layout_toEndOf="@+id/live_avatar" />
+            android:layout_toEndOf="@+id/card_view"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/live_date"
@@ -37,7 +46,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_toRightOf="@+id/live_author"
             android:layout_toEndOf="@+id/live_author" />
 
     </RelativeLayout>
@@ -45,7 +53,6 @@
     <LinearLayout
         android:id="@+id/live_content"
         android:layout_marginStart="12dp"
-        android:layout_marginLeft="32dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">

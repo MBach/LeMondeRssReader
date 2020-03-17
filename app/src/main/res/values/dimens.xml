@@ -8,7 +8,7 @@
     <dimen name="article_description">11sp</dimen>
     <dimen name="article_authors">8sp</dimen>
     <dimen name="article_body">9sp</dimen>
-    <dimen name="live_body">8sp</dimen>
+    <dimen name="live_body">7sp</dimen>
 
     <dimen name="spacing_medium">8dp</dimen>
     <dimen name="detail_backdrop_height">240dp</dimen>

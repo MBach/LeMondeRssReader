@@ -70,7 +70,8 @@ class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         switch (model.getType()) {
             case RssItem.ARTICLE_TYPE:
                 ((ViewHolderArticle) holder).setId(model.getLink().hashCode());
-                ((ViewHolderArticle) holder).getTitle().setText(model.getTitle());
+                ((ViewHolderArticle) holder).favoriteTitleTextView.setText(model.getTitle());
+                ((ViewHolderArticle) holder).favoriteCategoryTextView.setText(model.getCategory());
                 break;
             case RssItem.DATE_GROUP_TYPE:
                 SimpleDateFormat sdf = new SimpleDateFormat("EEEE d MMM yyyy", Locale.FRENCH);
@@ -105,10 +106,15 @@ class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @NonNull
         private final View view;
 
+        private final TextView favoriteTitleTextView;
+        private final TextView favoriteCategoryTextView;
+
         ViewHolderArticle(@NonNull View view) {
             super(view);
             this.view = view;
-            Button button = this.view.findViewById(R.id.deleteFavoriteButton);
+            this.favoriteTitleTextView = view.findViewById(R.id.favorite_title);
+            this.favoriteCategoryTextView = view.findViewById(R.id.favorite_category);
+            Button button = view.findViewById(R.id.deleteFavoriteButton);
             Drawable background;
             if (ThemeUtils.isDarkTheme(view.getContext())) {
                 background = view.getContext().getResources().getDrawable(R.drawable.baseline_delete_white_24);
@@ -116,15 +122,11 @@ class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 background = view.getContext().getResources().getDrawable(R.drawable.baseline_delete_dark_24);
             }
             button.setBackgroundDrawable(background);
-            this.view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
+            view.setBackgroundColor(ThemeUtils.getStyleableColor(view.getContext(), R.styleable.CustomTheme_colorBackgroundDrawer));
         }
 
         void setId(int id) {
             view.setId(id);
-        }
-
-        TextView getTitle() {
-            return view.findViewById(R.id.favorite_title);
         }
     }
 }

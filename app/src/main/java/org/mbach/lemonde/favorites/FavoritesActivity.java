@@ -74,12 +74,12 @@ public class FavoritesActivity extends AppCompatActivity {
      */
     private void loadFavorites() {
         LeMondeDB leMondeDB = new LeMondeDB(this);
-        this.favorites = leMondeDB.getFavorites();
-        List<RssItem> items = new ArrayList<>();
+        favorites = leMondeDB.getFavorites();
         if (favorites.size() == 0) {
             findViewById(R.id.noFavorites).setVisibility(View.VISIBLE);
             Snackbar.make(findViewById(R.id.constraintFavorites), getString(R.string.favorites_none_found), Snackbar.LENGTH_INDEFINITE).show();
         } else {
+            List<RssItem> items = new ArrayList<>();
             Set<Long> dates = new HashSet<>();
             long d;
             for (RssItem f : favorites) {
@@ -93,8 +93,8 @@ public class FavoritesActivity extends AppCompatActivity {
                 }
                 items.add(f);
             }
+            favoritesAdapter.addItems(items);
         }
-        favoritesAdapter.addItems(items);
     }
 
     /**
@@ -129,19 +129,19 @@ public class FavoritesActivity extends AppCompatActivity {
      * @param view the favorite which was touched
      */
     public void deleteFavorite(@NonNull View view) {
-        /*int id = 0;
+        String link = "";
         View p = (View) view.getParent();
         for (RssItem favorite : this.favorites) {
-            if (favorite.getArticleId() == p.getId()) {
-                id = favorite.getArticleId();
+            if (favorite.getLink().hashCode() == p.getId()) {
+                link = favorite.getLink();
                 break;
             }
         }
-        if (id == 0) {
+        if (link.isEmpty()) {
             return;
-        }*/
+        }
         LeMondeDB leMondeDB = new LeMondeDB(this);
-        if (leMondeDB.deleteArticle("")) {
+        if (leMondeDB.deleteArticle(link)) {
             Snackbar.make(findViewById(R.id.constraintFavorites), getString(R.string.favorites_article_removed), Snackbar.LENGTH_SHORT).show();
             loadFavorites();
         }

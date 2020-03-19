@@ -3,6 +3,7 @@ package org.mbach.lemonde.home;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -19,6 +20,7 @@ import com.android.volley.toolbox.Volley;
 import org.mbach.lemonde.Constants;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * RssService class.
@@ -45,9 +47,9 @@ public class RssService extends IntentService {
         @Override
         public void onResponse(String response) {
             try {
-                ArrayList<RssItem> rssItems = parser.parse(new String(response.getBytes()));
+                List<RssItem> rssItems = parser.parse(new String(response.getBytes()));
                 Intent result = new Intent();
-                result.putParcelableArrayListExtra(PARCELABLE_EXTRAS, rssItems);
+                result.putParcelableArrayListExtra(PARCELABLE_EXTRAS, new ArrayList<Parcelable>(rssItems));
                 reply.send(RssService.this, FETCH_SUCCESS, result);
             } catch (@NonNull PendingIntent.CanceledException e) {
                 Log.e(TAG, "onHandleIntent error", e);

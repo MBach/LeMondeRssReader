@@ -25,7 +25,6 @@ public class LeMondeDB {
     private final LeMondeSQLiteOpenHelper statisticSQLiteOpenHelper;
     private SQLiteDatabase sqLiteDatabase;
 
-
     /**
      * Constructor.
      *
@@ -137,7 +136,6 @@ public class LeMondeDB {
         values.put(FavEntry.COL_MEDIA_CONTENT, favorite.getMediaContent());
         long id = sqLiteDatabase.insert(FavEntry.TABLE, null, values);
         close();
-        Log.d("LeMondeDB", "id : " + id);
         return id != -1;
     }
 

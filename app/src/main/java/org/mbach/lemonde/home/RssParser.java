@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,8 +42,8 @@ class RssParser {
     private final Pattern itemTypePattern = Pattern.compile("^https://www.lemonde.fr/[\\w]+/([\\w]+)/.*$");
 
     @NonNull
-    ArrayList<RssItem> parse(@NonNull String stream) {
-        ArrayList<RssItem> items = null;
+    List<RssItem> parse(@NonNull String stream) {
+        List<RssItem> items = null;
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -68,8 +69,8 @@ class RssParser {
      * @return a list of well formed news that can be clicked later inside {@link org.mbach.lemonde.article.ArticleActivity}
      */
     @NonNull
-    private ArrayList<RssItem> readFeed(@NonNull XmlPullParser parser) {
-        ArrayList<RssItem> items = new ArrayList<>();
+    private List<RssItem> readFeed(@NonNull XmlPullParser parser) {
+        List<RssItem> items = new ArrayList<>();
         RssItem item = new RssItem(RssItem.ARTICLE_TYPE);
         String text = null;
         try {

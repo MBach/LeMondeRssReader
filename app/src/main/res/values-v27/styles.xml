@@ -11,7 +11,7 @@
         <item name="android:windowSharedElementsUseOverlay">true</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="articleHeaderGradient">@color/article_header_gradient_dark</item>
-        <item name="authorDateText">#e0e0e0</item>
+        <item name="authorDateText">@color/primary_light_dark</item>
         <item name="background">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
         <item name="colorBackgroundDrawer">@color/primary</item>
@@ -31,7 +31,7 @@
         <item name="android:windowSharedElementsUseOverlay">true</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="articleHeaderGradient">@color/article_header_gradient</item>
-        <item name="authorDateText">#212121</item>
+        <item name="authorDateText">@color/primary_dark</item>
         <item name="background">@color/primary_light_dark</item>
         <item name="colorAccent">#ffab00</item>
         <item name="colorBackgroundDrawer">@color/primary_light_dark</item>

@@ -103,12 +103,13 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             default:
             case Model.TEXT_TYPE:
             case Model.TEXT_AND_ICON_TYPE:
-            case Model.COMMENT_TYPE:
                 return new ViewHolderText(new TextView(parent.getContext()));
             case Model.IMAGE_TYPE:
                 return new ViewHolderImage(new ImageView(parent.getContext()));
             case Model.TWEET_TYPE:
                 return new ViewHolderTweet(LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent, false));
+            case Model.COMMENT_TYPE:
+                return new ViewHolderComment(LayoutInflater.from(parent.getContext()).inflate(R.layout.comment_card, parent, false));
             case Model.LIVE_TYPE:
                 return new ViewHolderLive(LayoutInflater.from(parent.getContext()).inflate(R.layout.live_card, parent, false));
             case Model.FACTS_TYPE:
@@ -166,7 +167,6 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             switch (model.getType()) {
                 case Model.TEXT_TYPE:
                 case Model.TEXT_AND_ICON_TYPE:
-                case Model.COMMENT_TYPE:
                     TextView textView = (TextView) model.getTheContent();
                     ViewHolderText vh = (ViewHolderText) holder;
                     vh.text.setText(textView.getText());
@@ -218,6 +218,16 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     viewHolderVideo.getVideoView().start();
                     Log.d(TAG, "pos = " + viewHolderVideo.getVideoView().getCurrentPosition());
                     break;
+                case Model.COMMENT_TYPE:
+                    ViewHolderComment viewHolderComment = (ViewHolderComment) holder;
+                    CommentModel commentModel = (CommentModel) model;
+                    viewHolderComment.authorTextView.setText(commentModel.getAuthor());
+                    viewHolderComment.dateTextView.setText(commentModel.getDate());
+                    viewHolderComment.contentTextView.setText(commentModel.getContent());
+                    // Text color for author and content only
+                    viewHolderComment.authorTextView.setTextColor(defaultTextColor);
+                    viewHolderComment.contentTextView.setTextColor(defaultTextColor);
+                    break;
                 case Model.LIVE_TYPE:
                     ViewHolderLive viewHolder = (ViewHolderLive) holder;
                     LiveModel liveModel = (LiveModel) model;
@@ -226,7 +236,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     if (!liveModel.getAuthorAvatar().isEmpty()) {
                         Picasso.with((viewHolder.avatarView.getContext())).load(liveModel.getAuthorAvatar()).into(viewHolder.avatarView);
                     }
-                    ArrayList<LiveModel.SubModel> subModels = liveModel.getSubModels();
+                    List<LiveModel.SubModel> subModels = liveModel.getSubModels();
                     Context context = viewHolder.authorView.getContext();
                     viewHolder.clearContent();
                     for (LiveModel.SubModel subModel : subModels) {
@@ -333,6 +343,25 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public void clearContent() {
             this.contentLayout.removeAllViews();
+        }
+    }
+
+    /**
+     *
+     */
+    static class ViewHolderComment extends RecyclerView.ViewHolder {
+        @NonNull
+        private final TextView authorTextView;
+        @NonNull
+        private final TextView dateTextView;
+        @NonNull
+        private final TextView contentTextView;
+
+        ViewHolderComment(@NonNull View view) {
+            super(view);
+            this.authorTextView = view.findViewById(R.id.comment_author);
+            this.dateTextView = view.findViewById(R.id.comment_date);
+            this.contentTextView = view.findViewById(R.id.comment_content);
         }
     }
 

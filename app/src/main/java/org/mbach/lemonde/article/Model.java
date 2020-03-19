@@ -38,10 +38,10 @@ class Model implements Parcelable {
     static final int LIVE_TYPE = 7;
     static final int TEXT_AND_ICON_TYPE = 8;
 
-    private final int id;
+    private int id;
     private final int type;
     @NonNull
-    private final Object theContent;
+    private Object theContent;
 
     private Model(Parcel in) {
         this.id = in.readInt();
@@ -55,13 +55,9 @@ class Model implements Parcelable {
         this.id = id;
     }
 
-    /*
-    Model(int type) {
-        this.id = 0;
+    protected Model(int type) {
         this.type = type;
-        this.theContent = null; /// FIXME
     }
-    */
 
     int getType() {
         return type;

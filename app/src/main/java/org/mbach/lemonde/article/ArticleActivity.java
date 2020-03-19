@@ -135,33 +135,25 @@ public class ArticleActivity extends AppCompatActivity {
             items.add(new Model(Model.TEXT_TYPE, commentHeader, 0));
 
             // Extract comments
-            Element comments = commentDoc.getElementById("comments-river");
-            for (Element comment : comments.getAllElements()) {
-                Elements refs = comment.select("p.references");
-                if (atLeastOneChild(refs)) {
-                    // Clear date
-                    refs.select("span").remove();
-                    TextView author = new TextView(ArticleActivity.this);
-                    author.setTypeface(null, Typeface.BOLD);
-                    author.setText(refs.text());
-
-                    Elements commentComment = refs.next();
-                    if (atLeastOneChild(commentComment)) {
-                        TextView content = new TextView(ArticleActivity.this);
-                        content.setText(commentComment.first().text());
-                        if (comment.hasClass("reponse")) {
-                            author.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 12);
-                            content.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 16);
-                        } else {
-                            author.setPadding(0, 0, 0, 12);
-                            content.setPadding(0, 0, 0, 16);
-                        }
-                        int commentId = Integer.parseInt(comment.attr("data-reaction_id"));
-                        items.add(new Model(Model.COMMENT_TYPE, author, commentId));
-                        items.add(new Model(Model.COMMENT_TYPE, content, commentId));
-                    }
+            Element commentsRiver = commentDoc.getElementById("comments-river");
+            for (Element comment : commentsRiver.children()) {
+                CommentModel commentModel = new CommentModel();
+                Elements elementsAuthor = comment.select(".comment__header .comment__author");
+                if (atLeastOneChild(elementsAuthor)) {
+                    commentModel.setAuthor(elementsAuthor.first().text());
                 }
+                Elements elementsDate = comment.select(".comment__header .comment__date");
+                if (atLeastOneChild(elementsDate)) {
+                    commentModel.setDate(elementsDate.first().text());
+                }
+                Elements elementsContent = comment.select(".comment__content");
+                if (atLeastOneChild(elementsContent)) {
+                    commentModel.setContent(elementsContent.first().text());
+                }
+                Log.d(TAG, "comment = " + commentModel.getAuthor() + "," + commentModel.getDate());
+                items.add(commentModel);
             }
+            /*
             // Extract full comments page URI
             Elements div = commentDoc.select("div.reactions");
 
@@ -172,7 +164,7 @@ public class ArticleActivity extends AppCompatActivity {
                     commentsURI = Constants.BASE_URL2 + next.first().attr("href");
                 }
             }
-
+            */
             Log.d(TAG, "header : " + commentHeader.getText());
 
             articleAdapter.addItems(items);
@@ -192,6 +184,10 @@ public class ArticleActivity extends AppCompatActivity {
             findViewById(R.id.noNetwork).setVisibility(View.INVISIBLE);
 
             Document doc = Jsoup.parse(response);
+            Elements metas = doc.select("meta[property=og:article:section]");
+            if (atLeastOneChild(metas)) {
+                setTitle(metas.first().attr("content"));
+            }
 
             // If article was loaded from an external App, no image was passed from MainActivity,
             // so it must be fetched in the Collapsing Toolbar

@@ -1,58 +1,59 @@
 package org.mbach.lemonde.article;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class LiveModel extends Model {
+class LiveModel extends Model {
 
     private final ArrayList<SubModel> subModels;
     private String authorName;
     private String authorAvatar;
     private String date;
 
-    public LiveModel() {
+    LiveModel() {
         super(Model.LIVE_TYPE, null, 0);
         this.subModels = new ArrayList<>();
     }
 
-    public String getAuthorName() {
+    String getAuthorName() {
         return this.authorName;
     }
 
-    public void setAuthorName(String authorName) {
+    void setAuthorName(String authorName) {
         this.authorName = authorName;
     }
 
-    public String getAuthorAvatar() {
+    String getAuthorAvatar() {
         return authorAvatar;
     }
 
-    public void setAuthorAvatar(String authorAvatar) {
+    void setAuthorAvatar(String authorAvatar) {
         this.authorAvatar = authorAvatar;
     }
 
-    public String getDate() {
+    String getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    void setDate(String date) {
         this.date = date;
     }
 
-    public ArrayList<SubModel> getSubModels() {
+    List<SubModel> getSubModels() {
         return this.subModels;
     }
 
-    public void addSubModels(ArrayList<SubModel> subModels) {
+    void addSubModels(List<SubModel> subModels) {
         this.subModels.addAll(subModels);
     }
 
-    public Paragraph buildParagraph(String html) {
+    Paragraph buildParagraph(String html) {
         Paragraph paragraph = new Paragraph();
         paragraph.setHtml(html);
         return paragraph;
     }
 
-    public Image buildImage(String url) {
+    Image buildImage(String url) {
         Image image = new Image();
         image.setUrl(url);
 
@@ -60,18 +61,18 @@ public class LiveModel extends Model {
     }
 
     /*
-    public Quote buildQuote(String html) {
+    Quote buildQuote(String html) {
         Quote quote = new Quote();
         quote.setHtml(html);
         return quote;
     }
     */
 
-    public static class SubModel {
+    static class SubModel {
 
     }
 
-    public static class Quote extends SubModel {
+    static class Quote extends SubModel {
         private String html;
 
         public String getHtml() {
@@ -83,7 +84,7 @@ public class LiveModel extends Model {
         }
     }
 
-    public static class Image extends SubModel {
+    static class Image extends SubModel {
         private String url;
 
         public String getUrl() {
@@ -96,12 +97,12 @@ public class LiveModel extends Model {
     }
 
     /*
-    public static class Video extends SubModel {
+    static class Video extends SubModel {
 
     }
     */
 
-    public static class Paragraph extends SubModel {
+    static class Paragraph extends SubModel {
         private String html;
 
         public String getHtml() {

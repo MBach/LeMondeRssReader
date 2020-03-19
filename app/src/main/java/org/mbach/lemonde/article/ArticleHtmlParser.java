@@ -39,13 +39,13 @@ public class ArticleHtmlParser {
      * @return ArrayList<Model>
      */
     public ArrayList<Model> parse(Document doc) {
-        if (this.isLive(doc)) {
-            return this.parseLive(doc);
+        if (isLive(doc)) {
+            return parseLive(doc);
         }
-        if (this.isLongForm(doc)) {
-            return this.parseLongForm(doc);
+        if (isLongForm(doc)) {
+            return parseLongForm(doc);
         }
-        return this.parseArticle(doc);
+        return parseArticle(doc);
     }
 
     private boolean isLive(Document doc) {
@@ -251,8 +251,7 @@ public class ArticleHtmlParser {
 
         Elements contents = elem.select(".content--live");
         for (Element content : contents) {
-            ArrayList<LiveModel.SubModel> subModels = this.buildSubLive(content, model);
-            model.addSubModels(subModels);
+            model.addSubModels(buildSubLive(content, model));
         }
         return model;
     }

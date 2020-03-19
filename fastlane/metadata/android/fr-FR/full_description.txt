@@ -1,0 +1,11 @@
+Cette App pour Android 4.2 Jelly Bean et + (Android 11) est un lecteur de flux RSS pour le site lemonde.fr.
+
+Grâce au Web Scrapping, l'application affiche l'article complet avec ses commentaires via des composants natifs Android.
+
+Cette App a été designée pour être la plus simple et la plus rapide possible. Le rendu général respecte les directives "Material Design" de Google. En détails, vous trouverez à l'intérieur :
+
+- Un menu regroupant vos favoris ainsi que toutes les catégories du site
+- La possibilité de raffraîchir les actualités en "tirant vers le haut"
+- Dans les options, un mode sombre ou clair
+- L'affichage ou non d'informations peu pertinentes (comme les tweets), pour privilégier le contenu écrit
+- Et enfin, pour les smartphones sous Android 7.1 et + : des raccourcis type "Appui long" à l'ouverture pour retrouver les catégories que vous consultez le plus

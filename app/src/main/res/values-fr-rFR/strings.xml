@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- MainActivity: Right menu settings -->
+    <string name="action_settings">Paramètres</string>
+
+    <!-- Drawer -->
+    <string name="navigation_drawer_open">Ouvrir le menu</string>
+    <string name="navigation_drawer_close">Fermer le menu</string>
+    <string name="category_fav">Favoris</string>
+    <string name="category_news">À la Une</string>
+    <string name="category_international">International</string>
+    <string name="category_politics">Politique</string>
+    <string name="category_society">Société</string>
+    <string name="category_economy">Économie</string>
+    <string name="category_culture">Culture</string>
+    <string name="category_ideas">Idées</string>
+    <string name="category_planet">Planète</string>
+    <string name="category_sports">Sports</string>
+    <string name="category_sciences">Sciences</string>
+    <string name="category_pixels">Pixels</string>
+    <string name="category_campus">Campus</string>
+    <string name="category_decoders">Les décodeurs</string>
+    <string name="category_videos">Vidéos</string>
+
+    <!-- Article -->
+    <string name="open_tweet_external">Voir dans Twitter</string>
+    <string name="share_article">Partager cet article</string>
+    <string name="live_facts">Les faits</string>
+    <string name="live_events">Suivez le live de l’événement</string>
+    <string name="register">S’abonner</string>
+    <string name="restricted_content">L’accès à la totalité de l’article est protégé</string>
+    <string name="favorites_article_removed">Article supprimé des favoris</string>
+    <string name="favorites_article_added">Article ajouté aux favoris</string>
+    <string name="graph_source">Source</string>
+
+    <!-- Bubble tag of article -->
+    <string name="paid_article">Article Abonnés</string>
+    <string name="video_article">Vidéo</string>
+    <string name="live_article">Live</string>
+    <string name="image_from_article">Image de l’article</string>
+    <string name="type_article">Type d’article</string>
+
+    <!-- Favorites -->
+    <string name="favorites_title_activity">Favoris</string>
+    <string name="favorites_none_found">Aucun favori sauvegardé</string>
+
+    <!-- Strings related to errors -->
+    <string name="error_no_connection">Aucune connexion Internet</string>
+    <string name="error_no_connection_retry">Réessayer</string>
+    <string name="error_timeout">Connexion limitée : impossible de récupérer le flux</string>
+
+    <!-- Strings related to Settings -->
+    <string name="preference_article_layout">Mise en page</string>
+    <string name="preference_article_content">Contenu des articles</string>
+    <string name="preference_article_display_tweets">Inclure les tweets dans le corps d’un article</string>
+    <string name="preference_general_display">Affichage</string>
+    <string name="preference_app_style">Style de l’App</string>
+    <string name="preference_app_dark_theme">Thème sombre</string>
+    <string name="preference_share_icons">Icône de partage</string>
+    <string name="preference_share_description">Activer le partage d’un article (email, réseaux sociaux, etc.)</string>
+
+    <string name="user_avatar">User avatar</string>
+</resources>

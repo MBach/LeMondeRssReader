@@ -1,0 +1,1 @@
+Lecteur de flux RSS pour www.lemonde.fr : rapide, léger, natif et sans pub

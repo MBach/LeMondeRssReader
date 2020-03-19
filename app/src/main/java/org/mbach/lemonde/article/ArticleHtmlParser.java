@@ -22,7 +22,16 @@ import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Extract and parse a standard article from HTML.
+ *
+ * A standard article is published on the main page and by definition, is not a video nor a special
+ * multimedia content. It has some standardized fields like one (or multiple) author(s), a date,
+ * a description, an headline, a description and a list of paragraphs. Each paragraph is a block of
+ * text (comments included) or an image or an embedded tweet.
+ */
 public class ArticleHtmlParser {
     private static final String TAG = "ArticleHtmlParser";
 
@@ -36,9 +45,9 @@ public class ArticleHtmlParser {
      * Parse an article from an HTML Document.
      *
      * @param doc the document
-     * @return ArrayList<Model>
+     * @return List<Model>
      */
-    public ArrayList<Model> parse(Document doc) {
+    public List<Model> parse(Document doc) {
         if (isLive(doc)) {
             return parseLive(doc);
         }
@@ -56,8 +65,8 @@ public class ArticleHtmlParser {
         return doc.select(".article--longform").size() > 0;
     }
 
-    private ArrayList<Model> parseLive(Document doc) {
-        ArrayList<Model> models = new ArrayList<>();
+    private List<Model> parseLive(Document doc) {
+        List<Model> models = new ArrayList<>();
 
         models.add(buildHeadline(doc, ".title .title--live"));
         models.add(buildDescription(doc, ".title .summary--live"));
@@ -70,8 +79,8 @@ public class ArticleHtmlParser {
         return models;
     }
 
-    private ArrayList<Model> parseLongForm(Document doc) {
-        ArrayList<Model> models = new ArrayList<>();
+    private List<Model> parseLongForm(Document doc) {
+        List<Model> models = new ArrayList<>();
 
         models.add(buildHeadline(doc, ".article__heading .article__title"));
         models.add(buildDescription(doc, ".article__heading .article__desc"));
@@ -130,8 +139,8 @@ public class ArticleHtmlParser {
         return models;
     }
 
-    private ArrayList<Model> parseArticle(Document doc) {
-        ArrayList<Model> models = new ArrayList<>();
+    private List<Model> parseArticle(Document doc) {
+        List<Model> models = new ArrayList<>();
 
         models.add(buildHeadline(doc, ".article__header .article__title"));
         models.add(buildDescription(doc, ".article__header .article__desc"));
@@ -256,8 +265,8 @@ public class ArticleHtmlParser {
         return model;
     }
 
-    private ArrayList<LiveModel.SubModel> buildSubLive(Element elem, LiveModel model) {
-        ArrayList<LiveModel.SubModel> subModels = new ArrayList<>();
+    private List<LiveModel.SubModel> buildSubLive(Element elem, LiveModel model) {
+        List<LiveModel.SubModel> subModels = new ArrayList<>();
 
         if (elem.select("> div").size() == 0) {
             if (!elem.text().equals("")) {

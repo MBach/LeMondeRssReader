@@ -14,6 +14,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,8 +22,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(RobolectricTestRunner.class)
 public class ArticleHtmlParserTest
 {
-
-    private ArrayList<Model> models;
+    private List<Model> models;
 
     @Before
     public void setUp() {

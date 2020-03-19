@@ -5,7 +5,7 @@ import java.util.List;
 
 class LiveModel extends Model {
 
-    private final ArrayList<SubModel> subModels;
+    private final List<SubModel> subModels;
     private String authorName;
     private String authorAvatar;
     private String date;

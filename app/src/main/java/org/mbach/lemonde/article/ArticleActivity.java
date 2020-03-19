@@ -56,12 +56,15 @@ import org.mbach.lemonde.home.MainActivity;
 import org.mbach.lemonde.home.RssItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ArticleActivity class fetch an article from an URI, and parse the HTML response.
+ * Also get the comments if the article has some.
  *
  * @author Matthieu BACHELIER
  * @since 2017-05
+ * @version 2.0
  */
 public class ArticleActivity extends AppCompatActivity {
 
@@ -125,14 +128,16 @@ public class ArticleActivity extends AppCompatActivity {
         public void onResponse(String response) {
             Document commentDoc = Jsoup.parse(response);
 
-            ArrayList<Model> items = new ArrayList<>();
-            // Extract header
-            Element header = commentDoc.getElementById("comments-header");
-            TextView commentHeader = new TextView(ArticleActivity.this);
-            commentHeader.setText(header.text());
-            commentHeader.setTypeface(null, Typeface.BOLD);
-            commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
-            items.add(new Model(Model.TEXT_TYPE, commentHeader, 0));
+            List<Model> items = new ArrayList<>();
+            if (commentsURI.endsWith("contributions")) {
+                // Extract header
+                Element header = commentDoc.getElementById("comments-header");
+                TextView commentHeader = new TextView(ArticleActivity.this);
+                commentHeader.setText(header.text());
+                commentHeader.setTypeface(null, Typeface.BOLD);
+                commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
+                items.add(new Model(Model.TEXT_TYPE, commentHeader, 0));
+            }
 
             // Extract comments
             Element commentsRiver = commentDoc.getElementById("comments-river");
@@ -150,23 +155,15 @@ public class ArticleActivity extends AppCompatActivity {
                 if (atLeastOneChild(elementsContent)) {
                     commentModel.setContent(elementsContent.first().text());
                 }
-                Log.d(TAG, "comment = " + commentModel.getAuthor() + "," + commentModel.getDate());
                 items.add(commentModel);
             }
-            /*
-            // Extract full comments page URI
-            Elements div = commentDoc.select("div.reactions");
-
-            if (atLeastOneChild(div)) {
-                Element fullComments = div.first().nextElementSibling();
-                Elements next = fullComments.select("a");
-                if (atLeastOneChild(next)) {
-                    commentsURI = Constants.BASE_URL2 + next.first().attr("href");
-                }
+            // Extract next page in the pagination bloc
+            Elements nextLink = commentDoc.select("li.pagination__item.pagination__item--active + li.pagination__item a.pagination__link");
+            if (atLeastOneChild(nextLink)) {
+                commentsURI = nextLink.first().attr("href");
+            } else {
+                commentsURI = "";
             }
-            */
-            Log.d(TAG, "header : " + commentHeader.getText());
-
             articleAdapter.addItems(items);
         }
     };
@@ -208,7 +205,7 @@ public class ArticleActivity extends AppCompatActivity {
             }
 
             // Standard article
-            ArrayList<Model> items = extractDataFromHtml(doc);
+            List<Model> items = new ArticleHtmlParser(ArticleActivity.this).parse(doc);
             LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
             //Log.d(TAG, "shareLink " + shareLink);
             boolean hasArticle = leMondeDB.hasArticle(shareLink);
@@ -242,7 +239,6 @@ public class ArticleActivity extends AppCompatActivity {
             Elements commentsElements = doc.select(".article__reactions .comments__active");
             if (atLeastOneChild(commentsElements)) {
                 commentsURI = commentsElements.first().attr("href");
-                Log.d(TAG, commentsURI);
                 if (REQUEST_QUEUE != null) {
                     REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
                 }
@@ -325,10 +321,7 @@ public class ArticleActivity extends AppCompatActivity {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 if (recyclerView.getLayoutManager() != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == recyclerView.getLayoutManager().getItemCount() - 1) {
-                    if (Constants.BASE_URL2.equals(commentsURI)) {
-                        autoLoader.setVisibility(View.INVISIBLE);
-                        Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.no_more_comments_to_load), Snackbar.LENGTH_LONG).show();
-                    } else if (commentsURI != null) {
+                    if (!"".equals(commentsURI) && !isRestricted) {
                         autoLoader.setVisibility(View.VISIBLE);
                         REQUEST_QUEUE.add(new StringRequest(Request.Method.GET, commentsURI, commentsReceived, errorResponse));
                     }
@@ -360,7 +353,7 @@ public class ArticleActivity extends AppCompatActivity {
             if (recyclerView.getLayoutManager() != null) {
                 recyclerView.getLayoutManager().onRestoreInstanceState(parcelable);
             }
-            ArrayList<Model> items = getIntent().getParcelableArrayListExtra(STATE_ADAPTER_ITEM);
+            List<Model> items = getIntent().getParcelableArrayListExtra(STATE_ADAPTER_ITEM);
             if (items != null) {
                 articleAdapter.addItems(items);
             }
@@ -388,7 +381,7 @@ public class ArticleActivity extends AppCompatActivity {
             Parcelable parcelable = recyclerView.getLayoutManager().onSaveInstanceState();
             getIntent().putExtra(STATE_RECYCLER_VIEW, parcelable);
             getIntent().putExtra(STATE_RECYCLER_VIEW_POS, lastFirstVisiblePosition);
-            getIntent().putParcelableArrayListExtra(STATE_ADAPTER_ITEM, articleAdapter.getItems());
+            getIntent().putParcelableArrayListExtra(STATE_ADAPTER_ITEM, new ArrayList<Parcelable>((articleAdapter.getItems())));
         }
     }
 
@@ -440,7 +433,6 @@ public class ArticleActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem menuItem) {
                 final LeMondeDB leMondeDB = new LeMondeDB(ArticleActivity.this);
                 boolean hasArticle = leMondeDB.hasArticle(shareLink);
-                Log.d(TAG,"hasArticle : " + hasArticle + ", link : " + shareLink);
                 if (hasArticle && leMondeDB.deleteArticle(shareLink)) {
                     hasArticle = false;
                     Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_removed), Snackbar.LENGTH_SHORT).show();
@@ -455,7 +447,6 @@ public class ArticleActivity extends AppCompatActivity {
                     favorite.setCategory(getTitle().toString());
                     if (leMondeDB.saveArticle(favorite)) {
                         hasArticle = true;
-                        Log.d(TAG,"hasArticle saveArticle");
                         Snackbar.make(findViewById(R.id.coordinatorArticle), getString(R.string.favorites_article_added), Snackbar.LENGTH_SHORT).show();
                     }
                 }
@@ -514,8 +505,6 @@ public class ArticleActivity extends AppCompatActivity {
                     toggleFavItem.setIcon(getResources().getDrawable(R.drawable.star_border_black));
                 }
             }
-        } else {
-            Log.d(TAG, "toggleFavItem is null :(");
         }
     }
 
@@ -533,18 +522,5 @@ public class ArticleActivity extends AppCompatActivity {
         tagArticle.setBackgroundColor(ContextCompat.getColor(getBaseContext(), backgroundColor));
         tagArticle.setTextColor(textColor);
         tagArticle.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * Extract and parse a standard article from HTML. A standard article is published on the main page and by definition,
-     * is not: a video nor a special multimedia content. It has some standardized fields like
-     * one (or multiple) author(s), a date, a description, an headline, a description and a list of paragraphs.
-     * Each paragraph is a block of text (comments included) or an image or an embedded tweet.
-     *
-     * @param doc article to analyze
-     * @return a list of formatted content that can be nicely displayed in the recycler view.
-     */
-    private ArrayList<Model> extractDataFromHtml(@NonNull Document doc) {
-        return new ArticleHtmlParser(this).parse(doc);
     }
 }

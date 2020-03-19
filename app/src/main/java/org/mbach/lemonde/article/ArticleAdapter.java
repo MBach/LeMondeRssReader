@@ -46,43 +46,15 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "ArticleAdapter";
 
-    private ArrayList<Model> items;
+    private List<Model> items = new ArrayList<>();
 
     /**
      * Add items to render.
      *
      * @param items list of items (incl. comments) to display
      */
-    void addItems(@NonNull ArrayList<Model> items) {
-        if (this.items == null) {
-            this.items = items;
-            Log.d(TAG, items.toString());
-        } else {
-            List<Model> previousComments = new ArrayList<>();
-            for (Model model : this.items) {
-                if (model.getType() == Model.COMMENT_TYPE) {
-                    previousComments.add(model);
-                }
-            }
-            List<Model> next = new ArrayList<>(items);
-            if (!previousComments.isEmpty()) {
-                next.removeAll(previousComments);
-            }
-            this.items.addAll(next);
-        }
-        notifyDataSetChanged();
-    }
-
-    /**
-     * Add a single item to render.
-     *
-     * @param item item to add
-     */
-    void addItem(Model item) {
-        if (this.items == null) {
-            this.items = new ArrayList<>();
-        }
-        this.items.add(item);
+    void addItems(@NonNull List<Model> items) {
+        this.items.addAll(items);
         notifyDataSetChanged();
     }
 
@@ -274,7 +246,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    ArrayList<Model> getItems() {
+    List<Model> getItems() {
         return items;
     }
 

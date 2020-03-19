@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == GET_LATEST_RSS_FEED && resultCode == RssService.FETCH_SUCCESS && data != null) {
-            ArrayList<RssItem> rssItems = data.getParcelableArrayListExtra(RssService.PARCELABLE_EXTRAS);
+            List<RssItem> rssItems = data.getParcelableArrayListExtra(RssService.PARCELABLE_EXTRAS);
             if (rssItems == null) {
                 return;
             }

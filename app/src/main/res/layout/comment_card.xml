@@ -5,36 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:id="@+id/comment_header"
-        android:layout_width="0dp"
+    <include
+        layout="@layout/comment_card_details"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/comment_response" />
+
+    <LinearLayout
+        android:id="@+id/comment_response"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="32dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/comment_card_details">
 
-        <TextView
-            android:id="@+id/comment_author"
-            android:layout_width="wrap_content"
+        <Button
+            android:id="@+id/toggle_response"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/comment_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textSize="12sp" />
+            android:visibility="gone" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/comment_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/comment_header" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

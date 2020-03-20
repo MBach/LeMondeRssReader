@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.text.Html;
+import android.text.Layout;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -32,6 +33,7 @@ import com.squareup.picasso.Picasso;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +48,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "ArticleAdapter";
 
-    private List<Model> items = new ArrayList<>();
+    private final List<Model> items = new ArrayList<>();
 
     /**
      * Add items to render.
@@ -60,12 +62,12 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return items == null ? 0 : items.size();
+        return items.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return items == null ? -1 : items.get(position).getType();
+        return items.isEmpty() ? -1 : items.get(position).getType();
     }
 
     @NonNull
@@ -196,9 +198,25 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     viewHolderComment.authorTextView.setText(commentModel.getAuthor());
                     viewHolderComment.dateTextView.setText(commentModel.getDate());
                     viewHolderComment.contentTextView.setText(commentModel.getContent());
+
                     // Text color for author and content only
                     viewHolderComment.authorTextView.setTextColor(defaultTextColor);
                     viewHolderComment.contentTextView.setTextColor(defaultTextColor);
+                    for (CommentModel commentResponseModel : commentModel.getResponses()) {
+                        View commentResponse = LayoutInflater.from(viewHolderComment.authorTextView.getContext()).inflate(R.layout.comment_card_details, null, false);
+                        TextView author = commentResponse.findViewById(R.id.comment_author);
+                        TextView date = commentResponse.findViewById(R.id.comment_date);
+                        TextView content = commentResponse.findViewById(R.id.comment_content);
+
+                        author.setText(commentResponseModel.getAuthor());
+                        date.setText(commentResponseModel.getDate());
+                        content.setText(commentResponseModel.getContent());
+
+                        // Text color for author and content only
+                        author.setTextColor(defaultTextColor);
+                        content.setTextColor(defaultTextColor);
+                        viewHolderComment.responseLayout.addView(commentResponse);
+                    }
                     break;
                 case Model.LIVE_TYPE:
                     ViewHolderLive viewHolder = (ViewHolderLive) holder;
@@ -328,12 +346,15 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final TextView dateTextView;
         @NonNull
         private final TextView contentTextView;
+        @NonNull
+        private final LinearLayout responseLayout;
 
         ViewHolderComment(@NonNull View view) {
             super(view);
             this.authorTextView = view.findViewById(R.id.comment_author);
             this.dateTextView = view.findViewById(R.id.comment_date);
             this.contentTextView = view.findViewById(R.id.comment_content);
+            this.responseLayout = view.findViewById(R.id.comment_response);
         }
     }
 

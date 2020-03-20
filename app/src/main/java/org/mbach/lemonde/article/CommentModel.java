@@ -1,7 +1,11 @@
 package org.mbach.lemonde.article;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class CommentModel extends Model {
 
+    private List<CommentModel> responses = new ArrayList<>();
     private String author;
     private String date;
     private String content;
@@ -10,7 +14,15 @@ class CommentModel extends Model {
         super(Model.COMMENT_TYPE);
     }
 
-    public String getAuthor() {
+    public List<CommentModel> getResponses() {
+        return responses;
+    }
+
+    public void setResponses(List<CommentModel> responses) {
+        this.responses = responses;
+    }
+
+    String getAuthor() {
         return author;
     }
 
@@ -18,7 +30,7 @@ class CommentModel extends Model {
         this.author = author;
     }
 
-    public String getDate() {
+    String getDate() {
         return date;
     }
 
@@ -26,7 +38,7 @@ class CommentModel extends Model {
         this.date = date;
     }
 
-    public String getContent() {
+    String getContent() {
         return content;
     }
 

@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -142,18 +141,15 @@ public class ArticleActivity extends AppCompatActivity {
             // Extract comments
             Element commentsRiver = commentDoc.getElementById("comments-river");
             for (Element comment : commentsRiver.children()) {
-                CommentModel commentModel = new CommentModel();
-                Elements elementsAuthor = comment.select(".comment__header .comment__author");
-                if (atLeastOneChild(elementsAuthor)) {
-                    commentModel.setAuthor(elementsAuthor.first().text());
-                }
-                Elements elementsDate = comment.select(".comment__header .comment__date");
-                if (atLeastOneChild(elementsDate)) {
-                    commentModel.setDate(elementsDate.first().text());
-                }
-                Elements elementsContent = comment.select(".comment__content");
-                if (atLeastOneChild(elementsContent)) {
-                    commentModel.setContent(elementsContent.first().text());
+                CommentModel commentModel = extractComment(comment);
+                Elements elementsResponses = comment.select(".comment__footer + .comment__children");
+                if (atLeastOneChild(elementsResponses)) {
+                    List<CommentModel> commentResponseList = new ArrayList<>();
+                    for (Element commentResponse : elementsResponses.first().children()) {
+                        CommentModel commentResponseModel = extractComment(commentResponse);
+                        commentResponseList.add(commentResponseModel);
+                    }
+                    commentModel.setResponses(commentResponseList);
                 }
                 items.add(commentModel);
             }
@@ -165,6 +161,23 @@ public class ArticleActivity extends AppCompatActivity {
                 commentsURI = "";
             }
             articleAdapter.addItems(items);
+        }
+
+        private CommentModel extractComment(Element comment) {
+            CommentModel commentModel = new CommentModel();
+            Elements elementsAuthor = comment.select(".comment__header .comment__author");
+            if (atLeastOneChild(elementsAuthor)) {
+                commentModel.setAuthor(elementsAuthor.first().text());
+            }
+            Elements elementsDate = comment.select(".comment__header .comment__date");
+            if (atLeastOneChild(elementsDate)) {
+                commentModel.setDate(elementsDate.first().text());
+            }
+            Elements elementsContent = comment.select(".comment__content");
+            if (atLeastOneChild(elementsContent)) {
+                commentModel.setContent(elementsContent.first().text());
+            }
+            return commentModel;
         }
     };
 

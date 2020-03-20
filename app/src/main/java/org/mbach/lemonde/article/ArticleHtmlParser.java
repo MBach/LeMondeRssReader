@@ -6,7 +6,6 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Button;
 import android.widget.TextView;
@@ -33,8 +32,6 @@ import java.util.List;
  * text (comments included) or an image or an embedded tweet.
  */
 public class ArticleHtmlParser {
-    private static final String TAG = "ArticleHtmlParser";
-
     private final Context context;
 
     public ArticleHtmlParser(Context context) {
@@ -236,6 +233,7 @@ public class ArticleHtmlParser {
         if (time.isEmpty()) {
             return null;
         } else {
+            readTime.setText(time);
             return new Model(Model.TEXT_AND_ICON_TYPE, readTime,  ThemeUtils.isDarkTheme(this.context) ? R.drawable.baseline_timer_white_24 : R.drawable.baseline_timer_black_24);
         }
     }

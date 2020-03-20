@@ -2,7 +2,6 @@ package org.mbach.lemonde.article;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;

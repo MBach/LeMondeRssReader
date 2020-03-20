@@ -9,7 +9,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="125dp"
-        android:layout_height="match_parent">
+        android:layout_height="108dp">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/rss_image"

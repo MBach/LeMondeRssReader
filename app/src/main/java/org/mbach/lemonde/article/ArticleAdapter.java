@@ -5,7 +5,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.text.Html;
-import android.text.Layout;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -33,7 +32,6 @@ import com.squareup.picasso.Picasso;
 import org.mbach.lemonde.Constants;
 import org.mbach.lemonde.R;
 import org.mbach.lemonde.ThemeUtils;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +81,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case Model.TWEET_TYPE:
                 return new ViewHolderTweet(LayoutInflater.from(parent.getContext()).inflate(R.layout.tweet_card, parent, false));
             case Model.COMMENT_TYPE:
+            case Model.COMMENT_RESPONSE_TYPE:
                 return new ViewHolderComment(LayoutInflater.from(parent.getContext()).inflate(R.layout.comment_card, parent, false));
             case Model.LIVE_TYPE:
                 return new ViewHolderLive(LayoutInflater.from(parent.getContext()).inflate(R.layout.live_card, parent, false));
@@ -101,7 +100,6 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
-
         Model model = items.get(position);
         if (model == null) {
             return;
@@ -149,7 +147,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     vh.text.setPadding(textView.getPaddingLeft(), textView.getPaddingTop(), textView.getPaddingRight(), textView.getPaddingBottom());
                     vh.text.setBackground(textView.getBackground());
                     if (model.getType() == Model.TEXT_AND_ICON_TYPE) {
-                        vh.text.setCompoundDrawablesRelativeWithIntrinsicBounds(model.getId(),0,0,0);
+                        vh.text.setCompoundDrawablesRelativeWithIntrinsicBounds(model.getId(), 0, 0, 0);
                     }
 
                     // Tag doesn't expand horizontally to the max
@@ -193,29 +191,19 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     Log.d(TAG, "pos = " + viewHolderVideo.getVideoView().getCurrentPosition());
                     break;
                 case Model.COMMENT_TYPE:
-                    ViewHolderComment viewHolderComment = (ViewHolderComment) holder;
-                    CommentModel commentModel = (CommentModel) model;
-                    viewHolderComment.authorTextView.setText(commentModel.getAuthor());
-                    viewHolderComment.dateTextView.setText(commentModel.getDate());
-                    viewHolderComment.contentTextView.setText(commentModel.getContent());
+                case Model.COMMENT_RESPONSE_TYPE:
+                    ViewHolderComment vhComment = (ViewHolderComment) holder;
+                    final CommentModel commentModel = (CommentModel) model;
+                    vhComment.authorTextView.setText(commentModel.getAuthor());
+                    vhComment.dateTextView.setText(commentModel.getDate());
+                    vhComment.contentTextView.setText(commentModel.getContent());
 
                     // Text color for author and content only
-                    viewHolderComment.authorTextView.setTextColor(defaultTextColor);
-                    viewHolderComment.contentTextView.setTextColor(defaultTextColor);
-                    for (CommentModel commentResponseModel : commentModel.getResponses()) {
-                        View commentResponse = LayoutInflater.from(viewHolderComment.authorTextView.getContext()).inflate(R.layout.comment_card_details, null, false);
-                        TextView author = commentResponse.findViewById(R.id.comment_author);
-                        TextView date = commentResponse.findViewById(R.id.comment_date);
-                        TextView content = commentResponse.findViewById(R.id.comment_content);
+                    vhComment.authorTextView.setTextColor(defaultTextColor);
+                    vhComment.contentTextView.setTextColor(defaultTextColor);
 
-                        author.setText(commentResponseModel.getAuthor());
-                        date.setText(commentResponseModel.getDate());
-                        content.setText(commentResponseModel.getContent());
-
-                        // Text color for author and content only
-                        author.setTextColor(defaultTextColor);
-                        content.setTextColor(defaultTextColor);
-                        viewHolderComment.responseLayout.addView(commentResponse);
+                    if (model.getType() == Model.COMMENT_RESPONSE_TYPE) {
+                        vhComment.itemView.setPadding(Constants.PADDING_COMMENT_ANSWER, 0, 0, 0);
                     }
                     break;
                 case Model.LIVE_TYPE:
@@ -226,10 +214,9 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     if (!liveModel.getAuthorAvatar().isEmpty()) {
                         Picasso.with((viewHolder.avatarView.getContext())).load(liveModel.getAuthorAvatar()).into(viewHolder.avatarView);
                     }
-                    List<LiveModel.SubModel> subModels = liveModel.getSubModels();
                     Context context = viewHolder.authorView.getContext();
                     viewHolder.clearContent();
-                    for (LiveModel.SubModel subModel : subModels) {
+                    for (LiveModel.SubModel subModel : liveModel.getSubModels()) {
                         if (subModel instanceof LiveModel.Paragraph) {
                             String par = ((LiveModel.Paragraph) subModel).getHtml();
                             // Deleting links
@@ -241,8 +228,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             paragraph.setPadding(0, 0, 0, Constants.PADDING_BOTTOM);
                             paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.live_body));
                             viewHolder.addContent(paragraph);
-                        }
-                        if (subModel instanceof LiveModel.Quote) {
+                        } else if (subModel instanceof LiveModel.Quote) {
                             String par = ((LiveModel.Quote) subModel).getHtml();
                             // Deleting links
                             par = par.replaceAll("<a[^>]*>", "");
@@ -252,8 +238,7 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             paragraph.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.live_body));
                             paragraph.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
                             viewHolder.addContent(paragraph);
-                        }
-                        if (subModel instanceof LiveModel.Image) {
+                        } else if (subModel instanceof LiveModel.Image) {
                             ImageView image = new ImageView(context);
                             Picasso.with(context).load(((LiveModel.Image) subModel).getUrl()).into(image);
                             viewHolder.addContent(image);
@@ -346,15 +331,12 @@ class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final TextView dateTextView;
         @NonNull
         private final TextView contentTextView;
-        @NonNull
-        private final LinearLayout responseLayout;
 
         ViewHolderComment(@NonNull View view) {
             super(view);
             this.authorTextView = view.findViewById(R.id.comment_author);
             this.dateTextView = view.findViewById(R.id.comment_date);
             this.contentTextView = view.findViewById(R.id.comment_content);
-            this.responseLayout = view.findViewById(R.id.comment_response);
         }
     }
 

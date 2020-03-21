@@ -28,14 +28,15 @@ class Model implements Parcelable {
     };
     static final int UNKNOWN_TYPE = -1;
     static final int TEXT_TYPE = 0;
-    static final int IMAGE_TYPE = 1;
-    static final int TWEET_TYPE = 2;
-    static final int FACTS_TYPE = 3;
-    static final int COMMENT_TYPE = 4;
-    static final int BUTTON_TYPE = 5;
-    static final int VIDEO_TYPE = 6;
-    static final int LIVE_TYPE = 7;
-    static final int TEXT_AND_ICON_TYPE = 8;
+    static final int TEXT_AND_ICON_TYPE = 1;
+    static final int IMAGE_TYPE = 2;
+    static final int TWEET_TYPE = 3;
+    static final int FACTS_TYPE = 4;
+    static final int COMMENT_TYPE = 5;
+    static final int COMMENT_RESPONSE_TYPE = 6;
+    static final int BUTTON_TYPE = 7;
+    static final int VIDEO_TYPE = 8;
+    static final int LIVE_TYPE = 9;
 
     private int id;
     private final int type;

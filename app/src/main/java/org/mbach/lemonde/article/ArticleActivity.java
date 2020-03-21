@@ -134,24 +134,22 @@ public class ArticleActivity extends AppCompatActivity {
                 TextView commentHeader = new TextView(ArticleActivity.this);
                 commentHeader.setText(header.text());
                 commentHeader.setTypeface(null, Typeface.BOLD);
-                commentHeader.setPadding(0, 0, 0, Constants.PADDING_COMMENT_ANSWER);
+                commentHeader.setPadding(0, 0, 0, Constants.PADDING_TOP_SUBTITLE);
                 items.add(new Model(Model.TEXT_TYPE, commentHeader, 0));
             }
 
             // Extract comments
             Element commentsRiver = commentDoc.getElementById("comments-river");
             for (Element comment : commentsRiver.children()) {
-                CommentModel commentModel = extractComment(comment);
+                CommentModel commentModel = extractComment(Model.COMMENT_TYPE, comment);
+                items.add(commentModel);
                 Elements elementsResponses = comment.select(".comment__footer + .comment__children");
                 if (atLeastOneChild(elementsResponses)) {
-                    List<CommentModel> commentResponseList = new ArrayList<>();
                     for (Element commentResponse : elementsResponses.first().children()) {
-                        CommentModel commentResponseModel = extractComment(commentResponse);
-                        commentResponseList.add(commentResponseModel);
+                        CommentModel commentResponseModel = extractComment(Model.COMMENT_RESPONSE_TYPE, commentResponse);
+                        items.add(commentResponseModel);
                     }
-                    commentModel.setResponses(commentResponseList);
                 }
-                items.add(commentModel);
             }
             // Extract next page in the pagination bloc
             Elements nextLink = commentDoc.select("li.pagination__item.pagination__item--active + li.pagination__item a.pagination__link");
@@ -163,8 +161,8 @@ public class ArticleActivity extends AppCompatActivity {
             articleAdapter.addItems(items);
         }
 
-        private CommentModel extractComment(Element comment) {
-            CommentModel commentModel = new CommentModel();
+        private CommentModel extractComment(int type, Element comment) {
+            CommentModel commentModel = new CommentModel(type);
             Elements elementsAuthor = comment.select(".comment__header .comment__author");
             if (atLeastOneChild(elementsAuthor)) {
                 commentModel.setAuthor(elementsAuthor.first().text());

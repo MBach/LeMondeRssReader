@@ -21,7 +21,7 @@ public final class Constants {
     public static final int PADDING_BOTTOM = 16;
     public static final int PADDING_TOP_SUBTITLE = 30;
     public static final int PADDING_BOTTOM_SUBTITLE = 20;
-    public static final int PADDING_COMMENT_ANSWER = 30;
+    public static final int PADDING_COMMENT_ANSWER = 48;
     public static final int THEME_CHANGED = 0;
     private static final String RSS_FULL = "/rss_full.xml";
     public static final String CAT_INTERNATIONAL = "international" + RSS_FULL;

@@ -1,0 +1,10 @@
+This App for Android 4.2 Jelly Bean and later (Android 11) reads RSS stream from lemonde.fr.
+
+Thanks to Web scraping, it renders the article and its comments in the feed directly in native Android components.
+
+This App was also built to be as fastest and simple as possible. Material design guidelines were applied so you'll find:
+
+- A menu with your favorites and all categories
+- The ability to refresh the feed with "Pull to refresh"
+- In the settings, a dark mode or a light mode
+- And finally, for the smartphones on Android 7.1 and up: dynamic shortcuts (long press) before opening the App, to quicly access the categories you're reader the most

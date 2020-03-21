@@ -48,19 +48,19 @@
     <string name="favorites_none_found">No favorites saved</string>
 
     <!-- Strings related to errors -->
-    <string name="error_no_connection">Aucune connexion Internet</string>
-    <string name="error_no_connection_retry">Réessayer</string>
-    <string name="error_timeout">Connexion limitée : impossible de récupérer le flux</string>
+    <string name="error_no_connection">No Internet connection</string>
+    <string name="error_no_connection_retry">Retry</string>
+    <string name="error_timeout">Limited connection: cannot fetch the stream</string>
 
     <!-- Strings related to Settings -->
-    <string name="preference_article_layout">Mise en page</string>
-    <string name="preference_article_content">Contenu des articles</string>
-    <string name="preference_article_display_tweets">Inclure les tweets dans le corps d’un article</string>
-    <string name="preference_general_display">Affichage</string>
-    <string name="preference_app_style">Style de l’App</string>
-    <string name="preference_app_dark_theme">Thème sombre</string>
-    <string name="preference_share_icons">Icône de partage</string>
-    <string name="preference_share_description">Activer le partage d’un article (email, réseaux sociaux, etc.)</string>
+    <string name="preference_article_layout">Layout</string>
+    <string name="preference_article_content">Content of articles</string>
+    <string name="preference_article_display_tweets">Include tweets in the body of an article</string>
+    <string name="preference_general_display">Display</string>
+    <string name="preference_app_style">Style of the App</string>
+    <string name="preference_app_dark_theme">Dark theme</string>
+    <string name="preference_share_icons">Share icons</string>
+    <string name="preference_share_description">Activate sharing of an article (email, social networks, etc.)</string>
 
     <string name="user_avatar">User avatar</string>
 </resources>

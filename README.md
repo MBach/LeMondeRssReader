@@ -73,8 +73,6 @@ A smartphone at least on Android 4.2
 <a href="https://f-droid.org/packages/org.mbach.lemonde/">
 <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a>
 
-Or you can get the app directly on GitHub, here is the [v1.20](https://github.com/MBach/LeMondeRssReader/releases/download/v1.20/LeMondeRssReader-1.20.apk)
-
 ## Video
 
 [Overview of the App](https://mbach.github.io/LeMondeRssReader/video/video_1.mp4)

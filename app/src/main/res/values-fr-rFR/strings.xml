@@ -32,6 +32,7 @@
     <string name="favorites_article_removed">Article supprimé des favoris</string>
     <string name="favorites_article_added">Article ajouté aux favoris</string>
     <string name="graph_source">Source</string>
+    <string name="no_comments">Aucun commentaire pour le moment</string>
 
     <!-- Bubble tag of article -->
     <string name="paid_article">Article Abonnés</string>

@@ -132,7 +132,11 @@ public class ArticleActivity extends AppCompatActivity {
                 // Extract header
                 Element header = commentDoc.getElementById("comments-header");
                 TextView commentHeader = new TextView(ArticleActivity.this);
-                commentHeader.setText(header.text());
+                if (header == null) {
+                    commentHeader.setText(R.string.no_comments);
+                } else {
+                    commentHeader.setText(header.text());
+                }
                 commentHeader.setTypeface(null, Typeface.BOLD);
                 commentHeader.setPadding(0, 0, 0, Constants.PADDING_TOP_SUBTITLE);
                 items.add(new Model(Model.TEXT_TYPE, commentHeader, 0));

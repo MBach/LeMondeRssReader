@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="article_headline">14sp</dimen>
-    <dimen name="article_description">11sp</dimen>
-    <dimen name="article_authors">8sp</dimen>
-    <dimen name="article_body">9sp</dimen>
-</resources>

@@ -1,0 +1,383 @@
+[
+  {
+    "cat": "news",
+    "color": "#ffc400",
+    "feeds": [
+      {
+        "name": "latestNews",
+        "active": true,
+        "uri": "rss/une.xml"
+      },
+      {
+        "name": "continuousNews",
+        "active": false,
+        "uri": "rss/en_continu.xml"
+      },
+      {
+        "name": "videos",
+        "active": false,
+        "uri": "videos/rss_full.xml"
+      },
+      {
+        "name": "portfolios",
+        "active": false,
+        "uri": "photo/rss_full.xml"
+      },
+      {
+        "name": "mostRead",
+        "active": false,
+        "uri": "rss/plus-lus.xml"
+      },
+      {
+        "name": "mostShared",
+        "active": false,
+        "uri": "rss/plus-partages.xml"
+      }
+    ]
+  },
+  {
+    "cat": "international",
+    "color": "#0386C3",
+    "feeds": [
+      {
+        "name": "international",
+        "active": true,
+        "uri": "international/rss_full.xml"
+      },
+      {
+        "name": "europe",
+        "active": false,
+        "uri": "europe/rss_full.xml"
+      },
+      {
+        "name": "america",
+        "active": false,
+        "uri": "ameriques/rss_full.xml"
+      },
+      {
+        "name": "africa",
+        "active": true,
+        "uri": "afrique/rss_full.xml"
+      },
+      {
+        "name": "asia",
+        "active": false,
+        "uri": "asie-pacifique/rss_full.xml"
+      },
+      {
+        "name": "middleEast",
+        "active": false,
+        "uri": "proche-orient/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "france",
+    "color": "#1F0D67",
+    "feeds": [
+      {
+        "name": "politics",
+        "active": true,
+        "uri": "politique/rss_full.xml"
+      },
+      {
+        "name": "society",
+        "active": true,
+        "uri": "societe/rss_full.xml"
+      },
+      {
+        "name": "decoders",
+        "active": true,
+        "uri": "les-decodeurs/rss_full.xml"
+      },
+      {
+        "name": "justice",
+        "active": false,
+        "uri": "justice/rss_full.xml"
+      },
+      {
+        "name": "police",
+        "active": false,
+        "uri": "police/rss_full.xml"
+      },
+      {
+        "name": "campus",
+        "active": true,
+        "uri": "campus/rss_full.xml"
+      },
+      {
+        "name": "education",
+        "active": false,
+        "uri": "education/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "economy",
+    "color": "#FE2F2F",
+    "feeds": [
+      {
+        "name": "economy",
+        "active": true,
+        "uri": "economie/rss_full.xml"
+      },
+      {
+        "name": "companies",
+        "active": false,
+        "uri": "entreprises/rss_full.xml"
+      },
+      {
+        "name": "money",
+        "active": false,
+        "uri": "argent/rss_full.xml"
+      },
+      {
+        "name": "frenchEconomy",
+        "active": false,
+        "uri": "economie-francaise/rss_full.xml"
+      },
+      {
+        "name": "industry",
+        "active": false,
+        "uri": "industrie/rss_full.xml"
+      },
+      {
+        "name": "jobs",
+        "active": false,
+        "uri": "emploi/rss_full.xml"
+      },
+      {
+        "name": "realEstate",
+        "active": false,
+        "uri": "immobilier/rss_full.xml"
+      },
+      {
+        "name": "medias",
+        "active": true,
+        "uri": "medias/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "culture",
+    "color": "#F20559",
+    "feeds": [
+      {
+        "name": "culture",
+        "active": true,
+        "uri": "culture/rss_full.xml"
+      },
+      {
+        "name": "cinema",
+        "active": false,
+        "uri": "cinema/rss_full.xml"
+      },
+      {
+        "name": "music",
+        "active": false,
+        "uri": "musiques/rss_full.xml"
+      },
+      {
+        "name": "tv-radio",
+        "active": false,
+        "uri": "televisions-radio/rss_full.xml"
+      },
+      {
+        "name": "books",
+        "active": false,
+        "uri": "livres/rss_full.xml"
+      },
+      {
+        "name": "arts",
+        "active": false,
+        "uri": "arts/rss_full.xml"
+      },
+      {
+        "name": "scene",
+        "active": false,
+        "uri": "scenes/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "sports",
+    "color": "#30932E",
+    "feeds": [
+      {
+        "name": "sports",
+        "active": true,
+        "uri": "sport/rss_full.xml"
+      },
+      {
+        "name": "football",
+        "active": false,
+        "uri": "football/rss_full.xml"
+      },
+      {
+        "name": "rugby",
+        "active": false,
+        "uri": "rugby/rss_full.xml"
+      },
+      {
+        "name": "tennis",
+        "active": false,
+        "uri": "tennis/rss_full.xml"
+      },
+      {
+        "name": "cycling",
+        "active": false,
+        "uri": "cyclisme/rss_full.xml"
+      },
+      {
+        "name": "basket",
+        "active": false,
+        "uri": "basket/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "planet",
+    "color": "#30932E",
+    "feeds": [
+      {
+        "name": "planet",
+        "active": true,
+        "uri": "planete/rss_full.xml"
+      },
+      {
+        "name": "weather",
+        "active": false,
+        "uri": "climat/rss_full.xml"
+      },
+      {
+        "name": "agriculture",
+        "active": false,
+        "uri": "agriculture/rss_full.xml"
+      },
+      {
+        "name": "environment",
+        "active": false,
+        "uri": "environnement/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "pixels",
+    "color": "#06B586",
+    "feeds": [
+      {
+        "name": "pixels",
+        "active": true,
+        "uri": "pixels/rss_full.xml"
+      },
+      {
+        "name": "video-games",
+        "active": false,
+        "uri": "jeux-video/rss_full.xml"
+      },
+      {
+        "name": "web",
+        "active": false,
+        "uri": "cultures-web/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "sciences",
+    "color": "#0CB4AE",
+    "feeds": [
+      {
+        "name": "sciences",
+        "active": true,
+        "uri": "sciences/rss_full.xml"
+      },
+      {
+        "name": "space",
+        "active": false,
+        "uri": "espace/rss_full.xml"
+      },
+      {
+        "name": "biology",
+        "active": false,
+        "uri": "biologie/rss_full.xml"
+      },
+      {
+        "name": "medicine",
+        "active": false,
+        "uri": "medecine/rss_full.xml"
+      },
+      {
+        "name": "physics",
+        "active": false,
+        "uri": "physique/rss_full.xml"
+      },
+      {
+        "name": "health",
+        "active": false,
+        "uri": "sante/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "thought",
+    "color": "#F20559",
+    "feeds": [
+      {
+        "name": "thought",
+        "active": true,
+        "uri": "idees/rss_full.xml"
+      },
+      {
+        "name": "editorials",
+        "active": false,
+        "uri": "editoriaux/rss_full.xml"
+      },
+      {
+        "name": "chronicles",
+        "active": false,
+        "uri": "chroniques/rss_full.xml"
+      },
+      {
+        "name": "grandstands",
+        "active": false,
+        "uri": "tribunes/rss_full.xml"
+      }
+    ]
+  },
+  {
+    "cat": "mag",
+    "color": "#212121",
+    "feeds": [
+      {
+        "name": "mag",
+        "active": true,
+        "uri": "m-le-mag/rss_full.xml"
+      },
+      {
+        "name": "the-time",
+        "active": false,
+        "uri": "m-perso/rss_full.xml"
+      },
+      {
+        "name": "styles",
+        "active": false,
+        "uri": "m-styles/rss_full.xml"
+      },
+      {
+        "name": "gastronomy",
+        "active": false,
+        "uri": "gastronomie/rss_full.xml"
+      },
+      {
+        "name": "recipes",
+        "active": false,
+        "uri": "les-recettes-du-monde/rss_full.xml"
+      },
+      {
+        "name": "sexo",
+        "active": false,
+        "uri": "sexo/rss_full.xml"
+      }
+    ]
+  }
+]

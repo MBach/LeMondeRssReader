@@ -9,8 +9,8 @@ const darkTheme = {
     primary: amberA400,
     accent: amberA400,
     border: '#303030',
-    divider: '#494949',
-  },
+    divider: '#494949'
+  }
 }
 
 const lightTheme = {
@@ -21,8 +21,8 @@ const lightTheme = {
     primary: amber500,
     accent: amber500,
     border: '#f2f2f2',
-    divider: '#f2f2f2',
-  },
+    divider: '#f2f2f2'
+  }
 }
 
 export { darkTheme, lightTheme }

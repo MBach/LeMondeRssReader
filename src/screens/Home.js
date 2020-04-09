@@ -1,21 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import {
-  useWindowDimensions,
-  FlatList,
-  Image,
-  ImageBackground,
-  StyleSheet,
-  StatusBar
-} from 'react-native'
+import { useWindowDimensions, FlatList, Image, ImageBackground, StyleSheet, StatusBar } from 'react-native'
 import ContentLoader, { Rect } from 'react-content-loader/native'
-import {
-  useTheme,
-  Appbar,
-  Snackbar,
-  Surface,
-  Text,
-  TouchableRipple
-} from 'react-native-paper'
+import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
 import { DOMParser } from 'xmldom'
 
@@ -65,17 +51,12 @@ function HomeScreen({ navigation, route }) {
 
   const fetchFeed = async uri => {
     setLoading(true)
-    const response = await ky.get(
-      `https://www.lemonde.fr/${uri ? uri : 'rss/une.xml'}`
-    )
+    const response = await ky.get(`https://www.lemonde.fr/${uri ? uri : 'rss/une.xml'}`)
     if (!response.ok) {
       setFetchFailed(true)
       return
     }
-    const doc = new DOMParser().parseFromString(
-      await response.text(),
-      'application/xml'
-    )
+    const doc = new DOMParser().parseFromString(await response.text(), 'application/xml')
     let objs = []
     const items = doc.documentElement.getElementsByTagName('item')
     for (let i = 0; i < items.length; i++) {
@@ -126,9 +107,7 @@ function HomeScreen({ navigation, route }) {
           <ImageBackground source={{ uri: item.uri }} style={styles.imageBG}>
             {icon && <Image source={icon} style={styles.image} />}
           </ImageBackground>
-          <Text style={{ padding: 8, width: window.width - 120 }}>
-            {item.title}
-          </Text>
+          <Text style={{ padding: 8, width: window.width - 120 }}>{item.title}</Text>
         </Surface>
       </TouchableRipple>
     )
@@ -138,45 +117,12 @@ function HomeScreen({ navigation, route }) {
     let loaders = []
     const d = (window.height + 24) / 7
     for (let i = 0; i < 8; i++) {
-      loaders.push(
-        <Rect
-          key={'r1-' + i}
-          x="0"
-          y={`${i * d}`}
-          rx="0"
-          ry="0"
-          width="126"
-          height={Math.floor(d) - 1}
-        />
-      )
-      loaders.push(
-        <Rect
-          key={'r2-' + i}
-          x="130"
-          y={`${10 + i * d}`}
-          rx="0"
-          ry="0"
-          width="250"
-          height="15"
-        />
-      )
-      loaders.push(
-        <Rect
-          key={'r3-' + i}
-          x="130"
-          y={`${40 + i * d}`}
-          rx="0"
-          ry="0"
-          width="170"
-          height="12"
-        />
-      )
+      loaders.push(<Rect key={'r1-' + i} x="0" y={`${i * d}`} rx="0" ry="0" width="126" height={Math.floor(d) - 1} />)
+      loaders.push(<Rect key={'r2-' + i} x="130" y={`${10 + i * d}`} rx="0" ry="0" width="250" height="15" />)
+      loaders.push(<Rect key={'r3-' + i} x="130" y={`${40 + i * d}`} rx="0" ry="0" width="170" height="12" />)
     }
     return (
-      <ContentLoader
-        backgroundColor={colors.border}
-        foregroundColor={colors.background}
-        viewBox={`6 0 ${window.width} ${window.height}`}>
+      <ContentLoader backgroundColor={colors.border} foregroundColor={colors.background} viewBox={`6 0 ${window.width} ${window.height}`}>
         {loaders}
       </ContentLoader>
     )
@@ -187,25 +133,15 @@ function HomeScreen({ navigation, route }) {
       style={{
         flex: 1
       }}>
+      <StatusBar color="translucent" />
       <Appbar.Header>
         <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
-        <Appbar.Content
-          title={
-            route?.params?.title
-              ? route?.params?.title
-              : i18n.t('feeds.latestNews')
-          }
-        />
+        <Appbar.Content title={route?.params?.title ? route?.params?.title : i18n.t('feeds.latestNews')} />
       </Appbar.Header>
       {loading ? (
         renderContentLoader()
       ) : (
-        <FlatList
-          data={items}
-          extraData={items}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-        />
+        <FlatList data={items} extraData={items} renderItem={renderItem} keyExtractor={(item, index) => index.toString()} />
       )}
       <Snackbar visible={fetchFailed} duration={Snackbar.DURATION_LONG}>
         Impossible de récupérer le flux

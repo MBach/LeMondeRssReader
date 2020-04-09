@@ -14,8 +14,7 @@ function FavScreen({ navigation }) {
   }, [])
 
   return (
-    <Surface
-      style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Surface style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Mes favoris</Text>
     </Surface>
   )

@@ -6,12 +6,4 @@ const IconLive = require('./live.png')
 const IconStar = require('./star.png')
 const IconVideo = require('./video.png')
 
-export {
-  IconCircle,
-  IconDragHandle,
-  IconHome,
-  IconInfo,
-  IconLive,
-  IconStar,
-  IconVideo,
-}
+export { IconCircle, IconDragHandle, IconHome, IconInfo, IconLive, IconStar, IconVideo }

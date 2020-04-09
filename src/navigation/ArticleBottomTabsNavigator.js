@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useTheme, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
 import { DOMParser } from 'xmldom'
+import { parse } from 'node-html-parser'
 
 import ArticleScreen from '../screens/Article'
 import CommentScreen from '../screens/Comments'
@@ -29,10 +30,8 @@ export default function ArticleBottomTabsNavigator({ route }) {
 
   const getContent = async () => {
     const response = await ky.get(route.params.url)
-    const doc = new DOMParser().parseFromString(
-      await response.text(),
-      'text/html'
-    )
+    //const doc = new DOMParser().parseFromString(await response.text(), 'text/html')
+    const doc = parse(await response.text())
     setContent(doc)
   }
 
@@ -84,9 +83,7 @@ export default function ArticleBottomTabsNavigator({ route }) {
               tabBarIcon: renderIcon(IconHome),
               tabBarLabel: 'Article',
             }}>
-            {(props) =>
-              content && <ArticleScreen {...props} content={content} />
-            }
+            {(props) => content && <ArticleScreen {...props} content={content} />}
           </Tab.Screen>
           <Tab.Screen
             name="Comment"
@@ -94,9 +91,7 @@ export default function ArticleBottomTabsNavigator({ route }) {
               tabBarIcon: renderIcon(IconInfo),
               tabBarLabel: 'Commentaires',
             }}>
-            {(props) =>
-              content && <CommentScreen {...props} content={content} />
-            }
+            {(props) => content && <CommentScreen {...props} content={content} />}
           </Tab.Screen>
         </>
       )}

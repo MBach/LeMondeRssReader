@@ -14,10 +14,8 @@ const Drawer = createDrawerNavigator()
 
 function DrawerNavigator() {
   return (
-    <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />}>
-      <Drawer.Screen name="Home">
-        {(props) => <HomeScreen {...props} />}
-      </Drawer.Screen>
+    <Drawer.Navigator drawerContent={props => <DrawerContent {...props} />}>
+      <Drawer.Screen name="Home">{props => <HomeScreen {...props} />}</Drawer.Screen>
     </Drawer.Navigator>
   )
 }
@@ -29,10 +27,7 @@ export default function AppContainer() {
         <Stack.Screen name="Drawer" component={DrawerNavigator} />
         <Stack.Screen name="Favorites" component={FavScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen
-          name="ArticleBottomTabsNavigator"
-          component={ArticleBottomTabsNavigator}
-        />
+        <Stack.Screen name="ArticleBottomTabsNavigator" component={ArticleBottomTabsNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   )

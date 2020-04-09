@@ -29,11 +29,7 @@ const styles = StyleSheet.create({
 export default function DrawerContent({ route, navigation, state, ...rest }) {
   const { settingsContext } = useContext(SettingsContext)
 
-  const category =
-    state &&
-    state.routes[0] &&
-    state.routes[0].params &&
-    state.routes[0].params.category
+  const category = state && state.routes[0] && state.routes[0].params && state.routes[0].params.category
 
   const [feed, setFeed] = useState([])
 
@@ -64,12 +60,7 @@ export default function DrawerContent({ route, navigation, state, ...rest }) {
           {feed.map((f, index) => (
             <Drawer.Item
               key={index}
-              icon={() => (
-                <Image
-                  source={IconCircle}
-                  style={{ width: 28, height: 28, tintColor: f.color }}
-                />
-              )}
+              icon={() => <Image source={IconCircle} style={{ width: 28, height: 28, tintColor: f.color }} />}
               label={i18n.t(`feeds.${f.feed}`)}
               onPress={() =>
                 navigation.navigate('Home', {
@@ -88,12 +79,7 @@ export default function DrawerContent({ route, navigation, state, ...rest }) {
           onPress={() => navigation.navigate('Favorites')}
           style={styles.item}
         />
-        <Drawer.Item
-          icon="tune"
-          label={i18n.t(`drawer.settings`)}
-          onPress={() => navigation.navigate('Settings')}
-          style={styles.item}
-        />
+        <Drawer.Item icon="tune" label={i18n.t(`drawer.settings`)} onPress={() => navigation.navigate('Settings')} style={styles.item} />
       </DrawerContentScrollView>
     </Surface>
   )

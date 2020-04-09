@@ -116,17 +116,11 @@ export default function SettingsScreen() {
         {({ settingsContext }) => (
           <ScrollView>
             <Surface style={styles.surfaceContainer}>
-              <Paragraph style={{ color: colors.accent }}>
-                {i18n.t('settings.layout.title')}
-              </Paragraph>
-              <TouchableRipple
-                rippleColor={colors.accent}
-                style={styles.rippleMarginTop}>
+              <Paragraph style={{ color: colors.accent }}>{i18n.t('settings.layout.title')}</Paragraph>
+              <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop}>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={styles.flex}>
-                    <Subheading>
-                      {i18n.t('settings.layout.content1')}
-                    </Subheading>
+                    <Subheading>{i18n.t('settings.layout.content1')}</Subheading>
                     <Caption>{i18n.t('settings.layout.desc1')}</Caption>
                   </View>
                   <Switch value={true} />
@@ -135,35 +129,20 @@ export default function SettingsScreen() {
             </Surface>
             <Divider style={{ backgroundColor: colors.divider }} />
             <Surface style={styles.surfaceContainer}>
-              <Paragraph style={{ color: colors.accent }}>
-                {i18n.t('settings.display.title')}
-              </Paragraph>
-              <TouchableRipple
-                rippleColor={colors.accent}
-                style={styles.rippleMarginTop}
-                onPress={changeTheme(settingsContext.setTheme)}>
+              <Paragraph style={{ color: colors.accent }}>{i18n.t('settings.display.title')}</Paragraph>
+              <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop} onPress={changeTheme(settingsContext.setTheme)}>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={styles.flex}>
-                    <Subheading>
-                      {i18n.t('settings.display.styleTitle')}
-                    </Subheading>
+                    <Subheading>{i18n.t('settings.display.styleTitle')}</Subheading>
                     <Caption>{i18n.t('settings.display.styleDesc')}</Caption>
                   </View>
-                  <Switch
-                    value={dark}
-                    onValueChange={changeTheme(settingsContext.setTheme)}
-                  />
+                  <Switch value={dark} onValueChange={changeTheme(settingsContext.setTheme)} />
                 </View>
               </TouchableRipple>
-              <TouchableRipple
-                rippleColor={colors.accent}
-                style={styles.rippleMarginTop}
-                onPress={() => {}}>
+              <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop} onPress={() => {}}>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={styles.flex}>
-                    <Subheading>
-                      {i18n.t('settings.display.shareTitle')}
-                    </Subheading>
+                    <Subheading>{i18n.t('settings.display.shareTitle')}</Subheading>
                     <Caption>{i18n.t('settings.display.shareDesc')}</Caption>
                   </View>
                   <Switch value={true} />
@@ -172,9 +151,7 @@ export default function SettingsScreen() {
             </Surface>
             <Divider style={styles.divider} />
             <Surface style={styles.surfaceContainer}>
-              <Paragraph style={{ color: colors.accent }}>
-                {i18n.t('settings.menu.title')}
-              </Paragraph>
+              <Paragraph style={{ color: colors.accent }}>{i18n.t('settings.menu.title')}</Paragraph>
               <Subheading>{i18n.t('settings.menu.desc')}</Subheading>
               {data ? renderEditableMenu() : <ActivityIndicator />}
             </Surface>

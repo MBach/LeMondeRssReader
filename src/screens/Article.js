@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Image, View, ScrollView } from 'react-native'
-import { useTheme, Headline, Surface, Subheading, Paragraph, Title } from 'react-native-paper'
+import { Image, View, ScrollView, Linking } from 'react-native'
+import { useTheme, Headline, Surface, Subheading, Paragraph, Title, Card, Button } from 'react-native-paper'
 
-import { IconHome } from '../assets/Icons'
+import { IconTimer } from '../assets/Icons'
+import i18n from '../locales/i18n'
 
 /**
  * @author Matthieu BACHELIER
@@ -24,6 +25,7 @@ function ArticleScreen({ content }) {
     d.authors = main.querySelector('span.meta__author').rawText
     d.date = main.querySelector('span.meta__date').rawText
     d.readTime = main.querySelector('p.meta__reading-time').lastChild.rawText
+    d.isRestricted = main.querySelector('p.article__status') !== null
 
     // Paragraphes and images
     const article = main.querySelector('article')
@@ -54,8 +56,6 @@ function ArticleScreen({ content }) {
         }
       }
     }
-    //const par = main.querySelectorAll('p.article__paragraph')
-    //d.par = par
     setData(d)
     setParagraphes(par)
   }, [])
@@ -74,17 +74,29 @@ function ArticleScreen({ content }) {
   }
 
   return (
-    <Surface style={{ flex: 1, padding: 8 }}>
+    <Surface style={{ flex: 1, paddingHorizontal: 8 }}>
       <ScrollView>
         <Headline>{data.headLine}</Headline>
         <Subheading>{data.desc}</Subheading>
         <Paragraph>{data.authors}</Paragraph>
         <Paragraph>{data.date}</Paragraph>
         <View style={{ flexDirection: 'row' }}>
-          <Image source={IconHome} style={{ width: 24, height: 24, tintColor: colors.text }} />
+          <Image source={IconTimer} style={{ width: 24, height: 24, tintColor: colors.text, marginEnd: 8, marginBottom: 4 }} />
           <Paragraph>{data.readTime}</Paragraph>
         </View>
         {renderParagraphes()}
+        {data.isRestricted && (
+          <Card style={{ marginVertical: 8 }}>
+            <Card.Content>
+              <Paragraph>{i18n.t('article.restricted')}</Paragraph>
+            </Card.Content>
+            <Card.Actions>
+              <Button mode="contained" onPress={() => Linking.openURL('https://abo.lemonde.fr/')}>
+                {i18n.t('article.register')}
+              </Button>
+            </Card.Actions>
+          </Card>
+        )}
       </ScrollView>
     </Surface>
   )

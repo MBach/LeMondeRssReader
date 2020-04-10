@@ -1,4 +1,8 @@
 {
+  "article": {
+    "register": "Register",
+    "restricted": "Full access is restricted to paid members"
+  },
   "categories": {
     "news": "News",
     "international": "International",
@@ -81,6 +85,9 @@
     "fav": "Favorites",
     "feed": "Feed",
     "settings": "Settings"
+  },
+  "home": {
+    "fetchFailed": "Cannot fetch feed"
   },
   "settings": {
     "layout": {

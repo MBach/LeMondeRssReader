@@ -3,7 +3,6 @@ import { Image } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useTheme, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
-import { DOMParser } from 'xmldom'
 import { parse } from 'node-html-parser'
 
 import ArticleScreen from '../screens/Article'

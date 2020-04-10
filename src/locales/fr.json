@@ -1,4 +1,8 @@
 {
+  "article": {
+    "register": "S’abonner",
+    "restricted": "L’accès à la totalité de l’article est protégé"
+  },
   "categories": {
     "news": "Actualités",
     "international": "International",
@@ -81,6 +85,9 @@
     "fav": "Favoris",
     "feed": "Flux",
     "settings": "Préférences"
+  },
+  "home": {
+    "fetchFailed": "Impossible de récupérer le flux"
   },
   "settings": {
     "layout": {

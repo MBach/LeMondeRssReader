@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useWindowDimensions, FlatList, Image, ImageBackground, StyleSheet, StatusBar } from 'react-native'
+import { useWindowDimensions, FlatList, Image, ImageBackground, RefreshControl, StyleSheet, StatusBar } from 'react-native'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
@@ -18,6 +18,7 @@ const regex = /https:\/\/www\.lemonde\.fr\/(\w+)\/(\w+)\/.*/g
  */
 function HomeScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const [fetchFailed, setFetchFailed] = useState(false)
   const [items, setItems] = useState([])
 
@@ -30,27 +31,35 @@ function HomeScreen({ navigation, route }) {
       flexDirection: 'row',
       height: 108,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border
+      borderBottomColor: colors.border,
     },
     imageBG: {
       width: 120,
       height: 108,
       alignItems: 'flex-end',
       paddingTop: 4,
-      paddingRight: 8
+      paddingRight: 8,
     },
     image: {
       width: 32,
-      height: 32
-    }
+      height: 32,
+    },
   })
 
   useEffect(() => {
-    fetchFeed(route?.params?.uri)
+    fetchFeed(route?.params?.uri, false)
   }, [route?.params?.uri])
 
-  const fetchFeed = async uri => {
-    setLoading(true)
+  const refreshFeed = async () => {
+    setRefreshing(true)
+    await fetchFeed(route?.params?.uri, true)
+    setRefreshing(false)
+  }
+
+  const fetchFeed = async (uri, isRefreshing) => {
+    if (!isRefreshing) {
+      setLoading(true)
+    }
     const response = await ky.get(`https://www.lemonde.fr/${uri ? uri : 'rss/une.xml'}`)
     if (!response.ok) {
       setFetchFailed(true)
@@ -78,7 +87,9 @@ function HomeScreen({ navigation, route }) {
       objs.push(item)
     }
     setItems(objs)
-    setLoading(false)
+    if (!isRefreshing) {
+      setLoading(false)
+    }
   }
 
   const renderItem = ({ item }) => {
@@ -100,7 +111,7 @@ function HomeScreen({ navigation, route }) {
         onPress={() =>
           navigation.navigate('ArticleBottomTabsNavigator', {
             url: item.link,
-            isLive
+            isLive,
           })
         }>
         <Surface style={styles.itemContainer}>
@@ -131,7 +142,7 @@ function HomeScreen({ navigation, route }) {
   return (
     <Surface
       style={{
-        flex: 1
+        flex: 1,
       }}>
       <StatusBar color="translucent" />
       <Appbar.Header>
@@ -141,10 +152,16 @@ function HomeScreen({ navigation, route }) {
       {loading ? (
         renderContentLoader()
       ) : (
-        <FlatList data={items} extraData={items} renderItem={renderItem} keyExtractor={(item, index) => index.toString()} />
+        <FlatList
+          data={items}
+          extraData={items}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshFeed} />}
+        />
       )}
       <Snackbar visible={fetchFailed} duration={Snackbar.DURATION_LONG}>
-        Impossible de récupérer le flux
+        {i18n.t('home.fetchFailed')}
       </Snackbar>
     </Surface>
   )

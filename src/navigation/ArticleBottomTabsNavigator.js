@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Image } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useTheme, TouchableRipple } from 'react-native-paper'
-import ky from 'ky'
-import { parse } from 'node-html-parser'
 
 import ArticleScreen from '../screens/Article'
 import CommentScreen from '../screens/Comments'
@@ -19,7 +17,7 @@ import { IconHome, IconInfo } from '../assets/Icons'
  */
 export default function ArticleBottomTabsNavigator({ route }) {
   const Tab = createBottomTabNavigator()
-  const { isLive } = route.params
+  const { item, isLive } = route.params
   const [content, setContent] = useState(null)
   const { colors } = useTheme()
 
@@ -28,10 +26,10 @@ export default function ArticleBottomTabsNavigator({ route }) {
   }, [])
 
   const getContent = async () => {
-    const response = await ky.get(route.params.url)
+    //const response = await ky.get(route.params.url)
     //const doc = new DOMParser().parseFromString(await response.text(), 'text/html')
-    const doc = parse(await response.text())
-    setContent(doc)
+    //const doc = parse(await response.text())
+    //setContent(doc)
   }
 
   const renderIcon = (icon) => ({ focused, size }) => (
@@ -82,7 +80,7 @@ export default function ArticleBottomTabsNavigator({ route }) {
               tabBarIcon: renderIcon(IconHome),
               tabBarLabel: 'Article',
             }}>
-            {(props) => content && <ArticleScreen {...props} content={content} />}
+            {(props) => <ArticleScreen {...props} item={item} />}
           </Tab.Screen>
           <Tab.Screen
             name="Comment"

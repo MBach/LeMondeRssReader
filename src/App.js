@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
 import { YellowBox } from 'react-native'
-import AppContainer from './navigation/AppContainer'
 
-import { loadLocale } from './locales/i18n'
 import SettingsProvider from './context/SettingsContext'
+import { loadLocale } from './locales/i18n'
+import AppContainer from './navigation/AppContainer'
 
 const uriPrefix = 'lemonde://lemonde'
 

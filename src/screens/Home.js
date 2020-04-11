@@ -4,6 +4,7 @@ import ContentLoader, { Rect } from 'react-content-loader/native'
 import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
 import { DOMParser } from 'xmldom'
+import { SharedElement } from 'react-navigation-shared-element'
 
 import { IconLive, IconVideo } from '../assets/Icons'
 import i18n from '../locales/i18n'
@@ -34,6 +35,7 @@ function HomeScreen({ navigation, route }) {
       borderBottomColor: colors.border,
     },
     imageBG: {
+      resizeMode: 'cover',
       width: 120,
       height: 108,
       alignItems: 'flex-end',
@@ -76,6 +78,9 @@ function HomeScreen({ navigation, route }) {
           case 'title':
             item.title = node.textContent
             break
+          case 'description':
+            item.description = node.textContent
+            break
           case 'link':
             item.link = node.textContent
             break
@@ -84,6 +89,7 @@ function HomeScreen({ navigation, route }) {
             break
         }
       }
+      item.id = i
       objs.push(item)
     }
     setItems(objs)
@@ -110,14 +116,20 @@ function HomeScreen({ navigation, route }) {
         rippleColor={colors.accent}
         onPress={() =>
           navigation.navigate('ArticleBottomTabsNavigator', {
+            item,
             url: item.link,
             isLive,
           })
         }>
         <Surface style={styles.itemContainer}>
+          {/*
           <ImageBackground source={{ uri: item.uri }} style={styles.imageBG}>
             {icon && <Image source={icon} style={styles.image} />}
           </ImageBackground>
+           */}
+          <SharedElement id={`item.${item.id}.photo`}>
+            <Image source={{ uri: item.uri }} style={styles.imageBG} />
+          </SharedElement>
           <Text style={{ padding: 8, width: window.width - 120 }}>{item.title}</Text>
         </Surface>
       </TouchableRipple>

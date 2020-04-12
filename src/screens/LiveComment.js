@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
+import { Surface } from 'react-native-paper'
 
 /**
  * @author Matthieu BACHELIER
@@ -8,9 +9,9 @@ import { Text, View } from 'react-native'
  */
 function LiveCommentScreen({ navigation }) {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Surface style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>LiveCommentScreen</Text>
-    </View>
+    </Surface>
   )
 }
 

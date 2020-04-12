@@ -5,7 +5,7 @@ import { SharedElement } from 'react-navigation-shared-element'
 import ky from 'ky'
 import { parse } from 'node-html-parser'
 
-import { IconTimer } from '../assets/Icons'
+import { IconTimer, DefaultImageFeed } from '../assets/Icons'
 import i18n from '../locales/i18n'
 
 const styles = StyleSheet.create({
@@ -13,8 +13,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   imageHeader: {
+    width: '100%',
     height: 200,
-    resizeMode: 'stretch',
+    resizeMode: 'contain',
   },
 })
 
@@ -29,8 +30,6 @@ function ArticleScreen({ item }) {
   const [paragraphes, setParagraphes] = useState([])
   const [loading, setLoading] = useState(true)
 
-  console.log(item)
-
   useEffect(() => {
     init()
   }, [])
@@ -44,8 +43,6 @@ function ArticleScreen({ item }) {
     let d = { ...data }
     let par = []
     // Header
-    //d.title = main.querySelector('h1')?.rawText
-    //d.description = main.querySelector('p.article__desc')?.structuredText
     d.authors = main.querySelector('span.meta__author')?.rawText
     d.date = main.querySelector('span.meta__date')?.rawText
     d.readTime = main.querySelector('p.meta__reading-time')?.lastChild.rawText
@@ -110,7 +107,7 @@ function ArticleScreen({ item }) {
     <Surface style={{ flex: 1 }}>
       <ScrollView>
         <SharedElement id={`item.${item.id}.photo`}>
-          <Image source={{ uri: item.uri }} style={styles.imageHeader} />
+          <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageHeader} />
         </SharedElement>
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>

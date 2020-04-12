@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { useWindowDimensions, FlatList, Image, ImageBackground, RefreshControl, StyleSheet, StatusBar } from 'react-native'
+import { useWindowDimensions, FlatList, Image, ImageBackground, RefreshControl, StyleSheet, StatusBar, View } from 'react-native'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
 import { DOMParser } from 'xmldom'
 import { SharedElement } from 'react-navigation-shared-element'
 
-import { IconLive, IconVideo } from '../assets/Icons'
+import { DefaultImageFeed, IconLive, IconVideo } from '../assets/Icons'
 import i18n from '../locales/i18n'
 
 // Check if 2nd capture group is live/video/other
@@ -85,7 +85,9 @@ function HomeScreen({ navigation, route }) {
             item.link = node.textContent
             break
           case 'media:content':
-            item.uri = node.getAttribute('url')
+            if (node.getAttribute('url')) {
+              item.uri = node.getAttribute('url')
+            }
             break
         }
       }
@@ -122,14 +124,12 @@ function HomeScreen({ navigation, route }) {
           })
         }>
         <Surface style={styles.itemContainer}>
-          {/*
-          <ImageBackground source={{ uri: item.uri }} style={styles.imageBG}>
-            {icon && <Image source={icon} style={styles.image} />}
-          </ImageBackground>
-           */}
-          <SharedElement id={`item.${item.id}.photo`}>
-            <Image source={{ uri: item.uri }} style={styles.imageBG} />
-          </SharedElement>
+          <View style={{ display: 'flex', flexDirection: 'row' }}>
+            <SharedElement id={`item.${item.id}.photo`}>
+              <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageBG} />
+            </SharedElement>
+            {icon && <Image source={icon} style={{ position: 'absolute', width: 32, height: 32, right: 8, top: 8 }} />}
+          </View>
           <Text style={{ padding: 8, width: window.width - 120 }}>{item.title}</Text>
         </Surface>
       </TouchableRipple>
@@ -156,8 +156,8 @@ function HomeScreen({ navigation, route }) {
       style={{
         flex: 1,
       }}>
-      <StatusBar color="translucent" />
-      <Appbar.Header>
+      <StatusBar backgroundColor={'rgba(0,0,0,0.5)'} translucent />
+      <Appbar.Header style={{ marginTop: StatusBar.currentHeight }}>
         <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
         <Appbar.Content title={route?.params?.title ? route?.params?.title : i18n.t('feeds.latestNews')} />
       </Appbar.Header>

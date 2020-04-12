@@ -1,5 +1,5 @@
 import { DefaultTheme, DarkTheme, Colors } from 'react-native-paper'
-const { amberA400, amber500 } = Colors
+const { amberA400, amber500, indigo900 } = Colors
 
 const darkTheme = {
   ...DarkTheme,
@@ -9,8 +9,8 @@ const darkTheme = {
     primary: amberA400,
     accent: amberA400,
     border: '#303030',
-    divider: '#494949'
-  }
+    divider: '#494949',
+  },
 }
 
 const lightTheme = {
@@ -18,11 +18,11 @@ const lightTheme = {
   roundness: 2,
   colors: {
     ...DefaultTheme.colors,
-    primary: amber500,
+    primary: indigo900,
     accent: amber500,
     border: '#f2f2f2',
-    divider: '#f2f2f2'
-  }
+    divider: '#f2f2f2',
+  },
 }
 
 export { darkTheme, lightTheme }

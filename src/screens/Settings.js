@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View, StatusBar } from 'react-native'
 import {
   useTheme,
   Caption,
@@ -10,11 +10,12 @@ import {
   Surface,
   Switch,
   TouchableRipple,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native-paper'
 
 import { SettingsContext } from '../context/SettingsContext'
 import i18n from '../locales/i18n'
+import DynamicNavbar from '../DynamicNavbar'
 
 /**
  * @author Matthieu BACHELIER
@@ -31,31 +32,31 @@ export default function SettingsScreen() {
 
   const styles = StyleSheet.create({
     flex: {
-      flex: 1
+      flex: 1,
     },
     surfaceContainer: {
-      padding: 16
+      padding: 16,
     },
     rippleMarginTop: {
-      marginTop: 16
+      marginTop: 16,
     },
     divider: {
-      backgroundColor: colors.divider
+      backgroundColor: colors.divider,
     },
     chipContainer: {
       flex: 0,
       flexDirection: 'row',
       flexWrap: 'wrap',
       marginLeft: -2,
-      marginBottom: 8
+      marginBottom: 8,
     },
     catChip: {
-      marginVertical: 4
+      marginVertical: 4,
     },
     chip: {
       marginHorizontal: 2,
-      marginBottom: 8
-    }
+      marginBottom: 8,
+    },
   })
 
   useEffect(() => {
@@ -64,14 +65,16 @@ export default function SettingsScreen() {
 
   const init = async () => {
     const theme = await settingsContext.getTheme()
-    setDark(theme === null || theme === 'dark')
+    const isDark = theme === null || theme === 'dark'
+    setDark(isDark)
+    DynamicNavbar.setLightNavigationBar(!isDark)
     const feed = await settingsContext.getFeed()
     if (feed) {
       setData(feed)
     }
   }
 
-  const changeTheme = setTheme => () => {
+  const changeTheme = (setTheme) => () => {
     setDark(!dark)
     setTheme(!dark ? 'dark' : 'light')
   }
@@ -98,7 +101,7 @@ export default function SettingsScreen() {
             <Chip
               key={idxFeed}
               selected={feed.active}
-              selectedColor={feed.active ? colors.accent : colors.text}
+              selectedColor={feed.active ? colors.primary : colors.text}
               style={styles.chip}
               onPress={toogleItem(idxCat, idxFeed)}>
               {i18n.t(`feeds.${feed.name}`)}
@@ -111,12 +114,13 @@ export default function SettingsScreen() {
   }
 
   return (
-    <Surface style={styles.flex}>
+    <Surface style={{ flex: 1 }}>
+      <StatusBar backgroundColor={colors.statusBar} translucent />
       <SettingsContext.Consumer>
         {({ settingsContext }) => (
-          <ScrollView>
+          <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
             <Surface style={styles.surfaceContainer}>
-              <Paragraph style={{ color: colors.accent }}>{i18n.t('settings.layout.title')}</Paragraph>
+              <Paragraph style={{ color: colors.primary }}>{i18n.t('settings.layout.title')}</Paragraph>
               <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop}>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={styles.flex}>
@@ -129,7 +133,7 @@ export default function SettingsScreen() {
             </Surface>
             <Divider style={{ backgroundColor: colors.divider }} />
             <Surface style={styles.surfaceContainer}>
-              <Paragraph style={{ color: colors.accent }}>{i18n.t('settings.display.title')}</Paragraph>
+              <Paragraph style={{ color: colors.primary }}>{i18n.t('settings.display.title')}</Paragraph>
               <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop} onPress={changeTheme(settingsContext.setTheme)}>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={styles.flex}>
@@ -151,7 +155,7 @@ export default function SettingsScreen() {
             </Surface>
             <Divider style={styles.divider} />
             <Surface style={styles.surfaceContainer}>
-              <Paragraph style={{ color: colors.accent }}>{i18n.t('settings.menu.title')}</Paragraph>
+              <Paragraph style={{ color: colors.primary }}>{i18n.t('settings.menu.title')}</Paragraph>
               <Subheading>{i18n.t('settings.menu.desc')}</Subheading>
               {data ? renderEditableMenu() : <ActivityIndicator />}
             </Surface>

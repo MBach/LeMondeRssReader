@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Image, View, ScrollView, StyleSheet, Linking } from 'react-native'
-import { useTheme, ActivityIndicator, Headline, Surface, Subheading, Paragraph, Title, Card, Button } from 'react-native-paper'
 import { SharedElement } from 'react-navigation-shared-element'
-import ky from 'ky'
-import { parse } from 'node-html-parser'
+import { useTheme, ActivityIndicator, Headline, Surface, Subheading, Paragraph, Title, Card, Button } from 'react-native-paper'
 
 import { IconTimer, DefaultImageFeed } from '../assets/Icons'
 import i18n from '../locales/i18n'
@@ -24,7 +22,7 @@ const styles = StyleSheet.create({
  * @since 2020-03
  * @version 1.0
  */
-function ArticleScreen({ item }) {
+function ArticleScreen({ doc, item }) {
   const { colors } = useTheme()
   const [data, setData] = useState({ title: item.title, description: item.description })
   const [paragraphes, setParagraphes] = useState([])
@@ -32,12 +30,13 @@ function ArticleScreen({ item }) {
 
   useEffect(() => {
     init()
-  }, [])
+  }, [doc])
 
   const init = async () => {
     setLoading(true)
-    const response = await ky.get(item.link)
-    const doc = parse(await response.text())
+    if (!doc) {
+      return
+    }
     const main = doc.querySelector('main')
 
     let d = { ...data }
@@ -45,7 +44,7 @@ function ArticleScreen({ item }) {
     // Header
     d.authors = main.querySelector('span.meta__author')?.rawText
     d.date = main.querySelector('span.meta__date')?.rawText
-    d.readTime = main.querySelector('p.meta__reading-time')?.lastChild.rawText
+    d.readTime = main.querySelector('.meta__reading-time')?.lastChild.rawText
     d.isRestricted = main.querySelector('p.article__status') !== null
 
     // Paragraphes and images
@@ -136,6 +135,7 @@ function ArticleScreen({ item }) {
             </Card.Actions>
           </Card>
         )}
+        <View style={{ paddingBottom: 100 }} />
       </ScrollView>
     </Surface>
   )

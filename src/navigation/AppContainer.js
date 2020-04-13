@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native'
 
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 
-import ArticleBottomTabsNavigator from './ArticleBottomTabsNavigator'
+import BottomTabsNavigator from './BottomTabsNavigator'
 import HomeScreen from '../screens/Home'
 import FavScreen from '../screens/Favorites'
 import SettingsScreen from '../screens/Settings'
@@ -31,8 +31,8 @@ export default function AppContainer() {
         <Stack.Screen name="Favorites" component={FavScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen
-          name="ArticleBottomTabsNavigator"
-          component={ArticleBottomTabsNavigator}
+          name="BottomTabsNavigator"
+          component={BottomTabsNavigator}
           sharedElementsConfig={(route) => {
             const { item } = route.params
             return [`item.${item.id}.photo`]

@@ -17,8 +17,6 @@ import com.facebook.react.bridge.UiThreadUtil;
  */
 public class DynamicNavbarModule extends ReactContextBaseJavaModule {
 
-    private static final String TAG = "DynamicNavbarModule";
-
     DynamicNavbarModule(ReactApplicationContext reactContext) {
         super(reactContext);
     }
@@ -32,25 +30,21 @@ public class DynamicNavbarModule extends ReactContextBaseJavaModule {
     public void setLightNavigationBar(final boolean isLight) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
-                UiThreadUtil.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (getCurrentActivity() == null) {
-                            return;
-                        }
-                        Window window = getCurrentActivity().getWindow();
-                        int mUIFlags = window.getDecorView().getSystemUiVisibility();
-                        if (isLight) {
-                            mUIFlags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                        } else {
-                            mUIFlags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                        }
-                        window.getDecorView().setSystemUiVisibility(mUIFlags);
-                        // promise.resolve(true);
+                UiThreadUtil.runOnUiThread(() -> {
+                    if (getCurrentActivity() == null) {
+                        return;
                     }
+                    Window window = getCurrentActivity().getWindow();
+                    int flags = window.getDecorView().getSystemUiVisibility();
+                    if (isLight) {
+                        flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                    } else {
+                        flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                    }
+                    window.getDecorView().setSystemUiVisibility(flags);
                 });
             } catch (Exception e) {
-                // promise.reject(e);
+                //
             }
         }
     }

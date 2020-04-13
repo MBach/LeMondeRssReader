@@ -11,6 +11,11 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+/**
+ * @author Matthieu BACHELIER
+ * @version 1.0
+ * @since 2020-04
+ */
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
@@ -51,8 +56,8 @@ public class MainApplication extends Application implements ReactApplication {
    * Loads Flipper in React Native templates. Call this in the onCreate method with something like
    * initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
    *
-   * @param context
-   * @param reactInstanceManager
+   * @param context the context
+   * @param reactInstanceManager the instance manager
    */
   private static void initializeFlipper(
       Context context, ReactInstanceManager reactInstanceManager) {

@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Image, View, ScrollView, StyleSheet, Linking } from 'react-native'
-import { useTheme, ActivityIndicator, Headline, Surface, Subheading, Paragraph, Title, Card, Button } from 'react-native-paper'
+import { Image, View, ScrollView, StyleSheet } from 'react-native'
 import { SharedElement } from 'react-navigation-shared-element'
-import ky from 'ky'
-import { parse } from 'node-html-parser'
+import { ActivityIndicator, Headline, IconButton, Paragraph, Subheading, Surface, Title } from 'react-native-paper'
 
 const styles = StyleSheet.create({
   paddingH: {
@@ -21,41 +19,74 @@ const styles = StyleSheet.create({
  * @since 2020-03
  * @version 1.0
  */
-function LiveFactScreen({ item }) {
-  const { colors } = useTheme()
+function LiveFactScreen({ doc, item }) {
   const [data, setData] = useState({ title: item.title, description: item.description })
   const [facts, setFacts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     init()
-  }, [])
+  }, [doc])
 
   const init = async () => {
     setLoading(true)
-    const response = await ky.get(item.link)
-    const doc = parse(await response.text())
+    if (!doc) {
+      return
+    }
     const facts = doc.querySelector('#js-facts-live')
-
     let d = { ...data }
     let f = []
-
     for (let i = 0; i < facts.childNodes.length; i++) {
       const node = facts.childNodes[i]
-      //console.log(node.tagName)
       if (node.tagName) {
-        //console.log('node', node)
-        switch (
-          node.tagName
-          //
-        ) {
+        switch (node.tagName) {
+          case 'h2':
+            if ('' !== node.text.trim()) f.push({ type: 'h2', text: node.text })
+            break
+          case 'p':
+            f.push({ type: 'paragraph', text: node.text })
+            break
+          case 'ul':
+            for (let j = 0; j < node.childNodes.length; j++) {
+              f.push({ type: 'listItem', text: node.childNodes[j].text })
+            }
+            break
         }
-      } else {
       }
     }
     setData(d)
     setFacts(f)
     setLoading(false)
+  }
+
+  const renderFacts = () => {
+    return facts.map((f, index) => {
+      switch (f.type) {
+        case 'h2':
+          return (
+            <Title key={index} style={styles.paddingH}>
+              {f.text}
+            </Title>
+          )
+        case 'paragraph':
+          return (
+            <Paragraph key={index} style={styles.paddingH}>
+              {f.text}
+            </Paragraph>
+          )
+        case 'listItem':
+          return (
+            <View style={{ flexDirection: 'row' }}>
+              <IconButton icon="circle-medium" size={20} />
+              <Paragraph key={index} style={{ flex: 1 }}>
+                {f.text}
+              </Paragraph>
+            </View>
+          )
+        default:
+          return false
+      }
+    })
   }
 
   return (
@@ -67,11 +98,9 @@ function LiveFactScreen({ item }) {
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>
         {loading ? (
-          <ActivityIndicator style={{ flex: 1, justifyContent: 'center', alignContent: 'center', height: '100%' }} />
+          <ActivityIndicator style={{ flex: 1, flexGrow: 1, justifyContent: 'center', alignContent: 'center' }} />
         ) : (
-          <>
-            <View style={{ ...styles.paddingH, flexDirection: 'row' }}></View>
-          </>
+          <>{renderFacts()}</>
         )}
       </ScrollView>
     </Surface>

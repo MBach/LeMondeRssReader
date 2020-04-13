@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { Image, StatusBar } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useTheme, TouchableRipple } from 'react-native-paper'
+import ky from 'ky'
+import { parse } from 'node-html-parser'
 
 import ArticleScreen from '../screens/Article'
 import CommentScreen from '../screens/Comments'
@@ -15,13 +17,22 @@ import { IconHome, IconInfo } from '../assets/Icons'
  * @since 2020-03
  * @version 1.0
  */
-export default function ArticleBottomTabsNavigator({ route }) {
+export default function BottomTabsNavigator({ route }) {
   const Tab = createBottomTabNavigator()
   const { item, isLive } = route.params
   const { colors } = useTheme()
 
-  //useEffect(() => {
-  //}, [])
+  const [doc, setDoc] = useState()
+
+  useEffect(() => {
+    init()
+  }, [])
+
+  const init = async () => {
+    const response = await ky.get(item.link)
+    const d = parse(await response.text())
+    setDoc(d)
+  }
 
   const renderIcon = (icon) => ({ focused, size }) => (
     <TouchableRipple rippleColor={colors.primary}>
@@ -54,7 +65,7 @@ export default function ArticleBottomTabsNavigator({ route }) {
                 tabBarIcon: renderIcon(IconHome),
                 tabBarLabel: 'Les faits',
               }}>
-              {(props) => <LiveFactScreen {...props} item={item} />}
+              {(props) => <LiveFactScreen {...props} doc={doc} item={item} />}
             </Tab.Screen>
             <Tab.Screen
               name="Comment"
@@ -62,7 +73,7 @@ export default function ArticleBottomTabsNavigator({ route }) {
                 tabBarIcon: renderIcon(IconInfo),
                 tabBarLabel: 'Suivez le live',
               }}>
-              {(props) => <LiveCommentScreen {...props} item={item} />}
+              {(props) => <LiveCommentScreen {...props} doc={doc} item={item} />}
             </Tab.Screen>
           </>
         ) : (
@@ -73,7 +84,7 @@ export default function ArticleBottomTabsNavigator({ route }) {
                 tabBarIcon: renderIcon(IconHome),
                 tabBarLabel: 'Article',
               }}>
-              {(props) => <ArticleScreen {...props} item={item} />}
+              {(props) => <ArticleScreen {...props} doc={doc} item={item} />}
             </Tab.Screen>
             <Tab.Screen
               name="Comment"
@@ -81,7 +92,7 @@ export default function ArticleBottomTabsNavigator({ route }) {
                 tabBarIcon: renderIcon(IconInfo),
                 tabBarLabel: 'Commentaires',
               }}>
-              {(props) => <CommentScreen {...props} item={item} />}
+              {(props) => <CommentScreen {...props} doc={doc} item={item} />}
             </Tab.Screen>
           </>
         )}

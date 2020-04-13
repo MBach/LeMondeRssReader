@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useWindowDimensions, FlatList, Image, ImageBackground, RefreshControl, StyleSheet, StatusBar, View } from 'react-native'
+import { useWindowDimensions, FlatList, Image, RefreshControl, StatusBar, StyleSheet, View } from 'react-native'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
@@ -117,7 +117,7 @@ function HomeScreen({ navigation, route }) {
         borderless
         rippleColor={colors.accent}
         onPress={() =>
-          navigation.navigate('ArticleBottomTabsNavigator', {
+          navigation.navigate('BottomTabsNavigator', {
             item,
             url: item.link,
             isLive,

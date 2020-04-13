@@ -14,7 +14,7 @@ def enableProguardInReleaseBuilds = false
 
 def jscFlavor = 'org.webkit:android-jsc:+'
 
-def enableHermes = project.ext.react.get("enableHermes", false);
+def enableHermes = project.ext.react.get("enableHermes", false)
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -97,7 +97,7 @@ dependencies {
     }
 
     if (enableHermes) {
-        def hermesPath = "../../node_modules/hermes-engine/android/";
+        def hermesPath = "../../node_modules/hermes-engine/android/"
         debugImplementation files(hermesPath + "hermes-debug.aar")
         releaseImplementation files(hermesPath + "hermes-release.aar")
     } else {

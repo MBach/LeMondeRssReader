@@ -9,9 +9,6 @@ import { SharedElement } from 'react-navigation-shared-element'
 import { DefaultImageFeed, IconLive, IconVideo } from '../assets/Icons'
 import i18n from '../locales/i18n'
 
-// Check if 2nd capture group is live/video/other
-const regex = /https:\/\/www\.lemonde\.fr\/(\w+)\/(\w+)\/.*/g
-
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
@@ -101,9 +98,11 @@ function HomeScreen({ navigation, route }) {
   }
 
   const renderItem = ({ item }) => {
+    // Check if 2nd capture group is live/video/other
+    const regex = /https:\/\/www\.lemonde\.fr\/([\w-]+)\/(\w+)\/.*/g
     const b = regex.exec(item.link)
-    let icon = null,
-      isLive = false
+    let icon = null
+    let isLive = false
     if (b && b.length === 3) {
       if (b[2] === 'live') {
         icon = IconLive

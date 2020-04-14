@@ -76,11 +76,9 @@ function LiveFactScreen({ doc, item }) {
           )
         case 'listItem':
           return (
-            <View style={{ flexDirection: 'row' }}>
+            <View key={index} style={{ flexDirection: 'row' }}>
               <IconButton icon="circle-medium" size={20} />
-              <Paragraph key={index} style={{ flex: 1 }}>
-                {f.text}
-              </Paragraph>
+              <Paragraph style={{ flex: 1 }}>{f.text}</Paragraph>
             </View>
           )
         default:

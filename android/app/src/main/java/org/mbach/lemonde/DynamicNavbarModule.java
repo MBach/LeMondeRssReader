@@ -1,5 +1,6 @@
 package org.mbach.lemonde;
 
+import android.graphics.Color;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import android.view.View;
@@ -28,24 +29,27 @@ public class DynamicNavbarModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setLightNavigationBar(final boolean isLight) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 UiThreadUtil.runOnUiThread(() -> {
                     if (getCurrentActivity() == null) {
                         return;
                     }
                     Window window = getCurrentActivity().getWindow();
-                    int flags = window.getDecorView().getSystemUiVisibility();
-                    if (isLight) {
-                        flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                    } else {
-                        flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        int flags = window.getDecorView().getSystemUiVisibility();
+                        if (isLight) {
+                            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                        } else {
+                            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                        }
+                        window.getDecorView().setSystemUiVisibility(flags);
                     }
-                    window.getDecorView().setSystemUiVisibility(flags);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        window.setNavigationBarColor(Color.parseColor(isLight ? "#FFFFFF" : "#000000"));
+                    }
                 });
             } catch (Exception e) {
                 //
             }
-        }
     }
 }

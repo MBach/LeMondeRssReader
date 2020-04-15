@@ -3,6 +3,7 @@ import { Provider as PaperProvider } from 'react-native-paper'
 import AsyncStorage from '@react-native-community/async-storage'
 
 import { darkTheme, lightTheme } from '../styles'
+import DynamicNavbar from '../DynamicNavbar'
 
 const defaultFeeds = require('../feeds.json')
 
@@ -15,20 +16,22 @@ export default class SettingsProvider extends Component {
       hydrated: false,
       theme: {},
       feed: [],
-      setTheme: async theme => {
-        this.setState(state => ({
+      setTheme: async (theme) => {
+        const isDark = theme === 'dark'
+        this.setState((state) => ({
           ...state,
-          theme: theme === 'dark' ? darkTheme : lightTheme
+          theme: isDark ? darkTheme : lightTheme,
         }))
+        DynamicNavbar.setLightNavigationBar(!isDark)
         await AsyncStorage.setItem('theme', theme)
       },
       getTheme: async () => {
         return await AsyncStorage.getItem('theme')
       },
-      setFeed: async feed => {
-        this.setState(state => ({
+      setFeed: async (feed) => {
+        this.setState((state) => ({
           ...state,
-          feed
+          feed,
         }))
         await AsyncStorage.setItem('feed', JSON.stringify(feed))
       },
@@ -39,17 +42,19 @@ export default class SettingsProvider extends Component {
         } else {
           return defaultFeeds
         }
-      }
+      },
     }
   }
 
   async componentDidMount() {
     const t = await this.state.getTheme()
-    if (t === null || t === 'dark') {
+    const isDark = t === null || t === 'dark'
+    if (isDark) {
       this.setState({ theme: darkTheme, hydrated: true })
     } else {
       this.setState({ theme: lightTheme, hydrated: true })
     }
+    DynamicNavbar.setLightNavigationBar(!isDark)
   }
 
   render() {

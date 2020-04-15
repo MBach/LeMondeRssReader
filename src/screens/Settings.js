@@ -15,7 +15,6 @@ import {
 
 import { SettingsContext } from '../context/SettingsContext'
 import i18n from '../locales/i18n'
-import DynamicNavbar from '../DynamicNavbar'
 
 /**
  * @author Matthieu BACHELIER
@@ -67,7 +66,6 @@ export default function SettingsScreen() {
     const theme = await settingsContext.getTheme()
     const isDark = theme === null || theme === 'dark'
     setDark(isDark)
-    DynamicNavbar.setLightNavigationBar(!isDark)
     const feed = await settingsContext.getFeed()
     if (feed) {
       setData(feed)

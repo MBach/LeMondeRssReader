@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Image, StatusBar } from 'react-native'
+import { StatusBar } from 'react-native'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useTheme, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
@@ -9,8 +10,6 @@ import ArticleScreen from '../screens/Article'
 import CommentScreen from '../screens/Comments'
 import LiveCommentScreen from '../screens/LiveComment'
 import LiveFactScreen from '../screens/LiveFact'
-
-import { IconHome, IconInfo } from '../assets/Icons'
 
 /**
  * @author Matthieu BACHELIER
@@ -34,17 +33,9 @@ export default function BottomTabsNavigator({ route }) {
     setDoc(d)
   }
 
-  const renderIcon = (icon) => ({ focused, size }) => (
+  const renderIcon = (iconSource) => ({ focused, size }) => (
     <TouchableRipple rippleColor={colors.primary}>
-      <Image
-        source={icon}
-        style={{
-          width: size,
-          height: size,
-          resizeMode: 'contain',
-          tintColor: focused ? colors.primary : colors.text,
-        }}
-      />
+      <Icon name={iconSource} size={size} color={focused ? colors.primary : colors.divider} />
     </TouchableRipple>
   )
 
@@ -62,7 +53,7 @@ export default function BottomTabsNavigator({ route }) {
             <Tab.Screen
               name="Article"
               options={{
-                tabBarIcon: renderIcon(IconHome),
+                tabBarIcon: renderIcon('playlist-check'),
                 tabBarLabel: 'Les faits',
               }}>
               {(props) => <LiveFactScreen {...props} doc={doc} item={item} />}
@@ -70,7 +61,7 @@ export default function BottomTabsNavigator({ route }) {
             <Tab.Screen
               name="Comment"
               options={{
-                tabBarIcon: renderIcon(IconInfo),
+                tabBarIcon: renderIcon('comment-text-multiple'),
                 tabBarLabel: 'Suivez le live',
               }}>
               {(props) => <LiveCommentScreen {...props} doc={doc} item={item} />}
@@ -81,7 +72,7 @@ export default function BottomTabsNavigator({ route }) {
             <Tab.Screen
               name="Article"
               options={{
-                tabBarIcon: renderIcon(IconHome),
+                tabBarIcon: renderIcon('view-headline'),
                 tabBarLabel: 'Article',
               }}>
               {(props) => <ArticleScreen {...props} doc={doc} item={item} />}
@@ -89,10 +80,10 @@ export default function BottomTabsNavigator({ route }) {
             <Tab.Screen
               name="Comment"
               options={{
-                tabBarIcon: renderIcon(IconInfo),
+                tabBarIcon: renderIcon('comment-text'),
                 tabBarLabel: 'Commentaires',
               }}>
-              {(props) => <CommentScreen {...props} doc={doc} item={item} />}
+              {(props) => <CommentScreen {...props} item={item} />}
             </Tab.Screen>
           </>
         )}

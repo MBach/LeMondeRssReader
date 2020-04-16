@@ -3,8 +3,6 @@ import { Image, View, ScrollView, StyleSheet, StatusBar } from 'react-native'
 import { useTheme, ActivityIndicator, Caption, Paragraph, Surface, Text, Subheading } from 'react-native-paper'
 import { DefaultLiveAvatar } from '../assets/Icons'
 
-const styles = StyleSheet.create({})
-
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
@@ -14,6 +12,16 @@ function LiveCommentScreen({ doc }) {
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(false)
   const { colors } = useTheme()
+
+  const styles = StyleSheet.create({
+    quote: {
+      fontStyle: 'italic',
+      borderLeftWidth: 2,
+      paddingLeft: 12,
+      marginLeft: 8,
+      borderLeftColor: colors.divider,
+    },
+  })
 
   useEffect(() => {
     init()
@@ -95,9 +103,6 @@ function LiveCommentScreen({ doc }) {
               }
             }
           }
-          //if (liveNode.childNodes.length === 0) {
-          //  console.log(liveNode)
-          //}
         }
         if (liveContents.length > 0) {
           comment.liveContents = liveContents
@@ -126,16 +131,7 @@ function LiveCommentScreen({ doc }) {
           break
         case 'quote':
           contents.push(
-            <Paragraph
-              key={i}
-              style={{
-                ...styles.paddingH,
-                fontStyle: 'italic',
-                borderLeftWidth: 2,
-                paddingLeft: 12,
-                marginLeft: 8,
-                borderLeftColor: colors.divider,
-              }}>
+            <Paragraph key={i} style={styles.quote}>
               {lc.text}
             </Paragraph>
           )

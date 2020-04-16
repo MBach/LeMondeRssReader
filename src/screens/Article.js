@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useWindowDimensions, Image, View, ScrollView, StyleSheet, Linking, StatusBar } from 'react-native'
 import { SharedElement } from 'react-navigation-shared-element'
-import { useTheme, ActivityIndicator, Button, Card, Headline, Paragraph, Subheading, Surface, Title } from 'react-native-paper'
+import { useTheme, ActivityIndicator, Button, Card, Headline, Paragraph, Subheading, Surface, Title, Caption } from 'react-native-paper'
 
 import { IconTimer, DefaultImageFeed } from '../assets/Icons'
 import i18n from '../locales/i18n'
@@ -68,7 +68,19 @@ function ArticleScreen({ doc, item }) {
           case 'figure':
             const img = node.querySelector('img')
             if (img) {
-              const imgSrc = img.getAttribute('src')
+              let imgSrc = img.getAttribute('src')
+              if (!imgSrc) {
+                imgSrc = img.getAttribute('data-src')
+              }
+              let caption = null
+              if (imgSrc) {
+                const figcaption = node.querySelector('figcaption')
+                if (figcaption && figcaption.text) {
+                  caption = figcaption.text
+                }
+              } else {
+                break
+              }
               const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.*/g
               const b = regex.exec(imgSrc)
               let ratio
@@ -77,10 +89,7 @@ function ArticleScreen({ doc, item }) {
               } else {
                 ratio = 1.5
               }
-              console.log(b)
-              console.log(ratio)
-
-              par.push({ type: 'img', uri: imgSrc, ratio })
+              par.push({ type: 'img', uri: imgSrc, ratio, caption })
             }
             break
         }
@@ -107,7 +116,14 @@ function ArticleScreen({ doc, item }) {
             </Paragraph>
           )
         case 'img':
-          return <Image key={index} source={{ uri: p.uri }} style={{ width: window.width, height: window.width / p.ratio }} />
+          return (
+            <View key={index} style={{ marginHorizontal: 8 }}>
+              <Image source={{ uri: p.uri }} style={{ width: window.width - 16, height: (window.width - 16) / p.ratio }} />
+              {p.caption && (
+                <Caption style={{ position: 'absolute', bottom: -2, padding: 4, backgroundColor: 'rgba(0,0,0,0.5)' }}>{p.caption}</Caption>
+              )}
+            </View>
+          )
         default:
           return false
       }

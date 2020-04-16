@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Image, View, ScrollView, StyleSheet, Linking } from 'react-native'
+import { useWindowDimensions, Image, View, ScrollView, StyleSheet, Linking, StatusBar } from 'react-native'
 import { SharedElement } from 'react-navigation-shared-element'
-import { useTheme, ActivityIndicator, Headline, Surface, Subheading, Paragraph, Title, Card, Button } from 'react-native-paper'
+import { useTheme, ActivityIndicator, Button, Card, Headline, Paragraph, Subheading, Surface, Title } from 'react-native-paper'
 
 import { IconTimer, DefaultImageFeed } from '../assets/Icons'
 import i18n from '../locales/i18n'
@@ -27,6 +27,7 @@ function ArticleScreen({ doc, item }) {
   const [data, setData] = useState({ title: item.title, description: item.description })
   const [paragraphes, setParagraphes] = useState([])
   const [loading, setLoading] = useState(true)
+  const window = useWindowDimensions()
 
   useEffect(() => {
     init()
@@ -52,27 +53,36 @@ function ArticleScreen({ doc, item }) {
 
     for (let i = 0; i < article.childNodes.length; i++) {
       const node = article.childNodes[i]
-      //console.log(node.tagName)
       if (node.tagName) {
-        //console.log('node', node)
-        switch (
-          node.tagName
-          //
-        ) {
-        }
-      } else {
-      }
-      if (node && node.classNames && node.classNames.length > 0) {
-        if (node.classNames.includes('article__paragraph')) {
-          par.push({ type: 'paragraph', text: node.text })
-        } else {
-          const h2 = node.querySelector('h2')
-          if (h2) {
-            par.push({ type: 'h2', text: h2.text })
-          } else {
-            //const img = node.querySelectorAll('picture.article__media')
-            //console.log('img', img)
-          }
+        switch (node.tagName) {
+          case 'h2':
+            par.push({ type: 'h2', text: node.text })
+            break
+          case 'p':
+            if (node && node.classNames && node.classNames.length > 0) {
+              if (node.classNames.includes('article__paragraph')) {
+                par.push({ type: 'paragraph', text: node.text })
+              }
+            }
+            break
+          case 'figure':
+            const img = node.querySelector('img')
+            if (img) {
+              const imgSrc = img.getAttribute('src')
+              const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.*/g
+              const b = regex.exec(imgSrc)
+              let ratio
+              if (b && b.length === 3) {
+                ratio = b[1] / b[2]
+              } else {
+                ratio = 1.5
+              }
+              console.log(b)
+              console.log(ratio)
+
+              par.push({ type: 'img', uri: imgSrc, ratio })
+            }
+            break
         }
       }
     }
@@ -84,18 +94,20 @@ function ArticleScreen({ doc, item }) {
   const renderParagraphes = () => {
     return paragraphes.map((p, index) => {
       switch (p.type) {
-        case 'paragraph':
-          return (
-            <Paragraph key={index} style={styles.paddingH}>
-              {p.text}
-            </Paragraph>
-          )
         case 'h2':
           return (
             <Title key={index} style={styles.paddingH}>
               {p.text}
             </Title>
           )
+        case 'paragraph':
+          return (
+            <Paragraph key={index} style={styles.paddingH}>
+              {p.text}
+            </Paragraph>
+          )
+        case 'img':
+          return <Image key={index} source={{ uri: p.uri }} style={{ width: window.width, height: window.width / p.ratio }} />
         default:
           return false
       }
@@ -104,7 +116,8 @@ function ArticleScreen({ doc, item }) {
 
   return (
     <Surface style={{ flex: 1 }}>
-      <ScrollView>
+      {data.isRestricted && <StatusBar backgroundColor={'rgba(255,196,0,1.0)'} barStyle="dark-content" animated />}
+      <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
         <SharedElement id={`item.${item.id}.photo`}>
           <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageHeader} />
         </SharedElement>
@@ -124,7 +137,7 @@ function ArticleScreen({ doc, item }) {
         )}
         {renderParagraphes()}
         {data.isRestricted && (
-          <Card style={{ marginVertical: 8 }}>
+          <Card style={{ margin: 8 }}>
             <Card.Content>
               <Paragraph>{i18n.t('article.restricted')}</Paragraph>
             </Card.Content>
@@ -135,7 +148,7 @@ function ArticleScreen({ doc, item }) {
             </Card.Actions>
           </Card>
         )}
-        <View style={{ paddingBottom: 100 }} />
+        <View style={{ paddingBottom: 40 }} />
       </ScrollView>
     </Surface>
   )

@@ -16,6 +16,9 @@
     "thought": "Thoughts",
     "mag": "M the mag"
   },
+  "comments": {
+    "fetchMore": "Comments page %{page} loaded"
+  },
   "feeds": {
     "latestNews": "Lastest News",
     "continuousNews": "Continuous",

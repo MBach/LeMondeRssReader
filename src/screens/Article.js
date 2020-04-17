@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
  * @since 2020-03
  * @version 1.0
  */
-function ArticleScreen({ doc, item }) {
+function ArticleScreen({ navigation, doc, item }) {
   const { colors } = useTheme()
   const [data, setData] = useState({ title: item.title, description: item.description })
   const [paragraphes, setParagraphes] = useState([])
@@ -47,6 +47,7 @@ function ArticleScreen({ doc, item }) {
     d.date = main.querySelector('span.meta__date')?.rawText
     d.readTime = main.querySelector('.meta__reading-time')?.lastChild.rawText
     d.isRestricted = main.querySelector('p.article__status') !== null
+    navigation.setOptions({ tabBarVisible: !d.isRestricted })
 
     // Paragraphes and images
     const article = main.querySelector('article')

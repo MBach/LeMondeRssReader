@@ -73,33 +73,37 @@ function LiveCommentScreen({ doc }) {
       if (liveNodes) {
         let liveContents = []
         for (const liveNode of liveNodes) {
-          for (let j = 0; j < liveNode.childNodes.length; j++) {
-            const childNode = liveNode.childNodes[j]
-            if (childNode) {
-              let lc = {}
-              switch (childNode.tagName) {
-                case 'em':
-                  lc.fontStyle = 'italic'
-                case undefined:
-                case 'p':
-                  lc.type = 'paragraph'
-                  lc.text = childNode.text
-                  break
-                case 'strong':
-                  lc.type = 'subheading'
-                  lc.text = childNode.text
-                  break
-                case 'blockquote':
-                  lc.type = 'quote'
-                  lc.text = childNode.text
-                  break
-                case 'img':
-                  lc.type = 'img'
-                  lc.text = childNode.getAttribute('src')
-                  break
-              }
-              if (lc.type && lc.text.trim() !== '') {
-                liveContents.push(lc)
+          if (liveNode.childNodes.length === 0) {
+            console.log(liveNode)
+          } else {
+            for (let j = 0; j < liveNode.childNodes.length; j++) {
+              const childNode = liveNode.childNodes[j]
+              if (childNode) {
+                let lc = {}
+                switch (childNode.tagName) {
+                  case 'em':
+                    lc.fontStyle = 'italic'
+                  case undefined:
+                  case 'p':
+                    lc.type = 'paragraph'
+                    lc.text = childNode.text
+                    break
+                  case 'strong':
+                    lc.type = 'subheading'
+                    lc.text = childNode.text
+                    break
+                  case 'blockquote':
+                    lc.type = 'quote'
+                    lc.text = childNode.text
+                    break
+                  case 'img':
+                    lc.type = 'img'
+                    lc.text = childNode.getAttribute('src')
+                    break
+                }
+                if (lc.type && lc.text.trim() !== '') {
+                  liveContents.push(lc)
+                }
               }
             }
           }

@@ -16,9 +16,9 @@ import LiveFactScreen from '../screens/LiveFact'
  * @since 2020-03
  * @version 1.0
  */
-export default function BottomTabsNavigator({ route }) {
+export default function BottomTabsNavigator({ route, url }) {
   const Tab = createBottomTabNavigator()
-  const { item, isLive } = route.params
+  const [isLive, setIsLive] = useState(route.params?.isLive)
   const { colors } = useTheme()
 
   const [doc, setDoc] = useState()
@@ -28,9 +28,19 @@ export default function BottomTabsNavigator({ route }) {
   }, [])
 
   const init = async () => {
-    const response = await ky.get(item.link)
-    const d = parse(await response.text())
-    setDoc(d)
+    if (route.params && route.params.item) {
+      const response = await ky.get(route.params.item.link)
+      const d = parse(await response.text())
+      setDoc(d)
+    } else {
+      console.log('BottomTabsNavigator', route, url)
+      const regex = /https:\/\/www\.lemonde\.fr\/([\w-]+)\/(\w+)\/.*/g
+      const b = regex.exec(url)
+      setIsLive(b && b.length === 3 && b[2] === 'live')
+      const response = await ky.get(url)
+      const d = parse(await response.text())
+      setDoc(d)
+    }
   }
 
   const renderIcon = (iconSource) => ({ focused, size }) => (
@@ -56,7 +66,7 @@ export default function BottomTabsNavigator({ route }) {
                 tabBarIcon: renderIcon('playlist-check'),
                 tabBarLabel: 'Les faits',
               }}>
-              {(props) => <LiveFactScreen {...props} doc={doc} item={item} />}
+              {(props) => <LiveFactScreen {...props} doc={doc} item={route.params && route.params.item} />}
             </Tab.Screen>
             <Tab.Screen
               name="Comment"
@@ -64,7 +74,7 @@ export default function BottomTabsNavigator({ route }) {
                 tabBarIcon: renderIcon('comment-text-multiple'),
                 tabBarLabel: 'Suivez le live',
               }}>
-              {(props) => <LiveCommentScreen {...props} doc={doc} item={item} />}
+              {(props) => <LiveCommentScreen {...props} doc={doc} item={route.params && route.params.item} />}
             </Tab.Screen>
           </>
         ) : (
@@ -75,7 +85,7 @@ export default function BottomTabsNavigator({ route }) {
                 tabBarIcon: renderIcon('view-headline'),
                 tabBarLabel: 'Article',
               }}>
-              {(props) => <ArticleScreen {...props} doc={doc} item={item} />}
+              {(props) => <ArticleScreen {...props} doc={doc} item={route.params && route.params.item} />}
             </Tab.Screen>
             <Tab.Screen
               name="Comment"
@@ -83,7 +93,7 @@ export default function BottomTabsNavigator({ route }) {
                 tabBarIcon: renderIcon('comment-text'),
                 tabBarLabel: 'Commentaires',
               }}>
-              {(props) => <CommentScreen {...props} item={item} />}
+              {(props) => <CommentScreen {...props} item={route.params && route.params.item} />}
             </Tab.Screen>
           </>
         )}

@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Image, View, ScrollView, StyleSheet } from 'react-native'
+import { useWindowDimensions, Image, View, ScrollView, StatusBar, StyleSheet } from 'react-native'
 import { SharedElement } from 'react-navigation-shared-element'
 import { ActivityIndicator, Headline, IconButton, Paragraph, Subheading, Surface, Title } from 'react-native-paper'
-
-const styles = StyleSheet.create({
-  paddingH: {
-    paddingHorizontal: 8,
-  },
-  imageHeader: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'contain',
-  },
-})
 
 /**
  * @author Matthieu BACHELIER
@@ -23,6 +12,18 @@ function LiveFactScreen({ doc, item }) {
   const [data, setData] = useState({ title: item.title, description: item.description })
   const [facts, setFacts] = useState([])
   const [loading, setLoading] = useState(false)
+  const window = useWindowDimensions()
+
+  const styles = StyleSheet.create({
+    paddingH: {
+      paddingHorizontal: 8,
+    },
+    imageHeader: {
+      width: window.width,
+      height: 200,
+      resizeMode: 'contain',
+    },
+  })
 
   useEffect(() => {
     init()
@@ -89,7 +90,7 @@ function LiveFactScreen({ doc, item }) {
 
   return (
     <Surface style={{ flex: 1 }}>
-      <ScrollView>
+      <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
         <SharedElement id={`item.${item.id}.photo`}>
           <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageHeader} />
         </SharedElement>

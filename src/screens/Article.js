@@ -6,17 +6,6 @@ import { useTheme, ActivityIndicator, Button, Card, Headline, Paragraph, Subhead
 import { IconTimer, DefaultImageFeed } from '../assets/Icons'
 import i18n from '../locales/i18n'
 
-const styles = StyleSheet.create({
-  paddingH: {
-    paddingHorizontal: 8,
-  },
-  imageHeader: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'contain',
-  },
-})
-
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
@@ -24,10 +13,21 @@ const styles = StyleSheet.create({
  */
 function ArticleScreen({ navigation, doc, item }) {
   const { colors } = useTheme()
-  const [data, setData] = useState({ title: item.title, description: item.description })
+  const [data, setData] = useState({ title: item?.title, description: item?.description })
   const [paragraphes, setParagraphes] = useState([])
   const [loading, setLoading] = useState(true)
   const window = useWindowDimensions()
+
+  const styles = StyleSheet.create({
+    paddingH: {
+      paddingHorizontal: 8,
+    },
+    imageHeader: {
+      width: window.width,
+      height: 200,
+      resizeMode: 'contain',
+    },
+  })
 
   useEffect(() => {
     init()
@@ -43,6 +43,10 @@ function ArticleScreen({ navigation, doc, item }) {
     let d = { ...data }
     let par = []
     // Header
+    if (!item) {
+      d.title = main.querySelector('h1')?.rawText
+      d.description = main.querySelector('p.article__desc')?.text.trim()
+    }
     d.authors = main.querySelector('span.meta__author')?.rawText
     d.date = main.querySelector('span.meta__date')?.rawText
     d.readTime = main.querySelector('.meta__reading-time')?.lastChild.rawText
@@ -135,9 +139,11 @@ function ArticleScreen({ navigation, doc, item }) {
     <Surface style={{ flex: 1 }}>
       {data.isRestricted && <StatusBar backgroundColor={'rgba(255,196,0,1.0)'} barStyle="dark-content" animated />}
       <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
-        <SharedElement id={`item.${item.id}.photo`}>
-          <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageHeader} />
-        </SharedElement>
+        {item && (
+          <SharedElement id={`item.${item.id}.photo`}>
+            <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageHeader} />
+          </SharedElement>
+        )}
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>
         {loading ? (

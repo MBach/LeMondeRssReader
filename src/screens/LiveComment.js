@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Image, View, ScrollView, StyleSheet, StatusBar } from 'react-native'
-import { useTheme, ActivityIndicator, Caption, Paragraph, Surface, Text, Subheading } from 'react-native-paper'
+import { useTheme, ActivityIndicator, Caption, IconButton, Paragraph, Surface, Text } from 'react-native-paper'
 import { DefaultLiveAvatar } from '../assets/Icons'
 
 /**
@@ -26,6 +26,64 @@ function LiveCommentScreen({ doc }) {
   useEffect(() => {
     init()
   }, [doc])
+
+  const extractLiveContent = (node, liveContents) => {
+    // recursive call
+    if (node.childNodes.length > 0) {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        extractLiveContent(node.childNodes[i], liveContents)
+      }
+    }
+    let lc = {}
+    switch (node.tagName) {
+      case 'br':
+        lc.type = 'br'
+        lc.text = 'br'
+        break
+      case 'b':
+        lc.fontWeight = 'bold'
+        lc.type = 'paragraph'
+        lc.text = node.text
+        break
+      case 'em':
+        lc.fontStyle = 'italic'
+        lc.type = 'paragraph'
+        lc.text = node.text
+        break
+      case undefined:
+        lc.type = 'paragraph'
+        lc.text = node.rawText
+        break
+      case 'p':
+        lc.type = 'paragraph'
+        lc.text = node.text
+        break
+      case 'strong':
+        lc.type = 'paragraph'
+        lc.text = node.text
+        break
+      case 'img':
+        lc.type = 'img'
+        lc.text = node.getAttribute('src')
+        break
+      case 'li':
+        liveContents.push({ type: 'listItem', text: node.text })
+        break
+    }
+    if (lc.type && lc.text.trim() !== '') {
+      // because of 'undefined' nodes, remove duplicates
+      if (liveContents.length > 0) {
+        const last = liveContents[liveContents.length - 1]
+        if (last.text === lc.text) {
+          liveContents.pop()
+        }
+      }
+      if (node.parentNode?.tagName === 'blockquote') {
+        lc.quote = true
+      }
+      liveContents.push(lc)
+    }
+  }
 
   const init = async () => {
     setLoading(true)
@@ -73,38 +131,10 @@ function LiveCommentScreen({ doc }) {
       if (liveNodes) {
         let liveContents = []
         for (const liveNode of liveNodes) {
-          if (liveNode.childNodes.length === 0) {
-            console.log(liveNode)
-          } else {
-            for (let j = 0; j < liveNode.childNodes.length; j++) {
-              const childNode = liveNode.childNodes[j]
-              if (childNode) {
-                let lc = {}
-                switch (childNode.tagName) {
-                  case 'em':
-                    lc.fontStyle = 'italic'
-                  case undefined:
-                  case 'p':
-                    lc.type = 'paragraph'
-                    lc.text = childNode.text
-                    break
-                  case 'strong':
-                    lc.type = 'subheading'
-                    lc.text = childNode.text
-                    break
-                  case 'blockquote':
-                    lc.type = 'quote'
-                    lc.text = childNode.text
-                    break
-                  case 'img':
-                    lc.type = 'img'
-                    lc.text = childNode.getAttribute('src')
-                    break
-                }
-                if (lc.type && lc.text.trim() !== '') {
-                  liveContents.push(lc)
-                }
-              }
+          for (let j = 0; j < liveNode.childNodes.length; j++) {
+            const childNode = liveNode.childNodes[j]
+            if (childNode) {
+              extractLiveContent(childNode, liveContents)
             }
           }
         }
@@ -123,28 +153,33 @@ function LiveCommentScreen({ doc }) {
     for (const i in liveContents) {
       const lc = liveContents[i]
       switch (lc.type) {
+        case 'br':
+          contents.push(<View key={i} style={{ height: 8, width: '100%', flexGrow: 1 }} />)
+          break
         case 'img':
           contents.push(<Image key={i} source={{ uri: lc.text }} style={{ width: '100%', height: 200 }} />)
           break
+        case 'listItem':
+          contents.push(
+            <View key={i} style={{ flexDirection: 'row' }}>
+              <IconButton icon="circle-medium" size={20} />
+              <Paragraph style={{ flex: 1 }}>{lc.text}</Paragraph>
+            </View>
+          )
+          break
         case 'paragraph':
+          let s = {
+            ...styles.paddingH,
+            fontStyle: lc.fontStyle ? lc.fontStyle : 'normal',
+            fontWeight: lc.fontWeight ? lc.fontWeight : 'normal',
+          }
+          if (lc.quote) {
+            s = { ...s, ...styles.quote }
+          }
           contents.push(
-            <Paragraph key={i} style={{ ...styles.paddingH, fontStyle: lc.fontStyle ? lc.fontStyle : 'normal' }}>
+            <Paragraph key={i} style={s}>
               {lc.text}
             </Paragraph>
-          )
-          break
-        case 'quote':
-          contents.push(
-            <Paragraph key={i} style={styles.quote}>
-              {lc.text}
-            </Paragraph>
-          )
-          break
-        case 'subheading':
-          contents.push(
-            <Subheading key={i} style={styles.paddingH}>
-              {lc.text}
-            </Subheading>
           )
           break
       }
@@ -182,7 +217,7 @@ function LiveCommentScreen({ doc }) {
               </Text>
             </View>
           )}
-          {comment.liveContents && renderLiveContents(comment.liveContents)}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>{comment.liveContents && renderLiveContents(comment.liveContents)}</View>
         </View>
       )
     }

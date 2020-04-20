@@ -14,7 +14,7 @@ import i18n from '../locales/i18n'
  * @since 2020-03
  * @version 1.0
  */
-function HomeScreen({ navigation, route }) {
+export default function HomeScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [fetchFailed, setFetchFailed] = useState(false)
@@ -177,5 +177,3 @@ function HomeScreen({ navigation, route }) {
     </Surface>
   )
 }
-
-export default HomeScreen

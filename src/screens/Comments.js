@@ -10,7 +10,7 @@ import i18n from '../locales/i18n'
  * @since 2020-03
  * @version 1.0
  */
-function CommentScreen({ item }) {
+export default function CommentScreen({ item }) {
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -72,7 +72,6 @@ function CommentScreen({ item }) {
    * Fetch the page which contains all comments.
    */
   const getComments = async () => {
-    console.log('getComments', currentPage)
     if (currentPage === 1) {
       setLoading(true)
     }
@@ -186,5 +185,3 @@ function CommentScreen({ item }) {
     </Surface>
   )
 }
-
-export default CommentScreen

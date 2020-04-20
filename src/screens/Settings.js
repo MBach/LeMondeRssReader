@@ -25,6 +25,7 @@ export default function SettingsScreen() {
   const { settingsContext } = useContext(SettingsContext)
 
   const [dark, setDark] = useState(true)
+  const [shared, setShared] = useState(true)
   const [data, setData] = useState(null)
 
   const { colors } = useTheme()
@@ -63,6 +64,10 @@ export default function SettingsScreen() {
   }, [])
 
   const init = async () => {
+    const share = await settingsContext.getShare()
+    const isShared = share === null || share === '1'
+    setShared(isShared)
+
     const theme = await settingsContext.getTheme()
     const isDark = theme === null || theme === 'dark'
     setDark(isDark)
@@ -72,9 +77,14 @@ export default function SettingsScreen() {
     }
   }
 
-  const changeTheme = (setTheme) => () => {
+  const toggleTheme = (setTheme) => () => {
     setDark(!dark)
     setTheme(!dark ? 'dark' : 'light')
+  }
+
+  const toggleShare = (setShare) => () => {
+    setShared(!shared)
+    setShare(!shared)
   }
 
   const toogleItem = (idxCat, idxFeed) => () => {
@@ -132,22 +142,22 @@ export default function SettingsScreen() {
             <Divider style={{ backgroundColor: colors.divider }} />
             <Surface style={styles.surfaceContainer}>
               <Paragraph style={{ color: colors.primary }}>{i18n.t('settings.display.title')}</Paragraph>
-              <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop} onPress={changeTheme(settingsContext.setTheme)}>
+              <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop} onPress={toggleTheme(settingsContext.setTheme)}>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={styles.flex}>
                     <Subheading>{i18n.t('settings.display.styleTitle')}</Subheading>
                     <Caption>{i18n.t('settings.display.styleDesc')}</Caption>
                   </View>
-                  <Switch value={dark} onValueChange={changeTheme(settingsContext.setTheme)} />
+                  <Switch value={dark} onValueChange={toggleTheme(settingsContext.setTheme)} />
                 </View>
               </TouchableRipple>
-              <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop} onPress={() => {}}>
+              <TouchableRipple rippleColor={colors.accent} style={styles.rippleMarginTop} onPress={toggleShare(settingsContext.setShare)}>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={styles.flex}>
                     <Subheading>{i18n.t('settings.display.shareTitle')}</Subheading>
                     <Caption>{i18n.t('settings.display.shareDesc')}</Caption>
                   </View>
-                  <Switch value={true} />
+                  <Switch value={shared} onValueChange={toggleShare(settingsContext.setShare)} />
                 </View>
               </TouchableRipple>
             </Surface>

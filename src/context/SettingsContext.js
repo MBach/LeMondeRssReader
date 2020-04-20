@@ -16,6 +16,43 @@ export default class SettingsProvider extends Component {
       hydrated: false,
       theme: {},
       feed: [],
+      toggleFavorite: async (item) => {
+        let favorites = await this.state.getFavorites()
+        const index = favorites.findIndex((f) => f.link === item.link)
+        if (index === -1) {
+          favorites.push(item)
+        } else {
+          favorites.splice(index, 1)
+        }
+        await AsyncStorage.setItem('favorites', JSON.stringify(favorites))
+      },
+      hasFavorite: async (link) => {
+        let favorites = await AsyncStorage.getItem('favorites')
+        if (favorites) {
+          let fav = JSON.parse(favorites)
+          for (const f of fav) {
+            if (f.link === link) {
+              return true
+            }
+          }
+          return false
+        } else {
+          return false
+        }
+      },
+      getFavorites: async () => {
+        let favorites = await AsyncStorage.getItem('favorites')
+        if (favorites) {
+          return JSON.parse(favorites)
+        } else {
+          return []
+        }
+      },
+      setShare: async (shared) => {
+        const isShared = shared ? '1' : '0'
+        await AsyncStorage.setItem('share', isShared)
+      },
+      getShare: async () => await AsyncStorage.getItem('share'),
       setTheme: async (theme) => {
         const isDark = theme === 'dark'
         this.setState((state) => ({
@@ -25,9 +62,7 @@ export default class SettingsProvider extends Component {
         DynamicNavbar.setLightNavigationBar(!isDark)
         await AsyncStorage.setItem('theme', theme)
       },
-      getTheme: async () => {
-        return await AsyncStorage.getItem('theme')
-      },
+      getTheme: async () => await AsyncStorage.getItem('theme'),
       setFeed: async (feed) => {
         this.setState((state) => ({
           ...state,
@@ -37,24 +72,18 @@ export default class SettingsProvider extends Component {
       },
       getFeed: async () => {
         const feed = await AsyncStorage.getItem('feed')
-        if (feed) {
-          return JSON.parse(feed)
-        } else {
-          return defaultFeeds
-        }
+        return feed ? JSON.parse(feed) : defaultFeeds
       },
     }
   }
 
   async componentDidMount() {
+    let state = { hydrated: true }
     const t = await this.state.getTheme()
     const isDark = t === null || t === 'dark'
-    if (isDark) {
-      this.setState({ theme: darkTheme, hydrated: true })
-    } else {
-      this.setState({ theme: lightTheme, hydrated: true })
-    }
+    state.theme = isDark ? darkTheme : lightTheme
     DynamicNavbar.setLightNavigationBar(!isDark)
+    this.setState(state)
   }
 
   render() {

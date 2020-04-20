@@ -8,7 +8,7 @@ import { DefaultLiveAvatar } from '../assets/Icons'
  * @since 2020-03
  * @version 1.0
  */
-function LiveCommentScreen({ doc }) {
+export default function LiveCommentScreen({ doc }) {
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(false)
   const { colors } = useTheme()
@@ -236,5 +236,3 @@ function LiveCommentScreen({ doc }) {
     </Surface>
   )
 }
-
-export default LiveCommentScreen

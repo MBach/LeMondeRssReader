@@ -8,7 +8,7 @@ import { ActivityIndicator, Headline, IconButton, Paragraph, Subheading, Surface
  * @since 2020-03
  * @version 1.0
  */
-function LiveFactScreen({ doc, item }) {
+export default function LiveFactScreen({ doc, item }) {
   const [data, setData] = useState({ title: item.title, description: item.description })
   const [facts, setFacts] = useState([])
   const [loading, setLoading] = useState(false)
@@ -105,5 +105,3 @@ function LiveFactScreen({ doc, item }) {
     </Surface>
   )
 }
-
-export default LiveFactScreen

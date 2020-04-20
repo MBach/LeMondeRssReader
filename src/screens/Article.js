@@ -1,9 +1,22 @@
-import React, { useEffect, useState } from 'react'
-import { useWindowDimensions, Image, View, ScrollView, StyleSheet, Linking, StatusBar } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
+import { useWindowDimensions, Image, Linking, ScrollView, Share, StatusBar, StyleSheet, View } from 'react-native'
 import { SharedElement } from 'react-navigation-shared-element'
-import { useTheme, ActivityIndicator, Button, Card, Headline, Paragraph, Subheading, Surface, Title, Caption } from 'react-native-paper'
+import {
+  useTheme,
+  ActivityIndicator,
+  Button,
+  Caption,
+  Card,
+  Headline,
+  IconButton,
+  Paragraph,
+  Subheading,
+  Surface,
+  Title,
+} from 'react-native-paper'
 
 import { IconTimer, DefaultImageFeed } from '../assets/Icons'
+import { SettingsContext } from '../context/SettingsContext'
 import i18n from '../locales/i18n'
 
 /**
@@ -11,9 +24,15 @@ import i18n from '../locales/i18n'
  * @since 2020-03
  * @version 1.0
  */
-function ArticleScreen({ navigation, doc, item }) {
+export default function ArticleScreen({ route, navigation, doc, url }) {
   const { colors } = useTheme()
-  const [data, setData] = useState({ title: item?.title, description: item?.description })
+  const { settingsContext } = useContext(SettingsContext)
+  const [shared, setShared] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
+
+  const [data, setData] = useState({ title: route.params?.item?.title, description: route.params?.item?.description })
+  const [item, setItem] = useState({ id: route.params?.item?.id, uri: route.params?.item?.uri })
+
   const [paragraphes, setParagraphes] = useState([])
   const [loading, setLoading] = useState(true)
   const window = useWindowDimensions()
@@ -38,24 +57,47 @@ function ArticleScreen({ navigation, doc, item }) {
     if (!doc) {
       return
     }
-    const main = doc.querySelector('main')
+
+    const share = await settingsContext.getShare()
+    const isShared = share === null || share === '1'
+    setShared(isShared)
 
     let d = { ...data }
-    let par = []
+    const main = doc.querySelector('main')
+
     // Header
-    if (!item) {
+    if (route.params?.item) {
+      d.link = route.params.item.link
+    } else {
+      d.link = url
       d.title = main.querySelector('h1')?.rawText
       d.description = main.querySelector('p.article__desc')?.text.trim()
     }
-    d.authors = main.querySelector('span.meta__author')?.rawText
-    d.date = main.querySelector('span.meta__date')?.rawText
+    setItem({ ...item, title: d.title, description: d.description })
+
+    let author = main.querySelector('span.meta__author')
+    if (author) {
+      d.authors = author.rawText
+    } else {
+      author = main.querySelector('span.meta__authors')
+      d.authors = author.text
+    }
+    let date = main.querySelector('span.meta__date')
+    if (date) {
+      d.date = date.rawText
+    } else {
+      d.date = main.querySelector('p.meta__publisher')?.text
+    }
     d.readTime = main.querySelector('.meta__reading-time')?.lastChild.rawText
     d.isRestricted = main.querySelector('p.article__status') !== null
     navigation.setOptions({ tabBarVisible: !d.isRestricted })
+    console.log(d.readTime)
+
+    setIsFavorite(await settingsContext.hasFavorite(d.link))
 
     // Paragraphes and images
     const article = main.querySelector('article')
-
+    let par = []
     for (let i = 0; i < article.childNodes.length; i++) {
       const node = article.childNodes[i]
       if (node.tagName) {
@@ -135,15 +177,44 @@ function ArticleScreen({ navigation, doc, item }) {
     })
   }
 
+  const shareContent = async () => {
+    try {
+      await Share.share({ title: `Le monde.fr : ${item.title}`, message: data.link })
+    } catch (error) {
+      //console.log(error.message)
+    }
+  }
+
+  const toggleFavorite = async () => {
+    setIsFavorite(!isFavorite)
+    settingsContext.toggleFavorite(item)
+  }
+
   return (
     <Surface style={{ flex: 1 }}>
       {data.isRestricted && <StatusBar backgroundColor={'rgba(255,196,0,1.0)'} barStyle="dark-content" animated />}
       <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
-        {item && (
-          <SharedElement id={`item.${item.id}.photo`}>
-            <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageHeader} />
-          </SharedElement>
-        )}
+        <View style={{ flexDirection: 'row', height: 200 }}>
+          <View style={{ position: 'absolute' }}>
+            {item && (
+              <SharedElement id={`item.${item.id}.photo`}>
+                <Image source={{ uri: item.uri }} style={styles.imageHeader} />
+              </SharedElement>
+            )}
+          </View>
+          <IconButton icon="arrow-left" size={20} onPress={navigation.goBack} />
+          <View style={{ flexGrow: 1 }} />
+          {!loading && shared && <IconButton icon="share-variant" size={20} onPress={shareContent} />}
+          {!loading && (
+            <IconButton
+              animated
+              icon={isFavorite ? 'star' : 'star-outline'}
+              size={20}
+              color={isFavorite ? colors.accent : colors.text}
+              onPress={toggleFavorite}
+            />
+          )}
+        </View>
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>
         {loading ? (
@@ -152,10 +223,12 @@ function ArticleScreen({ navigation, doc, item }) {
           <>
             <Paragraph style={styles.paddingH}>{data.authors}</Paragraph>
             <Paragraph style={styles.paddingH}>{data.date}</Paragraph>
-            <View style={{ ...styles.paddingH, flexDirection: 'row' }}>
-              <Image source={IconTimer} style={{ width: 24, height: 24, tintColor: colors.text, marginEnd: 8, marginBottom: 4 }} />
-              <Paragraph>{data.readTime}</Paragraph>
-            </View>
+            {data.readTime && (
+              <View style={{ ...styles.paddingH, flexDirection: 'row' }}>
+                <Image source={IconTimer} style={{ width: 24, height: 24, tintColor: colors.text, marginEnd: 8, marginBottom: 4 }} />
+                <Paragraph>{data.readTime}</Paragraph>
+              </View>
+            )}
           </>
         )}
         {renderParagraphes()}
@@ -176,5 +249,3 @@ function ArticleScreen({ navigation, doc, item }) {
     </Surface>
   )
 }
-
-export default ArticleScreen

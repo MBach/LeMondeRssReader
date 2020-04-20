@@ -33,7 +33,6 @@ export default function BottomTabsNavigator({ route, url }) {
       const d = parse(await response.text())
       setDoc(d)
     } else {
-      console.log('BottomTabsNavigator', route, url)
       const regex = /https:\/\/www\.lemonde\.fr\/([\w-]+)\/(\w+)\/.*/g
       const b = regex.exec(url)
       setIsLive(b && b.length === 3 && b[2] === 'live')
@@ -85,7 +84,7 @@ export default function BottomTabsNavigator({ route, url }) {
                 tabBarIcon: renderIcon('view-headline'),
                 tabBarLabel: 'Article',
               }}>
-              {(props) => <ArticleScreen {...props} doc={doc} item={route.params && route.params.item} />}
+              {(props) => <ArticleScreen {...props} route={route} doc={doc} url={url} />}
             </Tab.Screen>
             <Tab.Screen
               name="Comment"

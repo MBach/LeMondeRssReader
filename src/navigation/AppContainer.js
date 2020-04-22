@@ -31,8 +31,8 @@ export default function AppContainer({ url }) {
         <Stack.Screen
           name="BottomTabsNavigator"
           component={(props) => <BottomTabsNavigator {...props} url={url} />}
-          sharedElementsConfig={(route) => {
-            if (route?.params?.item) {
+          sharedElementsConfig={(route, otherRoute) => {
+            if (otherRoute.name === 'Drawer' && route?.params?.item) {
               return [`item.${route?.params?.item.id}.photo`]
             } else {
               return false

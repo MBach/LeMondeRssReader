@@ -1,17 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { FlatList, StatusBar, StyleSheet, View } from 'react-native'
-import {
-  useTheme,
-  ActivityIndicator,
-  Caption,
-  Paragraph,
-  Snackbar,
-  Subheading,
-  Surface,
-  List,
-  TouchableRipple,
-  IconButton,
-} from 'react-native-paper'
+import { FlatList, StatusBar, View } from 'react-native'
+import { useTheme, ActivityIndicator, Snackbar, Subheading, Surface, List, IconButton } from 'react-native-paper'
 import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
 
@@ -45,12 +34,18 @@ export default function FavScreen({ navigation }) {
       <List.Item
         title={item.title}
         titleNumberOfLines={3}
-        description={item.description}
-        descriptionNumberOfLines={3}
+        description={item.category}
         onPress={() => navigation.navigate('BottomTabsNavigator', { item })}
         right={() => (
           <View style={{ justifyContent: 'center' }}>
-            <IconButton icon="delete" size={22} onPress={() => settingsContext.toggleFavorite(item.link)} />
+            <IconButton
+              icon="delete"
+              size={22}
+              onPress={async () => {
+                await settingsContext.toggleFavorite(item)
+                getFavorites()
+              }}
+            />
           </View>
         )}
       />
@@ -64,7 +59,7 @@ export default function FavScreen({ navigation }) {
       ) : favorites.length === 0 ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <List.Icon icon="star-off" color={colors.divider} />
-          <Subheading style={{ color: colors.divider }}>Aucun favori</Subheading>
+          <Subheading style={{ color: colors.divider }}>{i18n.t('favorites.empty')}</Subheading>
         </View>
       ) : (
         <>
@@ -73,10 +68,9 @@ export default function FavScreen({ navigation }) {
             data={favorites}
             renderItem={renderFavorite}
             keyExtractor={(item, index) => index.toString()}
-            ListFooterComponent={<View style={{ marginBottom: 40 }} />}
           />
           <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={Snackbar.DURATION_SHORT}>
-            Favori supprimé
+            {i18n.t('favorites.deleted')}
           </Snackbar>
         </>
       )}

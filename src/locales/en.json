@@ -1,5 +1,7 @@
 {
   "article": {
+    "favAdded": "Favorite added",
+    "favRemoved": "Favorite removed",
     "register": "Register",
     "restricted": "Full access is restricted to paid members"
   },
@@ -18,6 +20,10 @@
   },
   "comments": {
     "fetchMore": "Comments page %{page} loaded"
+  },
+  "favorites": {
+    "deleted": "Favorite removed",
+    "empty": "No favorites"
   },
   "feeds": {
     "latestNews": "Lastest News",

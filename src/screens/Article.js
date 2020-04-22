@@ -10,6 +10,7 @@ import {
   Headline,
   IconButton,
   Paragraph,
+  Snackbar,
   Subheading,
   Surface,
   Title,
@@ -24,11 +25,12 @@ import i18n from '../locales/i18n'
  * @since 2020-03
  * @version 1.0
  */
-export default function ArticleScreen({ route, navigation, doc, url }) {
+export default function ArticleScreen({ navigation, route, doc, url }) {
   const { colors } = useTheme()
   const { settingsContext } = useContext(SettingsContext)
   const [shared, setShared] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [snackbarVisible, setSnackbarVisible] = useState(false)
 
   const [data, setData] = useState({ title: route.params?.item?.title, description: route.params?.item?.description })
   const [item, setItem] = useState({ id: route.params?.item?.id, uri: route.params?.item?.uri })
@@ -68,12 +70,25 @@ export default function ArticleScreen({ route, navigation, doc, url }) {
     // Header
     if (route.params?.item) {
       d.link = route.params.item.link
+      d.title = route.params.item.title
+      d.description = route.params.item.description
     } else {
       d.link = url
       d.title = main.querySelector('h1')?.rawText
       d.description = main.querySelector('p.article__desc')?.text.trim()
     }
-    setItem({ ...item, title: d.title, description: d.description })
+
+    // Category
+    const metas = doc.querySelectorAll('meta')
+    for (const meta of metas) {
+      const property = meta.getAttribute('property')
+      if ('og:article:section' === property) {
+        d.category = meta.getAttribute('content')
+        break
+      }
+    }
+
+    setItem({ ...item, title: d.title, description: d.description, category: d.category, link: d.link })
 
     let author = main.querySelector('span.meta__author')
     if (author) {
@@ -91,7 +106,6 @@ export default function ArticleScreen({ route, navigation, doc, url }) {
     d.readTime = main.querySelector('.meta__reading-time')?.lastChild.rawText
     d.isRestricted = main.querySelector('p.article__status') !== null
     navigation.setOptions({ tabBarVisible: !d.isRestricted })
-    console.log(d.readTime)
 
     setIsFavorite(await settingsContext.hasFavorite(d.link))
 
@@ -187,7 +201,8 @@ export default function ArticleScreen({ route, navigation, doc, url }) {
 
   const toggleFavorite = async () => {
     setIsFavorite(!isFavorite)
-    settingsContext.toggleFavorite(item)
+    await settingsContext.toggleFavorite(item)
+    setSnackbarVisible(true)
   }
 
   return (
@@ -246,6 +261,11 @@ export default function ArticleScreen({ route, navigation, doc, url }) {
         )}
         <View style={{ paddingBottom: 40 }} />
       </ScrollView>
+      {snackbarVisible && (
+        <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={Snackbar.DURATION_SHORT}>
+          {isFavorite ? i18n.t('article.favAdded') : i18n.t('article.favRemoved')}
+        </Snackbar>
+      )}
     </Surface>
   )
 }

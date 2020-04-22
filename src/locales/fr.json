@@ -1,5 +1,7 @@
 {
   "article": {
+    "favAdded": "Favori ajouté",
+    "favRemoved": "Favori supprimé",
     "register": "S’abonner",
     "restricted": "L’accès à la totalité de l’article est protégé"
   },
@@ -18,6 +20,10 @@
   },
   "comments": {
     "fetchMore": "Commentaires page %{page} chargés"
+  },
+  "favorites": {
+    "deleted": "Favori supprimé",
+    "empty": "Aucun favori"
   },
   "feeds": {
     "latestNews": "À la une",

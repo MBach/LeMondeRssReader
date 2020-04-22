@@ -19,6 +19,7 @@ import {
 import { IconTimer, DefaultImageFeed } from '../assets/Icons'
 import { SettingsContext } from '../context/SettingsContext'
 import i18n from '../locales/i18n'
+import { StackActions } from '@react-navigation/native'
 
 /**
  * @author Matthieu BACHELIER
@@ -68,6 +69,7 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
     const main = doc.querySelector('main')
 
     // Header
+    // Check if user has open this Article from the Home or from an external App like Firefox
     if (route.params?.item) {
       d.link = route.params.item.link
       d.title = route.params.item.title
@@ -84,11 +86,13 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
       const property = meta.getAttribute('property')
       if ('og:article:section' === property) {
         d.category = meta.getAttribute('content')
-        break
+      }
+      if (!route.params?.item?.uri && 'og:image' === property) {
+        d.imgUri = meta.getAttribute('content')
       }
     }
 
-    setItem({ ...item, title: d.title, description: d.description, category: d.category, link: d.link })
+    setItem({ ...item, imgUri: d.imgUri, title: d.title, description: d.description, category: d.category, link: d.link })
 
     let author = main.querySelector('span.meta__author')
     if (author) {
@@ -161,6 +165,46 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
     setLoading(false)
   }
 
+  const shareContent = async () => {
+    try {
+      await Share.share({ title: `Le monde.fr : ${item.title}`, message: data.link })
+    } catch (error) {
+      // nothing
+    }
+  }
+
+  const toggleFavorite = async () => {
+    setIsFavorite(!isFavorite)
+    await settingsContext.toggleFavorite(item)
+    setSnackbarVisible(true)
+  }
+
+  const renderHeader = () => (
+    <View style={{ flexDirection: 'row', height: 200 }}>
+      {item && item.uri ? (
+        <View style={{ position: 'absolute' }}>
+          <SharedElement id={`item.${item.id}.photo`}>
+            <Image source={{ uri: item.uri }} style={styles.imageHeader} />
+          </SharedElement>
+        </View>
+      ) : (
+        <Image source={data.imgUri ? { uri: data.imgUri } : DefaultImageFeed} style={{ position: 'absolute', ...styles.imageHeader }} />
+      )}
+      <IconButton icon="arrow-left" size={20} onPress={() => navigation.dispatch(StackActions.replace('Drawer'))} />
+      <View style={{ flexGrow: 1 }} />
+      {!loading && shared && <IconButton icon="share-variant" size={20} onPress={shareContent} />}
+      {!loading && (
+        <IconButton
+          animated
+          icon={isFavorite ? 'star' : 'star-outline'}
+          size={20}
+          color={isFavorite ? colors.accent : colors.text}
+          onPress={toggleFavorite}
+        />
+      )}
+    </View>
+  )
+
   const renderParagraphes = () => {
     return paragraphes.map((p, index) => {
       switch (p.type) {
@@ -191,45 +235,25 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
     })
   }
 
-  const shareContent = async () => {
-    try {
-      await Share.share({ title: `Le monde.fr : ${item.title}`, message: data.link })
-    } catch (error) {
-      //console.log(error.message)
-    }
-  }
-
-  const toggleFavorite = async () => {
-    setIsFavorite(!isFavorite)
-    await settingsContext.toggleFavorite(item)
-    setSnackbarVisible(true)
-  }
+  const renderRestrictedCard = () =>
+    data.isRestricted && (
+      <Card style={{ margin: 8 }}>
+        <Card.Content>
+          <Paragraph>{i18n.t('article.restricted')}</Paragraph>
+        </Card.Content>
+        <Card.Actions>
+          <Button mode="contained" onPress={() => Linking.openURL('https://abo.lemonde.fr/')}>
+            {i18n.t('article.register')}
+          </Button>
+        </Card.Actions>
+      </Card>
+    )
 
   return (
     <Surface style={{ flex: 1 }}>
       {data.isRestricted && <StatusBar backgroundColor={'rgba(255,196,0,1.0)'} barStyle="dark-content" animated />}
       <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
-        <View style={{ flexDirection: 'row', height: 200 }}>
-          <View style={{ position: 'absolute' }}>
-            {item && (
-              <SharedElement id={`item.${item.id}.photo`}>
-                <Image source={{ uri: item.uri }} style={styles.imageHeader} />
-              </SharedElement>
-            )}
-          </View>
-          <IconButton icon="arrow-left" size={20} onPress={navigation.goBack} />
-          <View style={{ flexGrow: 1 }} />
-          {!loading && shared && <IconButton icon="share-variant" size={20} onPress={shareContent} />}
-          {!loading && (
-            <IconButton
-              animated
-              icon={isFavorite ? 'star' : 'star-outline'}
-              size={20}
-              color={isFavorite ? colors.accent : colors.text}
-              onPress={toggleFavorite}
-            />
-          )}
-        </View>
+        {renderHeader()}
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>
         {loading ? (
@@ -247,18 +271,7 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
           </>
         )}
         {renderParagraphes()}
-        {data.isRestricted && (
-          <Card style={{ margin: 8 }}>
-            <Card.Content>
-              <Paragraph>{i18n.t('article.restricted')}</Paragraph>
-            </Card.Content>
-            <Card.Actions>
-              <Button mode="contained" onPress={() => Linking.openURL('https://abo.lemonde.fr/')}>
-                {i18n.t('article.register')}
-              </Button>
-            </Card.Actions>
-          </Card>
-        )}
+        {renderRestrictedCard()}
         <View style={{ paddingBottom: 40 }} />
       </ScrollView>
       {snackbarVisible && (

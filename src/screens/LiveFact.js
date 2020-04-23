@@ -8,8 +8,8 @@ import { ActivityIndicator, Headline, IconButton, Paragraph, Subheading, Surface
  * @since 2020-03
  * @version 1.0
  */
-export default function LiveFactScreen({ doc, item }) {
-  const [data, setData] = useState({ title: item.title, description: item.description })
+export default function LiveFactScreen({ doc, route }) {
+  const [data, setData] = useState({ title: route.params.item.title, description: route.params.item.description })
   const [facts, setFacts] = useState([])
   const [loading, setLoading] = useState(false)
   const window = useWindowDimensions()
@@ -91,8 +91,8 @@ export default function LiveFactScreen({ doc, item }) {
   return (
     <Surface style={{ flex: 1 }}>
       <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
-        <SharedElement id={`item.${item.id}.photo`}>
-          <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageHeader} />
+        <SharedElement id={`item.${route.params.item.id}.photo`}>
+          <Image source={route.params.item.uri ? { uri: route.params.item.uri } : DefaultImageFeed} style={styles.imageHeader} />
         </SharedElement>
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>

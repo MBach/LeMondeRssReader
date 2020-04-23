@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, Image, Linking, ScrollView, Share, StatusBar, StyleSheet, View } from 'react-native'
+import { StackActions } from '@react-navigation/native'
 import { SharedElement } from 'react-navigation-shared-element'
 import {
   useTheme,
@@ -19,7 +20,6 @@ import {
 import { IconTimer, DefaultImageFeed } from '../assets/Icons'
 import { SettingsContext } from '../context/SettingsContext'
 import i18n from '../locales/i18n'
-import { StackActions } from '@react-navigation/native'
 
 /**
  * @author Matthieu BACHELIER
@@ -86,6 +86,8 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
       const property = meta.getAttribute('property')
       if ('og:article:section' === property) {
         d.category = meta.getAttribute('content')
+      } else if ('og:article:author' === property) {
+        d.authors = meta.getAttribute('content')
       }
       if (!route.params?.item?.uri && 'og:image' === property) {
         d.imgUri = meta.getAttribute('content')
@@ -94,13 +96,6 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
 
     setItem({ ...item, imgUri: d.imgUri, title: d.title, description: d.description, category: d.category, link: d.link })
 
-    let author = main.querySelector('span.meta__author')
-    if (author) {
-      d.authors = author.rawText
-    } else {
-      author = main.querySelector('span.meta__authors')
-      d.authors = author.text
-    }
     let date = main.querySelector('span.meta__date')
     if (date) {
       d.date = date.rawText

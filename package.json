@@ -12,11 +12,11 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.9.0",
-    "@react-native-community/masked-view": "^0.1.9",
+    "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/bottom-tabs": "^5.2.7",
     "@react-navigation/drawer": "^5.5.0",
     "@react-navigation/native": "^5.1.6",
-    "@react-navigation/stack": "^5.2.11",
+    "@react-navigation/stack": "^5.2.13",
     "i18n-js": "^3.5.1",
     "ky": "^0.19.1",
     "node-html-parser": "^1.2.16",
@@ -32,8 +32,7 @@
     "react-native-shared-element": "^0.7.0",
     "react-native-svg": "^12.1.0",
     "react-native-vector-icons": "^6.6.0",
-    "react-navigation-shared-element": "^5.0.0-alpha1",
-    "xmldom": "^0.3.0"
+    "react-navigation-shared-element": "^5.0.0-alpha1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",

@@ -50,12 +50,12 @@ export default function BottomTabsNavigator({ route, url }) {
 
   return (
     <>
-      <StatusBar backgroundColor={'rgba(0,0,0,0.5)'} translucent />
       <Tab.Navigator
         tabBarOptions={{
           activeTintColor: colors.primary,
           activeBackgroundColor: colors.background,
           inactiveBackgroundColor: colors.background,
+          style: { borderTopWidth: 0 },
         }}>
         {isLive ? (
           <>
@@ -65,7 +65,7 @@ export default function BottomTabsNavigator({ route, url }) {
                 tabBarIcon: renderIcon('playlist-check'),
                 tabBarLabel: 'Les faits',
               }}>
-              {(props) => <LiveFactScreen {...props} doc={doc} item={route.params && route.params.item} />}
+              {(props) => <LiveFactScreen {...props} route={route} doc={doc} />}
             </Tab.Screen>
             <Tab.Screen
               name="Comment"
@@ -73,7 +73,7 @@ export default function BottomTabsNavigator({ route, url }) {
                 tabBarIcon: renderIcon('comment-text-multiple'),
                 tabBarLabel: 'Suivez le live',
               }}>
-              {(props) => <LiveCommentScreen {...props} doc={doc} item={route.params && route.params.item} />}
+              {(props) => <LiveCommentScreen {...props} route={route} doc={doc} />}
             </Tab.Screen>
           </>
         ) : (
@@ -92,7 +92,7 @@ export default function BottomTabsNavigator({ route, url }) {
                 tabBarIcon: renderIcon('comment-text'),
                 tabBarLabel: 'Commentaires',
               }}>
-              {(props) => <CommentScreen {...props} item={route.params && route.params.item} />}
+              {(props) => <CommentScreen {...props} route={route} />}
             </Tab.Screen>
           </>
         )}

@@ -3,11 +3,13 @@ import { useWindowDimensions, FlatList, Image, RefreshControl, StatusBar, StyleS
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
-import { DOMParser } from 'xmldom'
+import { parse } from 'node-html-parser'
 import { SharedElement } from 'react-navigation-shared-element'
 
 import { DefaultImageFeed, IconLive, IconVideo } from '../assets/Icons'
 import i18n from '../locales/i18n'
+
+const regex = /<!\[CDATA\[(.*)+\]\]>/
 
 /**
  * @author Matthieu BACHELIER
@@ -64,22 +66,26 @@ export default function HomeScreen({ navigation, route }) {
       setFetchFailed(true)
       return
     }
-    const doc = new DOMParser().parseFromString(await response.text(), 'application/xml')
+    const text = await response.text()
+    const doc = parse(text)
+    const items = doc.querySelectorAll('item')
     let objs = []
-    const items = doc.documentElement.getElementsByTagName('item')
-    for (let i = 0; i < items.length; i++) {
-      let item = {}
-      for (let j = 0; j < items[i].childNodes.length; j++) {
-        const node = items[i].childNodes[j]
-        switch (node.nodeName) {
+
+    for (const index in items) {
+      let item = { id: index, title: '', description: '' }
+      for (let i = 0; i < items[index].childNodes.length; i++) {
+        const node = items[index].childNodes[i]
+        switch (node.tagName) {
+          case 'guid':
+            item.link = node.text
+            break
           case 'title':
-            item.title = node.textContent
+            const title = regex.exec(node.text)
+            item.title = title && title.length === 2 ? title[1] : ''
             break
           case 'description':
-            item.description = node.textContent
-            break
-          case 'link':
-            item.link = node.textContent
+            const description = regex.exec(node.text)
+            item.description = description && description.length === 2 ? description[1] : ''
             break
           case 'media:content':
             if (node.getAttribute('url')) {
@@ -88,9 +94,9 @@ export default function HomeScreen({ navigation, route }) {
             break
         }
       }
-      item.id = i
       objs.push(item)
     }
+
     setItems(objs)
     if (!isRefreshing) {
       setLoading(false)
@@ -155,7 +161,7 @@ export default function HomeScreen({ navigation, route }) {
       style={{
         flex: 1,
       }}>
-      <StatusBar backgroundColor={'rgba(0,0,0,0.5)'} translucent />
+      <StatusBar backgroundColor={'rgba(0,0,0,0.5)'} translucent animated />
       <Appbar.Header style={{ marginTop: StatusBar.currentHeight }}>
         <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
         <Appbar.Content title={route?.params?.title ? route?.params?.title : i18n.t('feeds.latestNews')} />

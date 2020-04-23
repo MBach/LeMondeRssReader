@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Linking } from 'react-native'
-import { YellowBox } from 'react-native'
 
 import SettingsProvider from './context/SettingsContext'
 import { loadLocale } from './locales/i18n'
 import AppContainer from './navigation/AppContainer'
-
-YellowBox.ignoreWarnings(['[xmldom warning]'])
 
 const App = () => {
   const [loading, setLoading] = useState(true)

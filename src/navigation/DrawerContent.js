@@ -12,13 +12,13 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     paddingLeft: 16,
     borderTopRightRadius: 24,
-    borderBottomRightRadius: 24
+    borderBottomRightRadius: 24,
   },
   favItem: {
     width: 24,
     height: 24,
-    marginLeft: 2
-  }
+    marginLeft: 2,
+  },
 })
 
 /**
@@ -34,7 +34,7 @@ export default function DrawerContent({ route, navigation, state, ...rest }) {
   const [feed, setFeed] = useState([])
 
   useEffect(() => {
-    settingsContext.getFeed().then(data => {
+    settingsContext.getFeed().then((data) => {
       let entries = []
       for (const index in data) {
         const d = data[index]
@@ -44,7 +44,8 @@ export default function DrawerContent({ route, navigation, state, ...rest }) {
               cat: d.cat,
               color: d.color,
               feed: f.name,
-              uri: f.uri
+              uri: f.uri,
+              subPath: f.subPath,
             })
           }
         }
@@ -65,7 +66,8 @@ export default function DrawerContent({ route, navigation, state, ...rest }) {
               onPress={() =>
                 navigation.navigate('Home', {
                   title: i18n.t(`feeds.${f.feed}`),
-                  uri: f.uri
+                  uri: f.uri,
+                  subPath: f.subPath,
                 })
               }
               style={styles.item}

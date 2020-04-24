@@ -1,13 +1,12 @@
 import React from 'react'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { NavigationContainer } from '@react-navigation/native'
-
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 
-import BottomTabsNavigator from './BottomTabsNavigator'
 import HomeScreen from '../screens/Home'
 import FavScreen from '../screens/Favorites'
 import SettingsScreen from '../screens/Settings'
+import BottomTabsNavigator from './BottomTabsNavigator'
 import DrawerContent from './DrawerContent'
 
 const Stack = createSharedElementStackNavigator()

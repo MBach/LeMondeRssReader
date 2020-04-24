@@ -10,7 +10,7 @@ import i18n from '../locales/i18n'
  * @since 2020-03
  * @version 1.0
  */
-export default function CommentScreen({ item }) {
+export default function CommentScreen({ route }) {
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -75,7 +75,7 @@ export default function CommentScreen({ item }) {
     if (currentPage === 1) {
       setLoading(true)
     }
-    const page = await ky.get(`${item.link}?contributions&page=${currentPage}`)
+    const page = await ky.get(`${route.params.item.link}?contributions&page=${currentPage}`)
     const doc = parse(await page.text())
     let c = [...comments]
     if (currentPage === 1) {

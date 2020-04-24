@@ -16,12 +16,14 @@
       {
         "name": "videos",
         "active": false,
-        "uri": "videos/rss_full.xml"
+        "uri": "videos/rss_full.xml",
+        "subPath": "videos"
       },
       {
         "name": "portfolios",
         "active": false,
-        "uri": "photo/rss_full.xml"
+        "uri": "photo/rss_full.xml",
+        "subPath": "photo"
       },
       {
         "name": "mostRead",
@@ -42,32 +44,38 @@
       {
         "name": "international",
         "active": true,
-        "uri": "international/rss_full.xml"
+        "uri": "international/rss_full.xml",
+        "subPath": "international"
       },
       {
         "name": "europe",
         "active": false,
-        "uri": "europe/rss_full.xml"
+        "uri": "europe/rss_full.xml",
+        "subPath": "europe"
       },
       {
         "name": "america",
         "active": false,
-        "uri": "ameriques/rss_full.xml"
+        "uri": "ameriques/rss_full.xml",
+        "subPath": "ameriques"
       },
       {
         "name": "africa",
         "active": true,
-        "uri": "afrique/rss_full.xml"
+        "uri": "afrique/rss_full.xml",
+        "subPath": "afrique"
       },
       {
         "name": "asia",
         "active": false,
-        "uri": "asie-pacifique/rss_full.xml"
+        "uri": "asie-pacifique/rss_full.xml",
+        "subPath": "asie-pacifique"
       },
       {
         "name": "middleEast",
         "active": false,
-        "uri": "proche-orient/rss_full.xml"
+        "uri": "proche-orient/rss_full.xml",
+        "subPath": "proche-orient"
       }
     ]
   },
@@ -78,37 +86,44 @@
       {
         "name": "politics",
         "active": true,
-        "uri": "politique/rss_full.xml"
+        "uri": "politique/rss_full.xml",
+        "subPath": "politique"
       },
       {
         "name": "society",
         "active": true,
-        "uri": "societe/rss_full.xml"
+        "uri": "societe/rss_full.xml",
+        "subPath": "societe"
       },
       {
         "name": "decoders",
         "active": true,
-        "uri": "les-decodeurs/rss_full.xml"
+        "uri": "les-decodeurs/rss_full.xml",
+        "subPath": "les-decodeurs"
       },
       {
         "name": "justice",
         "active": false,
-        "uri": "justice/rss_full.xml"
+        "uri": "justice/rss_full.xml",
+        "subPath": "justice"
       },
       {
         "name": "police",
         "active": false,
-        "uri": "police/rss_full.xml"
+        "uri": "police/rss_full.xml",
+        "subPath": "police"
       },
       {
         "name": "campus",
         "active": true,
-        "uri": "campus/rss_full.xml"
+        "uri": "campus/rss_full.xml",
+        "subPath": "campus"
       },
       {
         "name": "education",
         "active": false,
-        "uri": "education/rss_full.xml"
+        "uri": "education/rss_full.xml",
+        "subPath": "education"
       }
     ]
   },
@@ -119,42 +134,50 @@
       {
         "name": "economy",
         "active": true,
-        "uri": "economie/rss_full.xml"
+        "uri": "economie/rss_full.xml",
+        "subPath": "economie"
       },
       {
         "name": "companies",
         "active": false,
-        "uri": "entreprises/rss_full.xml"
+        "uri": "entreprises/rss_full.xml",
+        "subPath": "entreprises"
       },
       {
         "name": "money",
         "active": false,
-        "uri": "argent/rss_full.xml"
+        "uri": "argent/rss_full.xml",
+        "subPath": "argent"
       },
       {
         "name": "frenchEconomy",
         "active": false,
-        "uri": "economie-francaise/rss_full.xml"
+        "uri": "economie-francaise/rss_full.xml",
+        "subPath": "economie-francaise"
       },
       {
         "name": "industry",
         "active": false,
-        "uri": "industrie/rss_full.xml"
+        "uri": "industrie/rss_full.xml",
+        "subPath": "industrie"
       },
       {
         "name": "jobs",
         "active": false,
-        "uri": "emploi/rss_full.xml"
+        "uri": "emploi/rss_full.xml",
+        "subPath": "emploi"
       },
       {
         "name": "realEstate",
         "active": false,
-        "uri": "immobilier/rss_full.xml"
+        "uri": "immobilier/rss_full.xml",
+        "subPath": "immobilier"
       },
       {
         "name": "medias",
         "active": true,
-        "uri": "medias/rss_full.xml"
+        "uri": "medias/rss_full.xml",
+        "subPath": "medias"
       }
     ]
   },
@@ -165,37 +188,44 @@
       {
         "name": "culture",
         "active": true,
-        "uri": "culture/rss_full.xml"
+        "uri": "culture/rss_full.xml",
+        "subPath": "culture"
       },
       {
         "name": "cinema",
         "active": false,
-        "uri": "cinema/rss_full.xml"
+        "uri": "cinema/rss_full.xml",
+        "subPath": "cinema"
       },
       {
         "name": "music",
         "active": false,
-        "uri": "musiques/rss_full.xml"
+        "uri": "musiques/rss_full.xml",
+        "subPath": "musiques"
       },
       {
         "name": "tv-radio",
         "active": false,
-        "uri": "televisions-radio/rss_full.xml"
+        "uri": "televisions-radio/rss_full.xml",
+        "subPath": "televisions-radio"
       },
       {
         "name": "books",
         "active": false,
-        "uri": "livres/rss_full.xml"
+        "uri": "livres/rss_full.xml",
+        "subPath": "livres"
       },
       {
         "name": "arts",
         "active": false,
-        "uri": "arts/rss_full.xml"
+        "uri": "arts/rss_full.xml",
+        "subPath": "arts"
       },
       {
         "name": "scene",
         "active": false,
-        "uri": "scenes/rss_full.xml"
+        "uri": "scenes/rss_full.xml",
+        "subPath": "scenes"
       }
     ]
   },
@@ -206,32 +236,38 @@
       {
         "name": "sports",
         "active": true,
-        "uri": "sport/rss_full.xml"
+        "uri": "sport/rss_full.xml",
+        "subPath": "sport"
       },
       {
         "name": "football",
         "active": false,
-        "uri": "football/rss_full.xml"
+        "uri": "football/rss_full.xml",
+        "subPath": "football"
       },
       {
         "name": "rugby",
         "active": false,
-        "uri": "rugby/rss_full.xml"
+        "uri": "rugby/rss_full.xml",
+        "subPath": "rugby"
       },
       {
         "name": "tennis",
         "active": false,
-        "uri": "tennis/rss_full.xml"
+        "uri": "tennis/rss_full.xml",
+        "subPath": "tennis"
       },
       {
         "name": "cycling",
         "active": false,
-        "uri": "cyclisme/rss_full.xml"
+        "uri": "cyclisme/rss_full.xml",
+        "subPath": "cyclisme"
       },
       {
         "name": "basket",
         "active": false,
-        "uri": "basket/rss_full.xml"
+        "uri": "basket/rss_full.xml",
+        "subPath": "basket"
       }
     ]
   },
@@ -242,22 +278,26 @@
       {
         "name": "planet",
         "active": true,
-        "uri": "planete/rss_full.xml"
+        "uri": "planete/rss_full.xml",
+        "subPath": "planete"
       },
       {
         "name": "weather",
         "active": false,
-        "uri": "climat/rss_full.xml"
+        "uri": "climat/rss_full.xml",
+        "subPath": "climat"
       },
       {
         "name": "agriculture",
         "active": false,
-        "uri": "agriculture/rss_full.xml"
+        "uri": "agriculture/rss_full.xml",
+        "subPath": "agriculture"
       },
       {
         "name": "environment",
         "active": false,
-        "uri": "environnement/rss_full.xml"
+        "uri": "environnement/rss_full.xml",
+        "subPath": "environnement"
       }
     ]
   },
@@ -268,17 +308,20 @@
       {
         "name": "pixels",
         "active": true,
-        "uri": "pixels/rss_full.xml"
+        "uri": "pixels/rss_full.xml",
+        "subPath": "pixels"
       },
       {
         "name": "video-games",
         "active": false,
-        "uri": "jeux-video/rss_full.xml"
+        "uri": "jeux-video/rss_full.xml",
+        "subPath": "jeux-video"
       },
       {
         "name": "web",
         "active": false,
-        "uri": "cultures-web/rss_full.xml"
+        "uri": "cultures-web/rss_full.xml",
+        "subPath": "cultures-web"
       }
     ]
   },
@@ -289,32 +332,38 @@
       {
         "name": "sciences",
         "active": true,
-        "uri": "sciences/rss_full.xml"
+        "uri": "sciences/rss_full.xml",
+        "subPath": "sciences"
       },
       {
         "name": "space",
         "active": false,
-        "uri": "espace/rss_full.xml"
+        "uri": "espace/rss_full.xml",
+        "subPath": "espace"
       },
       {
         "name": "biology",
         "active": false,
-        "uri": "biologie/rss_full.xml"
+        "uri": "biologie/rss_full.xml",
+        "subPath": "biologie"
       },
       {
         "name": "medicine",
         "active": false,
-        "uri": "medecine/rss_full.xml"
+        "uri": "medecine/rss_full.xml",
+        "subPath": "medecine"
       },
       {
         "name": "physics",
         "active": false,
-        "uri": "physique/rss_full.xml"
+        "uri": "physique/rss_full.xml",
+        "subPath": "physique"
       },
       {
         "name": "health",
         "active": false,
-        "uri": "sante/rss_full.xml"
+        "uri": "sante/rss_full.xml",
+        "subPath": "sante"
       }
     ]
   },
@@ -325,22 +374,26 @@
       {
         "name": "thought",
         "active": true,
-        "uri": "idees/rss_full.xml"
+        "uri": "idees/rss_full.xml",
+        "subPath": "idees"
       },
       {
         "name": "editorials",
         "active": false,
-        "uri": "editoriaux/rss_full.xml"
+        "uri": "editoriaux/rss_full.xml",
+        "subPath": "editoriaux"
       },
       {
         "name": "chronicles",
         "active": false,
-        "uri": "chroniques/rss_full.xml"
+        "uri": "chroniques/rss_full.xml",
+        "subPath": "chroniques"
       },
       {
         "name": "grandstands",
         "active": false,
-        "uri": "tribunes/rss_full.xml"
+        "uri": "tribunes/rss_full.xml",
+        "subPath": "tribunes"
       }
     ]
   },
@@ -351,32 +404,38 @@
       {
         "name": "mag",
         "active": true,
-        "uri": "m-le-mag/rss_full.xml"
+        "uri": "m-le-mag/rss_full.xml",
+        "subPath": "m-le-mag"
       },
       {
         "name": "the-time",
         "active": false,
-        "uri": "m-perso/rss_full.xml"
+        "uri": "m-perso/rss_full.xml",
+        "subPath": "m-perso"
       },
       {
         "name": "styles",
         "active": false,
-        "uri": "m-styles/rss_full.xml"
+        "uri": "m-styles/rss_full.xml",
+        "subPath": "m-styles"
       },
       {
         "name": "gastronomy",
         "active": false,
-        "uri": "gastronomie/rss_full.xml"
+        "uri": "gastronomie/rss_full.xml",
+        "subPath": "m-gastronomie"
       },
       {
         "name": "recipes",
         "active": false,
-        "uri": "les-recettes-du-monde/rss_full.xml"
+        "uri": "les-recettes-du-monde/rss_full.xml",
+        "subPath": "les-recettes-du-monde"
       },
       {
         "name": "sexo",
         "active": false,
-        "uri": "sexo/rss_full.xml"
+        "uri": "sexo/rss_full.xml",
+        "subPath": "sexo"
       }
     ]
   }

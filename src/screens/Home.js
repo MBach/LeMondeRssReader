@@ -6,7 +6,7 @@ import ky from 'ky'
 import { parse } from 'node-html-parser'
 import { SharedElement } from 'react-navigation-shared-element'
 
-import { DefaultImageFeed, IconLive, IconVideo } from '../assets/Icons'
+import { DefaultImageFeed, IconLive, IconVideo, IconPremium } from '../assets/Icons'
 import i18n from '../locales/i18n'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
@@ -45,6 +45,14 @@ export default function HomeScreen({ navigation, route }) {
       width: 32,
       height: 32,
     },
+    iconPremium: {
+      position: 'absolute',
+      width: 24,
+      height: 24,
+      bottom: 4,
+      right: 4,
+      opacity: 0.2,
+    },
   })
 
   useEffect(() => {
@@ -68,13 +76,13 @@ export default function HomeScreen({ navigation, route }) {
     }
     const text = await response.text()
     const doc = parse(text)
-    const items = doc.querySelectorAll('item')
-    let objs = []
+    const nodeItems = doc.querySelectorAll('item')
 
-    for (const index in items) {
-      let item = { id: index, title: '', description: '' }
-      for (let i = 0; i < items[index].childNodes.length; i++) {
-        const node = items[index].childNodes[i]
+    let map = new Map()
+    for (const index in nodeItems) {
+      let item = { id: index, title: '', description: '', isRestricted: false }
+      for (let i = 0; i < nodeItems[index].childNodes.length; i++) {
+        const node = nodeItems[index].childNodes[i]
         switch (node.tagName) {
           case 'guid':
             item.link = node.text
@@ -94,13 +102,40 @@ export default function HomeScreen({ navigation, route }) {
             break
         }
       }
-      objs.push(item)
+      map.set(item.link, item)
     }
-
-    setItems(objs)
+    setItems(Array.from(map.values()))
     if (!isRefreshing) {
       setLoading(false)
     }
+    getPremiumIcons(map)
+  }
+
+  const getPremiumIcons = (map) => {
+    let subPath = ''
+    if (route?.params?.subPath) {
+      subPath = '/' + route.params.subPath
+    }
+    console.log('getPremiumIcons', subPath)
+    ky.get(`https://www.lemonde.fr${subPath}`)
+      .then((res) => res.text())
+      .then((page) => {
+        const doc = parse(page)
+        const articles = doc.querySelectorAll('.article, .teaser')
+        for (const article of articles) {
+          if (article.querySelector('span.icon__premium')) {
+            const link = article.querySelector('a')
+            const href = link?.getAttribute('href')
+            if (link && map.has(href)) {
+              let item = map.get(href)
+              item.isRestricted = true
+              map.set(href, item)
+            }
+          }
+        }
+        //setMapItems(map)
+        setItems(Array.from(map.values()))
+      })
   }
 
   const renderItem = ({ item }) => {
@@ -135,7 +170,10 @@ export default function HomeScreen({ navigation, route }) {
             </SharedElement>
             {icon && <Image source={icon} style={{ position: 'absolute', width: 32, height: 32, right: 8, top: 8 }} />}
           </View>
-          <Text style={{ padding: 8, width: window.width - 120 }}>{item.title}</Text>
+          <View style={{ display: 'flex' }}>
+            <Text style={{ padding: 8, width: window.width - 120 }}>{item.title}</Text>
+            {!isLive && item.isRestricted && <Image source={IconPremium} style={styles.iconPremium} />}
+          </View>
         </Surface>
       </TouchableRipple>
     )

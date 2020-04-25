@@ -71,10 +71,7 @@ export default function SettingsScreen() {
     const theme = await settingsContext.getTheme()
     const isDark = theme === null || theme === 'dark'
     setDark(isDark)
-    const feed = await settingsContext.getFeed()
-    if (feed) {
-      setData(feed)
-    }
+    setData(settingsContext.feed)
   }
 
   const toggleTheme = (setTheme) => () => {

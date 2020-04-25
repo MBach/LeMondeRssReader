@@ -28,10 +28,11 @@
     "react-native-paper": "^3.8.0",
     "react-native-reanimated": "^1.8.0",
     "react-native-safe-area-context": "^0.7.3",
-    "react-native-screens": "^2.5.0",
+    "react-native-screens": "^2.7.0",
     "react-native-shared-element": "^0.7.0",
     "react-native-svg": "^12.1.0",
     "react-native-vector-icons": "^6.6.0",
+    "react-native-webview": "^9.3.0",
     "react-navigation-shared-element": "^5.0.0-alpha1"
   },
   "devDependencies": {

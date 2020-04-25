@@ -6,7 +6,7 @@ import ky from 'ky'
 import { parse } from 'node-html-parser'
 import { SharedElement } from 'react-navigation-shared-element'
 
-import { DefaultImageFeed, IconLive, IconVideo, IconPremium } from '../assets/Icons'
+import { DefaultImageFeed, IconLive, IconMic, IconVideo, IconPremium } from '../assets/Icons'
 import i18n from '../locales/i18n'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
@@ -116,7 +116,6 @@ export default function HomeScreen({ navigation, route }) {
     if (route?.params?.subPath) {
       subPath = '/' + route.params.subPath
     }
-    console.log('getPremiumIcons', subPath)
     ky.get(`https://www.lemonde.fr${subPath}`)
       .then((res) => res.text())
       .then((page) => {
@@ -143,13 +142,17 @@ export default function HomeScreen({ navigation, route }) {
     const regex = /https:\/\/www\.lemonde\.fr\/([\w-]+)\/(\w+)\/.*/g
     const b = regex.exec(item.link)
     let icon = null
-    let isLive = false
+    let type = 'article'
     if (b && b.length === 3) {
       if (b[2] === 'live') {
         icon = IconLive
-        isLive = true
+        type = 'live'
       } else if (b[2] === 'video') {
         icon = IconVideo
+        type = 'video'
+      } else if (b[1] === 'podcasts') {
+        icon = IconMic
+        type = 'podcasts'
       }
     }
     return (
@@ -160,7 +163,7 @@ export default function HomeScreen({ navigation, route }) {
           navigation.navigate('BottomTabsNavigator', {
             item,
             url: item.link,
-            isLive,
+            type,
           })
         }>
         <Surface style={styles.itemContainer}>
@@ -172,7 +175,7 @@ export default function HomeScreen({ navigation, route }) {
           </View>
           <View style={{ display: 'flex' }}>
             <Text style={{ padding: 8, width: window.width - 120 }}>{item.title}</Text>
-            {!isLive && item.isRestricted && <Image source={IconPremium} style={styles.iconPremium} />}
+            {item.isRestricted && <Image source={IconPremium} style={styles.iconPremium} />}
           </View>
         </Surface>
       </TouchableRipple>

@@ -34,25 +34,23 @@ export default function DrawerContent({ route, navigation, state, ...rest }) {
   const [feed, setFeed] = useState([])
 
   useEffect(() => {
-    settingsContext.getFeed().then((data) => {
-      let entries = []
-      for (const index in data) {
-        const d = data[index]
-        for (const f of d.feeds) {
-          if (f.active) {
-            entries.push({
-              cat: d.cat,
-              color: d.color,
-              feed: f.name,
-              uri: f.uri,
-              subPath: f.subPath,
-            })
-          }
+    let entries = []
+    for (const index in settingsContext.feed) {
+      const d = settingsContext.feed[index]
+      for (const f of d.feeds) {
+        if (f.active) {
+          entries.push({
+            cat: d.cat,
+            color: d.color,
+            feed: f.name,
+            uri: f.uri,
+            subPath: f.subPath,
+          })
         }
       }
-      setFeed(entries)
-    })
-  }, [])
+    }
+    setFeed(entries)
+  }, [settingsContext.feed])
 
   return (
     <Surface style={{ flex: 1 }}>

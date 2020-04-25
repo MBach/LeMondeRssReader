@@ -83,6 +83,8 @@ export default class SettingsProvider extends Component {
     const isDark = t === null || t === 'dark'
     state.theme = isDark ? darkTheme : lightTheme
     DynamicNavbar.setLightNavigationBar(!isDark)
+    const f = await this.state.getFeed()
+    state.feed = f
     this.setState(state)
   }
 

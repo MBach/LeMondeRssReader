@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { StatusBar } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useTheme, TouchableRipple } from 'react-native-paper'
@@ -10,6 +9,7 @@ import ArticleScreen from '../screens/Article'
 import CommentScreen from '../screens/Comments'
 import LiveCommentScreen from '../screens/LiveComment'
 import LiveFactScreen from '../screens/LiveFact'
+import VideoScreen from '../screens/Video'
 
 /**
  * @author Matthieu BACHELIER
@@ -18,7 +18,7 @@ import LiveFactScreen from '../screens/LiveFact'
  */
 export default function BottomTabsNavigator({ route, url }) {
   const Tab = createBottomTabNavigator()
-  const [isLive, setIsLive] = useState(route.params?.isLive)
+  const [type, setType] = useState(route.params?.type)
   const { colors } = useTheme()
 
   const [doc, setDoc] = useState()
@@ -35,7 +35,7 @@ export default function BottomTabsNavigator({ route, url }) {
     } else {
       const regex = /https:\/\/www\.lemonde\.fr\/([\w-]+)\/(\w+)\/.*/g
       const b = regex.exec(url)
-      setIsLive(b && b.length === 3 && b[2] === 'live')
+      setType(b && b.length === 3 && b[2] === 'live')
       const response = await ky.get(url)
       const d = parse(await response.text())
       setDoc(d)
@@ -48,55 +48,87 @@ export default function BottomTabsNavigator({ route, url }) {
     </TouchableRipple>
   )
 
-  return (
+  const commentScreen = (
+    <Tab.Screen
+      name="Comment"
+      options={{
+        tabBarIcon: renderIcon('comment-text'),
+        tabBarLabel: 'Commentaires',
+      }}>
+      {(props) => <CommentScreen {...props} route={route} />}
+    </Tab.Screen>
+  )
+
+  const renderArticle = () => (
     <>
-      <Tab.Navigator
-        tabBarOptions={{
-          activeTintColor: colors.primary,
-          activeBackgroundColor: colors.background,
-          inactiveBackgroundColor: colors.background,
-          style: { borderTopWidth: 0 },
+      <Tab.Screen
+        name="Article"
+        options={{
+          tabBarIcon: renderIcon('view-headline'),
+          tabBarLabel: 'Article',
         }}>
-        {isLive ? (
-          <>
-            <Tab.Screen
-              name="Article"
-              options={{
-                tabBarIcon: renderIcon('playlist-check'),
-                tabBarLabel: 'Les faits',
-              }}>
-              {(props) => <LiveFactScreen {...props} route={route} doc={doc} />}
-            </Tab.Screen>
-            <Tab.Screen
-              name="Comment"
-              options={{
-                tabBarIcon: renderIcon('comment-text-multiple'),
-                tabBarLabel: 'Suivez le live',
-              }}>
-              {(props) => <LiveCommentScreen {...props} route={route} doc={doc} />}
-            </Tab.Screen>
-          </>
-        ) : (
-          <>
-            <Tab.Screen
-              name="Article"
-              options={{
-                tabBarIcon: renderIcon('view-headline'),
-                tabBarLabel: 'Article',
-              }}>
-              {(props) => <ArticleScreen {...props} route={route} doc={doc} url={url} />}
-            </Tab.Screen>
-            <Tab.Screen
-              name="Comment"
-              options={{
-                tabBarIcon: renderIcon('comment-text'),
-                tabBarLabel: 'Commentaires',
-              }}>
-              {(props) => <CommentScreen {...props} route={route} />}
-            </Tab.Screen>
-          </>
-        )}
-      </Tab.Navigator>
+        {(props) => <ArticleScreen {...props} route={route} doc={doc} url={url} />}
+      </Tab.Screen>
+      {commentScreen}
     </>
+  )
+
+  const renderLive = () => (
+    <>
+      <Tab.Screen
+        name="Article"
+        options={{
+          tabBarIcon: renderIcon('playlist-check'),
+          tabBarLabel: 'Les faits',
+        }}>
+        {(props) => <LiveFactScreen {...props} route={route} doc={doc} />}
+      </Tab.Screen>
+      <Tab.Screen
+        name="Comment"
+        options={{
+          tabBarIcon: renderIcon('comment-text-multiple'),
+          tabBarLabel: 'Suivez le live',
+        }}>
+        {(props) => <LiveCommentScreen {...props} route={route} doc={doc} />}
+      </Tab.Screen>
+    </>
+  )
+
+  const renderVideo = () => (
+    <>
+      <Tab.Screen
+        name="Video"
+        options={{
+          tabBarIcon: renderIcon('video-outline'),
+          tabBarLabel: 'Vidéo',
+        }}>
+        {(props) => <VideoScreen {...props} route={route} doc={doc} url={url} />}
+      </Tab.Screen>
+      {commentScreen}
+    </>
+  )
+
+  const renderTabs = () => {
+    switch (type) {
+      default:
+      case 'article':
+        return renderArticle()
+      case 'live':
+        return renderLive()
+      case 'video':
+        return renderVideo()
+    }
+  }
+
+  return (
+    <Tab.Navigator
+      tabBarOptions={{
+        activeTintColor: colors.primary,
+        activeBackgroundColor: colors.background,
+        inactiveBackgroundColor: colors.background,
+        style: { borderTopWidth: 0 },
+      }}>
+      {renderTabs()}
+    </Tab.Navigator>
   )
 }

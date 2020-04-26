@@ -6,5 +6,5 @@ This App was also built to be as fastest and simple as possible. Material design
 
 - A menu with your favorites and all categories
 - The ability to refresh the feed with "Pull to refresh"
+- And to customize the feeds to display
 - In the settings, a dark mode or a light mode
-- And finally, for the smartphones on Android 7.1 and up: dynamic shortcuts (long press) before opening the App, to quicly access the categories you're reader the most

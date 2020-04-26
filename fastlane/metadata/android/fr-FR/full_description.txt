@@ -6,6 +6,6 @@ Cette App a été designée pour être la plus simple et la plus rapide possible
 
 - Un menu regroupant vos favoris ainsi que toutes les catégories du site
 - La possibilité de raffraîchir les actualités en "tirant vers le haut"
+- De personnaliser les flux à afficher
 - Dans les options, un mode sombre ou clair
 - L'affichage ou non d'informations peu pertinentes (comme les tweets), pour privilégier le contenu écrit
-- Et enfin, pour les smartphones sous Android 7.1 et + : des raccourcis type "Appui long" à l'ouverture pour retrouver les catégories que vous consultez le plus

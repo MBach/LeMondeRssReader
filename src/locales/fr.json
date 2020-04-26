@@ -115,5 +115,12 @@
       "title": "Menu",
       "desc": "Sélectionnez les flux que vous souhaitez voir dans le menu"
     }
+  },
+  "tabs": {
+    "article": "Article",
+    "comments": "Commentaires",
+    "facts": "Les faits",
+    "live": "Suivez le live",
+    "video": "Vidéo"
   }
 }

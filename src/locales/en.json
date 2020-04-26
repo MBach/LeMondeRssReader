@@ -115,5 +115,12 @@
       "title": "Menu",
       "desc": "Select feeds that you’d like to be displayed in the menu"
     }
+  },
+  "tabs": {
+    "article": "Article",
+    "comments": "Comments",
+    "facts": "The Facts",
+    "live": "Follow the live",
+    "video": "Video"
   }
 }

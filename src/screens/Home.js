@@ -126,18 +126,18 @@ export default function HomeScreen({ navigation, route }) {
             const link = article.querySelector('a')
             const href = link?.getAttribute('href')
             if (link && map.has(href)) {
+              console.log(href)
               let item = map.get(href)
               item.isRestricted = true
               map.set(href, item)
             }
           }
         }
-        //setMapItems(map)
         setItems(Array.from(map.values()))
       })
   }
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item, index }) => {
     // Check if 2nd capture group is live/video/other
     const regex = /https:\/\/www\.lemonde\.fr\/([\w-]+)\/(\w+)\/.*/g
     const b = regex.exec(item.link)
@@ -175,7 +175,7 @@ export default function HomeScreen({ navigation, route }) {
           </View>
           <View style={{ display: 'flex' }}>
             <Text style={{ padding: 8, width: window.width - 120 }}>{item.title}</Text>
-            {item.isRestricted && <Image source={IconPremium} style={styles.iconPremium} />}
+            {index > 0 && item.isRestricted && <Image source={IconPremium} style={styles.iconPremium} />}
           </View>
         </Surface>
       </TouchableRipple>

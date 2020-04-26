@@ -5,6 +5,7 @@ import { useTheme, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
 import { parse } from 'node-html-parser'
 
+import i18n from '../locales/i18n'
 import ArticleScreen from '../screens/Article'
 import CommentScreen from '../screens/Comments'
 import LiveCommentScreen from '../screens/LiveComment'
@@ -53,7 +54,7 @@ export default function BottomTabsNavigator({ route, url }) {
       name="Comment"
       options={{
         tabBarIcon: renderIcon('comment-text'),
-        tabBarLabel: 'Commentaires',
+        tabBarLabel: i18n.t('tabs.comments'),
       }}>
       {(props) => <CommentScreen {...props} route={route} />}
     </Tab.Screen>
@@ -65,7 +66,7 @@ export default function BottomTabsNavigator({ route, url }) {
         name="Article"
         options={{
           tabBarIcon: renderIcon('view-headline'),
-          tabBarLabel: 'Article',
+          tabBarLabel: i18n.t('tabs.article'),
         }}>
         {(props) => <ArticleScreen {...props} route={route} doc={doc} url={url} />}
       </Tab.Screen>
@@ -79,7 +80,7 @@ export default function BottomTabsNavigator({ route, url }) {
         name="Article"
         options={{
           tabBarIcon: renderIcon('playlist-check'),
-          tabBarLabel: 'Les faits',
+          tabBarLabel: i18n.t('tabs.facts'),
         }}>
         {(props) => <LiveFactScreen {...props} route={route} doc={doc} />}
       </Tab.Screen>
@@ -87,7 +88,7 @@ export default function BottomTabsNavigator({ route, url }) {
         name="Comment"
         options={{
           tabBarIcon: renderIcon('comment-text-multiple'),
-          tabBarLabel: 'Suivez le live',
+          tabBarLabel: i18n.t('tabs.live'),
         }}>
         {(props) => <LiveCommentScreen {...props} route={route} doc={doc} />}
       </Tab.Screen>
@@ -100,7 +101,7 @@ export default function BottomTabsNavigator({ route, url }) {
         name="Video"
         options={{
           tabBarIcon: renderIcon('video-outline'),
-          tabBarLabel: 'Vidéo',
+          tabBarLabel: i18n.t('tabs.video'),
         }}>
         {(props) => <VideoScreen {...props} route={route} doc={doc} url={url} />}
       </Tab.Screen>

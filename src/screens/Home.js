@@ -126,7 +126,6 @@ export default function HomeScreen({ navigation, route }) {
             const link = article.querySelector('a')
             const href = link?.getAttribute('href')
             if (link && map.has(href)) {
-              console.log(href)
               let item = map.get(href)
               item.isRestricted = true
               map.set(href, item)

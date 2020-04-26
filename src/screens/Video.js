@@ -76,7 +76,6 @@ export default function VideoScreen({ route, doc, url }) {
       d.date = main.querySelector('p.meta__publisher')?.text
     }
 
-    // Paragraphes and images
     const videoContainer = main.querySelector('.article__special-container--video div')
     if (videoContainer) {
       const provider = videoContainer.getAttribute('data-provider')

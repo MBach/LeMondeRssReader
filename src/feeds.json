@@ -20,6 +20,12 @@
         "subPath": "videos"
       },
       {
+        "name": "podcasts",
+        "active": false,
+        "uri": "podcasts/rss_full.xml",
+        "subPath": "podcasts"
+      },
+      {
         "name": "portfolios",
         "active": false,
         "uri": "photo/rss_full.xml",

@@ -5,10 +5,23 @@ import { useTheme, ActivityIndicator, Button, Caption, Card, Headline, Paragraph
 import { IconTimer } from '../assets/Icons'
 import Header from '../components/Header'
 import i18n from '../locales/i18n'
+import WebView from 'react-native-webview'
+
+const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.*/
 
 const styles = StyleSheet.create({
   paddingH: {
     paddingHorizontal: 8,
+  },
+  imgCaption: {
+    position: 'absolute',
+    bottom: -2,
+    padding: 4,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  podcastContainer: {
+    width: '100%',
+    height: 460,
   },
 })
 
@@ -29,6 +42,64 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
   useEffect(() => {
     init()
   }, [doc])
+
+  const extractContent = (node, contents) => {
+    // recursive call
+    if (node.childNodes.length > 0) {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        extractContent(node.childNodes[i], contents)
+      }
+    }
+    if (!node.tagName) {
+      return
+    }
+    switch (node.tagName) {
+      case 'div':
+        if (node.classNames && node.classNames.length > 0 && node.classNames.includes('multimedia-embed') && node.childNodes[0]) {
+          const dataWidgetSrc = node.childNodes[0].getAttribute('data-widget-src')
+          if (dataWidgetSrc) {
+            contents.push({ type: 'podcast', uri: dataWidgetSrc })
+          }
+        }
+        break
+      case 'h2':
+        contents.push({ type: 'h2', text: node.text })
+        break
+      case 'p':
+        if (node.classNames && node.classNames.length > 0) {
+          if (node.classNames.includes('article__paragraph')) {
+            contents.push({ type: 'paragraph', text: node.text })
+          }
+        }
+        break
+      case 'figure':
+        const img = node.querySelector('img')
+        if (img) {
+          let imgSrc = img.getAttribute('src')
+          if (!imgSrc) {
+            imgSrc = img.getAttribute('data-src')
+          }
+          let caption = null
+          if (imgSrc) {
+            const figcaption = node.querySelector('figcaption')
+            if (figcaption && figcaption.text) {
+              caption = figcaption.text
+            }
+          } else {
+            break
+          }
+          const b = regex.exec(imgSrc)
+          let ratio
+          if (b && b.length === 3) {
+            ratio = b[1] / b[2]
+          } else {
+            ratio = 1.5
+          }
+          contents.push({ type: 'img', uri: imgSrc, ratio, caption })
+        }
+        break
+    }
+  }
 
   const init = async () => {
     setLoading(true)
@@ -81,48 +152,7 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
     const article = main.querySelector('article')
     let par = []
     for (let i = 0; i < article.childNodes.length; i++) {
-      const node = article.childNodes[i]
-      if (node.tagName) {
-        switch (node.tagName) {
-          case 'h2':
-            par.push({ type: 'h2', text: node.text })
-            break
-          case 'p':
-            if (node && node.classNames && node.classNames.length > 0) {
-              if (node.classNames.includes('article__paragraph')) {
-                par.push({ type: 'paragraph', text: node.text })
-              }
-            }
-            break
-          case 'figure':
-            const img = node.querySelector('img')
-            if (img) {
-              let imgSrc = img.getAttribute('src')
-              if (!imgSrc) {
-                imgSrc = img.getAttribute('data-src')
-              }
-              let caption = null
-              if (imgSrc) {
-                const figcaption = node.querySelector('figcaption')
-                if (figcaption && figcaption.text) {
-                  caption = figcaption.text
-                }
-              } else {
-                break
-              }
-              const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.*/g
-              const b = regex.exec(imgSrc)
-              let ratio
-              if (b && b.length === 3) {
-                ratio = b[1] / b[2]
-              } else {
-                ratio = 1.5
-              }
-              par.push({ type: 'img', uri: imgSrc, ratio, caption })
-            }
-            break
-        }
-      }
+      extractContent(article.childNodes[i], par)
     }
     setData(d)
     setParagraphes(par)
@@ -138,21 +168,21 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
               {p.text}
             </Title>
           )
+        case 'img':
+          return (
+            <View key={index} style={{ marginHorizontal: 8 }}>
+              <Image source={{ uri: p.uri }} style={{ width: window.width - 16, height: (window.width - 16) / p.ratio }} />
+              {p.caption && <Caption style={styles.imgCaption}>{p.caption}</Caption>}
+            </View>
+          )
         case 'paragraph':
           return (
             <Paragraph key={index} style={styles.paddingH}>
               {p.text}
             </Paragraph>
           )
-        case 'img':
-          return (
-            <View key={index} style={{ marginHorizontal: 8 }}>
-              <Image source={{ uri: p.uri }} style={{ width: window.width - 16, height: (window.width - 16) / p.ratio }} />
-              {p.caption && (
-                <Caption style={{ position: 'absolute', bottom: -2, padding: 4, backgroundColor: 'rgba(0,0,0,0.5)' }}>{p.caption}</Caption>
-              )}
-            </View>
-          )
+        case 'podcast':
+          return <WebView key={index} source={{ uri: p.uri }} style={styles.podcastContainer} />
         default:
           return false
       }

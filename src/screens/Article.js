@@ -159,8 +159,8 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
     setLoading(false)
   }
 
-  const renderParagraphes = () => {
-    return paragraphes.map((p, index) => {
+  const renderParagraphes = () =>
+    paragraphes.map((p, index) => {
       switch (p.type) {
         case 'h2':
           return (
@@ -187,7 +187,6 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
           return false
       }
     })
-  }
 
   const renderRestrictedCard = () =>
     data.isRestricted && (
@@ -211,7 +210,7 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>
         {loading ? (
-          <ActivityIndicator style={{ flex: 1, justifyContent: 'center', alignContent: 'center', height: '100%' }} />
+          <ActivityIndicator style={{ minHeight: 200, justifyContent: 'center', alignContent: 'center' }} />
         ) : (
           <>
             <Paragraph style={styles.paddingH}>{data.authors}</Paragraph>
@@ -222,10 +221,10 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
                 <Paragraph>{data.readTime}</Paragraph>
               </View>
             )}
+            {renderParagraphes()}
+            {renderRestrictedCard()}
           </>
         )}
-        {renderParagraphes()}
-        {renderRestrictedCard()}
         <View style={{ paddingBottom: 40 }} />
       </ScrollView>
     </Surface>

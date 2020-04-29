@@ -59,6 +59,7 @@ export default function LiveCommentScreen({ doc }) {
         lc.text = node.text
         break
       case 'strong':
+        lc.fontWeight = 'bold'
         lc.type = 'paragraph'
         lc.text = node.text
         break
@@ -217,7 +218,9 @@ export default function LiveCommentScreen({ doc }) {
               </Text>
             </View>
           )}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>{comment.liveContents && renderLiveContents(comment.liveContents)}</View>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            {comment.liveContents && renderLiveContents(comment.liveContents)}
+          </View>
         </View>
       )
     }

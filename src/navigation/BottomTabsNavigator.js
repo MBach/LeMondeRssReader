@@ -23,10 +23,11 @@ export default function BottomTabsNavigator({ route, url }) {
   const { colors } = useTheme()
 
   const [doc, setDoc] = useState()
+  const [refresh, setRefresh] = useState(false)
 
   useEffect(() => {
     init()
-  }, [])
+  }, [refresh])
 
   const init = async () => {
     if (route.params && route.params.item) {
@@ -40,6 +41,9 @@ export default function BottomTabsNavigator({ route, url }) {
       const response = await ky.get(url)
       const d = parse(await response.text())
       setDoc(d)
+    }
+    if (refresh) {
+      setRefresh(false)
     }
   }
 
@@ -90,7 +94,7 @@ export default function BottomTabsNavigator({ route, url }) {
           tabBarIcon: renderIcon('comment-text-multiple'),
           tabBarLabel: i18n.t('tabs.live'),
         }}>
-        {(props) => <LiveCommentScreen {...props} route={route} doc={doc} />}
+        {(props) => <LiveCommentScreen {...props} route={route} doc={doc} onRefresh={() => setRefresh(true)} />}
       </Tab.Screen>
     </>
   )

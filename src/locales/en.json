@@ -99,6 +99,10 @@
   "home": {
     "fetchFailed": "Cannot fetch feed"
   },
+  "live": {
+    "newComments": "Show new comments",
+    "view": "View"
+  },
   "settings": {
     "layout": {
       "title": "Layout",

@@ -217,7 +217,7 @@ export default function HomeScreen({ navigation, route }) {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshFeed} />}
         />
       )}
-      <Snackbar visible={fetchFailed} duration={Snackbar.DURATION_LONG}>
+      <Snackbar visible={fetchFailed} onDismiss={() => setFetchFailed(false)} duration={Snackbar.DURATION_LONG}>
         {i18n.t('home.fetchFailed')}
       </Snackbar>
     </Surface>

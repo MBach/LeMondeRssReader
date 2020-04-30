@@ -1,19 +1,51 @@
-import React, { useEffect, useState } from 'react'
-import { Image, View, ScrollView, StyleSheet, StatusBar } from 'react-native'
-import { useTheme, ActivityIndicator, Caption, IconButton, Paragraph, Surface, Text } from 'react-native-paper'
+import React, { useEffect, useRef, useState } from 'react'
+import { Image, ScrollView, StatusBar, StyleSheet, View } from 'react-native'
+import { useTheme, ActivityIndicator, Banner, Caption, IconButton, Paragraph, Surface, Text } from 'react-native-paper'
+import ky from 'ky'
+
 import { DefaultLiveAvatar } from '../assets/Icons'
+import i18n from '../locales/i18n'
+
+const regex = /lmfr:\/\/element\/article\/(\d+).*/
+
+function useInterval(callback, delay) {
+  const savedCallback = useRef()
+
+  useEffect(() => {
+    savedCallback.current = callback
+  })
+
+  useEffect(() => {
+    function tick() {
+      savedCallback.current()
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay)
+      return () => clearInterval(id)
+    }
+  }, [delay])
+}
 
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
  * @version 1.0
  */
-export default function LiveCommentScreen({ doc }) {
+export default function LiveCommentScreen({ doc, onRefresh }) {
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(false)
+  const [articleId, setArticleId] = useState(null)
+  const [latestPostId, setLatestPostId] = useState(null)
+  const [newCommentsReceived, setNewCommentsReceived] = useState(false)
+
   const { colors } = useTheme()
 
   const styles = StyleSheet.create({
+    avatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+    },
     quote: {
       fontStyle: 'italic',
       borderLeftWidth: 2,
@@ -21,11 +53,42 @@ export default function LiveCommentScreen({ doc }) {
       marginLeft: 8,
       borderLeftColor: colors.divider,
     },
+    headerContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    tagContainer: {
+      alignSelf: 'flex-start',
+      textTransform: 'uppercase',
+      paddingVertical: 2,
+      paddingHorizontal: 8,
+      marginVertical: 8,
+      fontSize: 11,
+      fontWeight: 'bold',
+    },
+    contentContainer: {
+      paddingBottom: 24,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'flex-start',
+    },
   })
 
   useEffect(() => {
     init()
   }, [doc])
+
+  useInterval(async () => {
+    if (latestPostId && articleId) {
+      const response = await ky.get(`https://www.lemonde.fr/ajax/live/${articleId}/after/${latestPostId}`)
+      if (response.ok) {
+        const res = await response.json()
+        if (res.elements.length > 0) {
+          setNewCommentsReceived(true)
+        }
+      }
+    }
+  }, 5000)
 
   const extractLiveContent = (node, liveContents) => {
     // recursive call
@@ -93,12 +156,31 @@ export default function LiveCommentScreen({ doc }) {
     }
     const posts = doc.querySelector('#post-container')
     let c = []
+    let id = null
     for (let i = 0; i < posts.childNodes.length; i++) {
       const node = posts.childNodes[i]
       if (node.tagName !== 'section') {
         continue
       }
+      if (!id) {
+        id = node.getAttribute('id')
+      }
       let comment = {}
+
+      // Article ID
+      const metas = doc.querySelectorAll('meta')
+      for (const meta of metas) {
+        const property = meta.getAttribute('property')
+        if ('al:android:url' === property) {
+          const content = meta.getAttribute('content')
+          const b = regex.exec(content)
+          if (!articleId && b && b.length === 2) {
+            setArticleId(b[1])
+          }
+          break
+        }
+      }
+
       // Header
       const header = node.querySelector('div.header-content__live')
       if (header) {
@@ -145,6 +227,7 @@ export default function LiveCommentScreen({ doc }) {
       }
       c.push(comment)
     }
+    setLatestPostId(id)
     setComments(c)
     setLoading(false)
   }
@@ -193,42 +276,45 @@ export default function LiveCommentScreen({ doc }) {
     for (const i in comments) {
       const comment = comments[i]
       c.push(
-        <View key={i} style={{ marginBottom: 24 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image
-              source={comment.avatarUri ? { uri: comment.avatarUri } : DefaultLiveAvatar}
-              style={{ width: 32, height: 32, borderRadius: 16 }}
-            />
-            <Paragraph style={{ marginHorizontal: 8 }}>{comment.authorName}</Paragraph>
-            <Caption>{comment.authorDate}</Caption>
-          </View>
-          {comment.tagText && (
-            <View style={{ flexWrap: 'wrap' }}>
-              <Text
-                style={{
-                  textTransform: 'uppercase',
-                  paddingVertical: 2,
-                  paddingHorizontal: 8,
-                  marginVertical: 8,
-                  fontSize: 11,
-                  fontWeight: 'bold',
-                  ...comment.tagStyle,
-                }}>
-                {comment.tagText}
-              </Text>
-            </View>
-          )}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-            {comment.liveContents && renderLiveContents(comment.liveContents)}
-          </View>
+        <View key={'header-' + i} style={styles.headerContainer}>
+          <Image source={comment.avatarUri ? { uri: comment.avatarUri } : DefaultLiveAvatar} style={styles.avatar} />
+          <Paragraph style={{ marginHorizontal: 8 }}>{comment.authorName}</Paragraph>
+          <Caption>{comment.authorDate}</Caption>
         </View>
       )
+      comment.tagText &&
+        c.push(
+          <Text key={'tag-' + i} style={[styles.tagContainer, comment.tagStyle]}>
+            {comment.tagText}
+          </Text>
+        )
+      comment.liveContents &&
+        c.push(
+          <View key={'content-' + i} style={styles.contentContainer}>
+            {renderLiveContents(comment.liveContents)}
+          </View>
+        )
     }
     return c
   }
 
   return (
-    <Surface style={{ flex: 1, paddingHorizontal: 8, paddingTop: 8 }}>
+    <Surface style={{ flex: 1, paddingHorizontal: 8 }}>
+      <Banner
+        style={{ marginTop: 32 }}
+        icon="update"
+        visible={newCommentsReceived}
+        actions={[
+          {
+            label: i18n.t('live.view'),
+            onPress: () => {
+              setNewCommentsReceived(false)
+              onRefresh()
+            },
+          },
+        ]}>
+        {i18n.t('live.newComments')}
+      </Banner>
       <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
         {loading ? (
           <ActivityIndicator style={{ flex: 1, flexGrow: 1, justifyContent: 'center', alignContent: 'center' }} />

@@ -99,6 +99,10 @@
   "home": {
     "fetchFailed": "Impossible de récupérer le flux"
   },
+  "live": {
+    "newComments": "Nouveaux commentaires disponibles",
+    "view": "Voir"
+  },
   "settings": {
     "layout": {
       "title": "Mise en page",

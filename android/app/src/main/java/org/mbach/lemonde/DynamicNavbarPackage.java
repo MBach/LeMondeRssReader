@@ -18,6 +18,7 @@ import java.util.List;
  */
 public class DynamicNavbarPackage implements ReactPackage {
 
+    @NonNull
     @Override
     public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
         List<NativeModule> l = new ArrayList<>();
@@ -25,6 +26,7 @@ public class DynamicNavbarPackage implements ReactPackage {
         return l;
     }
 
+    @NonNull
     @Override
     public List<ViewManager> createViewManagers(@NonNull ReactApplicationContext reactContext) {
         return Collections.emptyList();

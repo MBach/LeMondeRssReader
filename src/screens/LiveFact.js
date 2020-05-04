@@ -96,7 +96,7 @@ export default function LiveFactScreen({ doc, route }) {
         </SharedElement>
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>
-        {loading ? <ActivityIndicator style={{ flex: 1, flexGrow: 1, justifyContent: 'center', alignContent: 'center' }} /> : renderFacts()}
+        {loading ? <ActivityIndicator style={{ minHeight: 200, justifyContent: 'center', alignContent: 'center' }} /> : renderFacts()}
       </ScrollView>
     </Surface>
   )

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Image, ScrollView, StatusBar, StyleSheet, View } from 'react-native'
+import { useWindowDimensions, Image, ScrollView, StatusBar, StyleSheet, View } from 'react-native'
 import { useTheme, ActivityIndicator, Banner, Caption, IconButton, Paragraph, Surface, Text } from 'react-native-paper'
 import ky from 'ky'
 
@@ -37,6 +37,7 @@ export default function LiveCommentScreen({ doc, onRefresh }) {
   const [articleId, setArticleId] = useState(null)
   const [latestPostId, setLatestPostId] = useState(null)
   const [newCommentsReceived, setNewCommentsReceived] = useState(false)
+  const window = useWindowDimensions()
 
   const { colors } = useTheme()
 
@@ -300,28 +301,28 @@ export default function LiveCommentScreen({ doc, onRefresh }) {
 
   return (
     <Surface style={{ flex: 1, paddingHorizontal: 8 }}>
-      <Banner
-        style={{ marginTop: 32 }}
-        icon="update"
-        visible={newCommentsReceived}
-        actions={[
-          {
-            label: i18n.t('live.view'),
-            onPress: () => {
-              setNewCommentsReceived(false)
-              onRefresh()
-            },
-          },
-        ]}>
-        {i18n.t('live.newComments')}
-      </Banner>
-      <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
-        {loading ? (
-          <ActivityIndicator style={{ flex: 1, flexGrow: 1, justifyContent: 'center', alignContent: 'center' }} />
-        ) : (
-          renderComments()
-        )}
-      </ScrollView>
+      {loading ? (
+        <ActivityIndicator style={{ flex: 1, flexGrow: 1, justifyContent: 'center', alignContent: 'center' }} />
+      ) : (
+        <>
+          <Banner
+            style={{ marginTop: 32 }}
+            icon="update"
+            visible={newCommentsReceived}
+            actions={[
+              {
+                label: i18n.t('live.view'),
+                onPress: () => {
+                  setNewCommentsReceived(false)
+                  onRefresh()
+                },
+              },
+            ]}>
+            {i18n.t('live.newComments')}
+          </Banner>
+          <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>{renderComments()}</ScrollView>
+        </>
+      )}
     </Surface>
   )
 }

@@ -15,13 +15,14 @@ buildscript {
 }
 
 allprojects {
+    tasks.withType(Javadoc).all { enabled = false }
     repositories {
         mavenLocal()
         maven {
-            url("$rootDir/../node_modules/react-native/android")
+            //url("$rootDir/../node_modules/react-native/android")
         }
         maven {
-            url("$rootDir/../node_modules/jsc-android/dist")
+            //url("$rootDir/../node_modules/jsc-android/dist")
         }
 
         google()

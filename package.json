@@ -1,6 +1,6 @@
 {
   "name": "lemonderssreader",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -13,6 +13,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.11.0",
     "@react-native-community/masked-view": "^0.1.10",
+    "@react-native-community/toolbar-android": "0.1.0-rc.2",
     "@react-navigation/bottom-tabs": "^5.5.2",
     "@react-navigation/drawer": "^5.8.2",
     "@react-navigation/native": "^5.5.1",
@@ -27,12 +28,12 @@
     "react-native-localize": "^1.4.0",
     "react-native-paper": "^3.10.1",
     "react-native-reanimated": "^1.9.0",
-    "react-native-safe-area-context": "^3.0.3",
+    "react-native-safe-area-context": "^3.0.5",
     "react-native-screens": "^2.8.0",
     "react-native-shared-element": "^0.7.0",
     "react-native-svg": "^12.1.0",
     "react-native-vector-icons": "^6.6.0",
-    "react-native-webview": "^10.2.3",
+    "react-native-webview": "^10.3.1",
     "react-navigation-shared-element": "^5.0.0-alpha1"
   },
   "devDependencies": {
@@ -40,7 +41,7 @@
     "@babel/runtime": "^7.10.2",
     "@react-native-community/eslint-config": "^2.0.0",
     "babel-jest": "^26.0.1",
-    "eslint": "^7.2.0",
+    "eslint": "^7.3.0",
     "jest": "^26.0.1",
     "metro-react-native-babel-preset": "^0.59.0",
     "react-test-renderer": "^16.13.1"

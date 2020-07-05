@@ -14,7 +14,28 @@ buildscript {
     }
 }
 
+subprojects {
+    afterEvaluate {
+        android {
+            compileSdkVersion rootProject.ext.compileSdkVersion
+            buildToolsVersion rootProject.ext.buildToolsVersion
+            defaultConfig {
+                minSdkVersion rootProject.ext.minSdkVersion
+                targetSdkVersion rootProject.ext.targetSdkVersion
+            }
+            buildTypes {
+                debug {}
+                stagingrelease {
+                    initWith release
+                    matchingFallbacks = ['debug', 'release']
+                }
+            }
+        }
+    }
+}
+
 allprojects {
+    tasks.withType(Javadoc).all { enabled = false }
     repositories {
         mavenLocal()
         maven {

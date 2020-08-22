@@ -183,14 +183,14 @@ export default function HomeScreen({ navigation, route }) {
 
   const renderContentLoader = () => {
     let loaders = []
-    const d = (window.height + 24) / 7
-    for (let i = 0; i < 8; i++) {
-      loaders.push(<Rect key={'r1-' + i} x="0" y={`${i * d}`} rx="0" ry="0" width="126" height={Math.floor(d) - 1} />)
+    const d = (window.height - 26) / 6
+    for (let i = 0; i < 7; i++) {
+      loaders.push(<Rect key={'r1-' + i} x="0" y={`${i * d}`} rx="0" ry="0" width="126" height={Math.floor(d)} />)
       loaders.push(<Rect key={'r2-' + i} x="130" y={`${10 + i * d}`} rx="0" ry="0" width="250" height="15" />)
       loaders.push(<Rect key={'r3-' + i} x="130" y={`${40 + i * d}`} rx="0" ry="0" width="170" height="12" />)
     }
     return (
-      <ContentLoader backgroundColor={colors.border} foregroundColor={colors.background} viewBox={`6 0 ${window.width} ${window.height}`}>
+      <ContentLoader backgroundColor={colors.border} foregroundColor={colors.background} viewBox={`6 18 ${window.width} ${window.height}`}>
         {loaders}
       </ContentLoader>
     )

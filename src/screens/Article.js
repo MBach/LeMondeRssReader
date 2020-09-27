@@ -50,10 +50,10 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
         extractContent(node.childNodes[i], contents)
       }
     }
-    if (!node.tagName) {
+    if (!node._tag_name) {
       return
     }
-    switch (node.tagName) {
+    switch (node._tag_name) {
       case 'div':
         if (node.classNames && node.classNames.length > 0 && node.classNames.includes('multimedia-embed') && node.childNodes[0]) {
           const dataWidgetSrc = node.childNodes[0].getAttribute('data-widget-src')

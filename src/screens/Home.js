@@ -83,7 +83,7 @@ export default function HomeScreen({ navigation, route }) {
       let item = { id: index, title: '', description: '', isRestricted: false }
       for (let i = 0; i < nodeItems[index].childNodes.length; i++) {
         const node = nodeItems[index].childNodes[i]
-        switch (node.tagName) {
+        switch (node._tag_name) {
           case 'guid':
             item.link = node.text
             break

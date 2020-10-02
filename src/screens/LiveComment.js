@@ -99,7 +99,7 @@ export default function LiveCommentScreen({ doc, onRefresh }) {
       }
     }
     let lc = {}
-    switch (node.tagName) {
+    switch (node._tag_name) {
       case 'br':
         lc.type = 'br'
         lc.text = 'br'
@@ -143,7 +143,7 @@ export default function LiveCommentScreen({ doc, onRefresh }) {
           liveContents.pop()
         }
       }
-      if (node.parentNode?.tagName === 'blockquote') {
+      if (node.parentNode?._tag_name === 'blockquote') {
         lc.quote = true
       }
       liveContents.push(lc)
@@ -160,7 +160,7 @@ export default function LiveCommentScreen({ doc, onRefresh }) {
     let id = null
     for (let i = 0; i < posts.childNodes.length; i++) {
       const node = posts.childNodes[i]
-      if (node.tagName !== 'section') {
+      if (node._tag_name !== 'section') {
         continue
       }
       if (!id) {

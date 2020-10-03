@@ -146,7 +146,6 @@ export default function ArticleScreen({ navigation, route, doc, url }) {
     }
     d.readTime = main.querySelector('.meta__reading-time')?.lastChild.rawText
     d.isRestricted = main.querySelector('p.article__status') !== null
-    navigation.setOptions({ tabBarVisible: !d.isRestricted })
 
     // Paragraphes and images
     const article = main.querySelector('article')

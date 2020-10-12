@@ -99,7 +99,7 @@ export default function LiveCommentScreen({ doc, onRefresh }) {
       }
     }
     let lc = {}
-    switch (node._tag_name) {
+    switch (node.tagName?.toLowerCase()) {
       case 'br':
         lc.type = 'br'
         lc.text = 'br'
@@ -143,7 +143,7 @@ export default function LiveCommentScreen({ doc, onRefresh }) {
           liveContents.pop()
         }
       }
-      if (node.parentNode?._tag_name === 'blockquote') {
+      if (node.parentNode?.tagName?.toLowerCase() === 'blockquote') {
         lc.quote = true
       }
       liveContents.push(lc)
@@ -160,7 +160,7 @@ export default function LiveCommentScreen({ doc, onRefresh }) {
     let id = null
     for (let i = 0; i < posts.childNodes.length; i++) {
       const node = posts.childNodes[i]
-      if (node._tag_name !== 'section') {
+      if (node?.tagName?.toLowerCase() !== 'section') {
         continue
       }
       if (!id) {

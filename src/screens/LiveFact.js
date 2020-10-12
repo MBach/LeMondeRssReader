@@ -39,20 +39,21 @@ export default function LiveFactScreen({ doc, route }) {
     let f = []
     for (let i = 0; i < facts.childNodes.length; i++) {
       const node = facts.childNodes[i]
-      if (node._tag_name) {
-        switch (node._tag_name) {
-          case 'h2':
-            if ('' !== node.text.trim()) f.push({ type: 'h2', text: node.text })
-            break
-          case 'p':
-            f.push({ type: 'paragraph', text: node.text })
-            break
-          case 'ul':
-            for (let j = 0; j < node.childNodes.length; j++) {
-              f.push({ type: 'listItem', text: node.childNodes[j].text })
-            }
-            break
-        }
+      if (!node.tagName) {
+        continue
+      }
+      switch (node.tagName.toLowerCase()) {
+        case 'h2':
+          if ('' !== node.text.trim()) f.push({ type: 'h2', text: node.text })
+          break
+        case 'p':
+          f.push({ type: 'paragraph', text: node.text })
+          break
+        case 'ul':
+          for (let j = 0; j < node.childNodes.length; j++) {
+            f.push({ type: 'listItem', text: node.childNodes[j].text })
+          }
+          break
       }
     }
     setData(d)

@@ -11,7 +11,7 @@ import i18n from '../locales/i18n'
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
- * @version 1.0
+ * @version 1.1
  */
 export default function Header({ data, item, loading }) {
   const { colors } = useTheme()
@@ -69,7 +69,7 @@ export default function Header({ data, item, loading }) {
       ) : (
         <Image source={data.imgUri ? { uri: data.imgUri } : DefaultImageFeed} style={{ position: 'absolute', ...styles.imageHeader }} />
       )}
-      <IconButton icon="arrow-left" size={20} onPress={navigation.goBack} />
+      <IconButton icon="arrow-left" size={20} onPress={() => navigation.navigate('Home')} />
       <View style={{ flexGrow: 1 }} />
       {!loading && shared && <IconButton icon="share-variant" size={20} onPress={shareContent} />}
       {!loading && (

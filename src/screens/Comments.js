@@ -88,7 +88,7 @@ export default function CommentScreen({ route }) {
     if (commentsRiver) {
       for (let i = 0; i < commentsRiver.childNodes.length; i++) {
         const commentNode = commentsRiver.childNodes[i]
-        if (!(commentNode && commentNode._tag_name === 'section')) {
+        if (!(commentNode && commentNode.tagName && commentNode.tagName.toLowerCase() === 'section')) {
           continue
         }
         let comment = { type: 'comment', ...extractAutorAndContent(commentNode) }
@@ -99,7 +99,7 @@ export default function CommentScreen({ route }) {
             let childCount = 0
             for (let k = 0; k < responseNode.childNodes.length; k++) {
               const childNode = responseNode.childNodes[k]
-              if (!(childNode && childNode._tag_name === 'section')) {
+              if (!(childNode && childNode.tagName && childNode.tagName.toLowerCase() === 'section')) {
                 continue
               }
               const response = extractAutorAndContent(childNode)

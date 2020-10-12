@@ -83,7 +83,10 @@ export default function HomeScreen({ navigation, route }) {
       let item = { id: index, title: '', description: '', isRestricted: false }
       for (let i = 0; i < nodeItems[index].childNodes.length; i++) {
         const node = nodeItems[index].childNodes[i]
-        switch (node._tag_name) {
+        if (!(node && node.tagName)) {
+          continue
+        }
+        switch (node.tagName.toLowerCase()) {
           case 'guid':
             item.link = node.text
             break
@@ -93,7 +96,7 @@ export default function HomeScreen({ navigation, route }) {
             break
           case 'description':
             const description = regex.exec(node.text)
-            item.description = description && description.length === 2 ? description[1] : ''
+            item.description = description?.length === 2 ? description[1] : ''
             break
           case 'media:content':
             if (node.getAttribute('url')) {

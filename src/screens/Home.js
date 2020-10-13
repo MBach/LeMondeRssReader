@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, FlatList, Image, RefreshControl, StatusBar, StyleSheet, View } from 'react-native'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
@@ -6,6 +6,7 @@ import ky from 'ky'
 import { parse } from 'node-html-parser'
 import { SharedElement } from 'react-navigation-shared-element'
 
+import { SettingsContext } from '../context/SettingsContext'
 import { DefaultImageFeed, IconLive, IconMic, IconVideo, IconPremium } from '../assets/Icons'
 import i18n from '../locales/i18n'
 
@@ -24,12 +25,12 @@ export default function HomeScreen({ navigation, route }) {
 
   const { colors } = useTheme()
   const window = useWindowDimensions()
+  const { settingsContext } = useContext(SettingsContext)
 
   const styles = StyleSheet.create({
     itemContainer: {
       flex: 1,
-      flexDirection: 'row',
-      height: 108,
+      flexDirection: settingsContext.fontScale > 1.5 ? 'column' : 'row',
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
@@ -176,7 +177,7 @@ export default function HomeScreen({ navigation, route }) {
             {icon && <Image source={icon} style={{ position: 'absolute', width: 32, height: 32, right: 8, top: 8 }} />}
           </View>
           <View style={{ display: 'flex' }}>
-            <Text style={{ padding: 8, width: window.width - 120 }}>{item.title}</Text>
+            <Text style={{ padding: 8, width: settingsContext.fontScale > 1.5 ? window.width : window.width - 120 }}>{item.title}</Text>
             {index > 0 && item.isRestricted && <Image source={IconPremium} style={styles.iconPremium} />}
           </View>
         </Surface>

@@ -1,10 +1,10 @@
 ## Introduction
 
-This App for Android 4.2 Jelly Bean and later (Android 11) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping).
+This App for Android 4.4 KitKat and later (Android 11) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping).
 
 ## Requirements
 
-A smartphone at least on Android 4.2
+A smartphone at least on Android 4.4
 
 ## Download
 

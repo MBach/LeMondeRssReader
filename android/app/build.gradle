@@ -28,8 +28,8 @@ android {
         applicationId "org.mbach.lemonde"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 27
-        versionName '2.1.4'
+        versionCode 28
+        versionName '2.1.5'
         multiDexEnabled true
     }
     dexOptions {

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Provider as PaperProvider } from 'react-native-paper'
-import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import DeviceInfo from 'react-native-device-info'
 
 import { darkTheme, lightTheme } from '../styles'
 import DynamicNavbar from '../DynamicNavbar'
@@ -16,6 +17,7 @@ export default class SettingsProvider extends Component {
       hydrated: false,
       theme: {},
       feed: [],
+      fontScale: 1,
       toggleFavorite: async (item) => {
         let favorites = await this.state.getFavorites()
         const index = favorites.findIndex((f) => f.link === item.link)
@@ -79,6 +81,7 @@ export default class SettingsProvider extends Component {
 
   async componentDidMount() {
     let state = { hydrated: true }
+    state.fontScale = await DeviceInfo.getFontScale()
     const t = await this.state.getTheme()
     const isDark = t === null || t === 'dark'
     state.theme = isDark ? darkTheme : lightTheme

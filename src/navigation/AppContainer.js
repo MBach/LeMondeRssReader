@@ -30,7 +30,7 @@ export default function AppContainer({ url }) {
         <Stack.Screen
           name="BottomTabsNavigator"
           component={(props) => <BottomTabsNavigator {...props} url={url} />}
-          sharedElementsConfig={(route, otherRoute, showing) => {
+          sharedElements={(route, otherRoute, showing) => {
             if (!showing) {
               return false
             } else if (otherRoute.name === 'Drawer' && route?.params?.item) {

@@ -1,4 +1,4 @@
-Cette App pour Android 4.2 Jelly Bean et + (Android 11) est un lecteur de flux RSS pour le site lemonde.fr.
+Cette App pour Android 4.4 KitKat et + (Android 11) est un lecteur de flux RSS pour le site LeMonde.fr.
 
 Grâce au Web Scrapping, l'application affiche l'article complet avec ses commentaires via des composants natifs Android.
 

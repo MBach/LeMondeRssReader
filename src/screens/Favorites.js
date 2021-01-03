@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { FlatList, StatusBar, View } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import { useTheme, ActivityIndicator, Snackbar, Subheading, Surface, List, IconButton } from 'react-native-paper'
 import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
@@ -19,6 +20,12 @@ export default function FavScreen({ navigation }) {
   useEffect(() => {
     getFavorites()
   }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      getFavorites()
+    }, [])
+  )
 
   const getFavorites = async () => {
     setLoading(true)

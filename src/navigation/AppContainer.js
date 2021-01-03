@@ -16,6 +16,8 @@ function DrawerNavigator() {
   return (
     <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />}>
       <Drawer.Screen name="Home">{(props) => <HomeScreen {...props} />}</Drawer.Screen>
+      <Drawer.Screen name="Favorites" component={FavScreen} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} />
     </Drawer.Navigator>
   )
 }
@@ -25,8 +27,6 @@ export default function AppContainer({ url }) {
     <NavigationContainer>
       <Stack.Navigator headerMode="none" initialRouteName={url ? 'BottomTabsNavigator' : 'Drawer'}>
         <Stack.Screen name="Drawer" component={DrawerNavigator} />
-        <Stack.Screen name="Favorites" component={FavScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen
           name="BottomTabsNavigator"
           component={(props) => <BottomTabsNavigator {...props} url={url} />}

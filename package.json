@@ -17,7 +17,7 @@
     "@react-navigation/stack": "^5.12.8",
     "i18n-js": "^3.8.0",
     "ky": "^0.25.1",
-    "node-html-parser": "^2.0.0",
+    "node-html-parser": "^2.0.1",
     "react": "17.0.1",
     "react-content-loader": "^5.1.4",
     "react-native": "^0.63.4",

@@ -4,7 +4,6 @@ import ContentLoader, { Rect } from 'react-content-loader/native'
 import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ky from 'ky'
 import { parse } from 'node-html-parser'
-import { SharedElement } from 'react-navigation-shared-element'
 
 import { SettingsContext } from '../context/SettingsContext'
 import { DefaultImageFeed, IconLive, IconMic, IconVideo, IconPremium } from '../assets/Icons'
@@ -171,9 +170,7 @@ export default function HomeScreen({ navigation, route }) {
         }>
         <Surface style={styles.itemContainer}>
           <View style={{ display: 'flex', flexDirection: 'row' }}>
-            <SharedElement id={`item.${item.id}.photo`}>
-              <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageBG} />
-            </SharedElement>
+            <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageBG} />
             {icon && <Image source={icon} style={{ position: 'absolute', width: 32, height: 32, right: 8, top: 8 }} />}
           </View>
           <View style={{ display: 'flex' }}>

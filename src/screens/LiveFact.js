@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useWindowDimensions, Image, View, ScrollView, StatusBar, StyleSheet } from 'react-native'
-import { SharedElement } from 'react-navigation-shared-element'
 import { ActivityIndicator, Headline, IconButton, Paragraph, Subheading, Surface, Title } from 'react-native-paper'
 
 /**
@@ -92,9 +91,7 @@ export default function LiveFactScreen({ doc, route }) {
   return (
     <Surface style={{ flex: 1 }}>
       <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
-        <SharedElement id={`item.${route.params.item.id}.photo`}>
-          <Image source={route.params.item.uri ? { uri: route.params.item.uri } : DefaultImageFeed} style={styles.imageHeader} />
-        </SharedElement>
+        <Image source={route.params.item.uri ? { uri: route.params.item.uri } : DefaultImageFeed} style={styles.imageHeader} />
         <Headline style={styles.paddingH}>{data.title}</Headline>
         <Subheading style={styles.paddingH}>{data.description}</Subheading>
         {loading ? <ActivityIndicator style={{ minHeight: 200, justifyContent: 'center', alignContent: 'center' }} /> : renderFacts()}

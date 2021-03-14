@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, Image, Share, StyleSheet, View } from 'react-native'
-import { SharedElement } from 'react-navigation-shared-element'
 import { useTheme, IconButton, Portal, Snackbar } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 
@@ -62,9 +61,7 @@ export default function Header({ data, item, loading }) {
     <View style={{ flexDirection: 'row', height: 200 }}>
       {item && item.uri ? (
         <View style={{ position: 'absolute' }}>
-          <SharedElement id={`item.${item.id}.photo`}>
-            <Image source={{ uri: item.uri }} style={styles.imageHeader} />
-          </SharedElement>
+          <Image source={{ uri: item.uri }} style={styles.imageHeader} />
         </View>
       ) : (
         <Image source={data.imgUri ? { uri: data.imgUri } : DefaultImageFeed} style={{ position: 'absolute', ...styles.imageHeader }} />

@@ -2,19 +2,11 @@ apply plugin: "com.android.application"
 
 import com.android.build.OutputFile
 
-project.ext.react = [
-    enableHermes: false,
-]
-
 apply from: "../../node_modules/react-native/react.gradle"
 
 def enableSeparateBuildPerCPUArchitecture = false
 
 def enableProguardInReleaseBuilds = false
-
-def jscFlavor = 'org.webkit:android-jsc:+'
-
-def enableHermes = project.ext.react.get("enableHermes", false)
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -28,8 +20,8 @@ android {
         applicationId "org.mbach.lemonde"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 28
-        versionName '2.1.5'
+        versionCode 29
+        versionName '2.1.6'
         multiDexEnabled true
     }
     dexOptions {
@@ -105,13 +97,9 @@ dependencies {
         exclude group:'com.facebook.flipper'
     }
 
-    if (enableHermes) {
-        def hermesPath = "../../node_modules/hermes-engine/android/"
-        debugImplementation files(hermesPath + "hermes-debug.aar")
-        releaseImplementation files(hermesPath + "hermes-release.aar")
-    } else {
-        implementation jscFlavor
-    }
+    def hermesPath = "../../node_modules/hermes-engine/android/"
+    debugImplementation files(hermesPath + "hermes-debug.aar")
+    releaseImplementation files(hermesPath + "hermes-release.aar")
 }
 
 project.ext.vectoricons = [

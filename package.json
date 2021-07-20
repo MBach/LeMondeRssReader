@@ -20,7 +20,7 @@
     "node-html-parser": "^2.0.2",
     "react": "17.0.1",
     "react-content-loader": "^6.0.2",
-    "react-native": "^0.64.0",
+    "react-native": "^0.64.1",
     "react-native-device-info": "^8.0.5",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-localize": "^2.0.2",

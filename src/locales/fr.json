@@ -92,6 +92,7 @@
     "sexo": "Sexo"
   },
   "drawer": {
+    "app": "App",
     "fav": "Favoris",
     "feed": "Flux",
     "settings": "Préférences"
@@ -104,6 +105,11 @@
     "view": "Voir"
   },
   "settings": {
+    "general": {
+      "title": "Général",
+      "content1": "Se souvenir de la dernière catégorie",
+      "desc1": "Quand l’App est réouverte, récupérer les actualités de la dernière catégorie consultée"
+    },
     "layout": {
       "title": "Mise en page",
       "content1": "Contenu des articles",
@@ -111,14 +117,29 @@
     },
     "display": {
       "title": "Affichage",
-      "styleTitle": "Style de l’App",
-      "styleDesc": "Thème sombre",
+      "theme": {
+        "title": "Thème",
+        "currentTheme": "Thème sélectionné : {{theme}}",
+        "dark": "Sombre",
+        "light": "Clair",
+        "system": "Système",
+        "system2": "Thème par défaut du système"
+      },
+      "premiumColorTitle": "Changer la barre de statut",
+      "premiumColorDesc": "Les articles protégés affichent une barre de statut jaune",
       "shareTitle": "Icône de partage",
       "shareDesc": "Activer le partage d’un article (email, réseaux sociaux, etc.)"
     },
     "menu": {
       "title": "Menu",
       "desc": "Sélectionnez les flux que vous souhaitez voir dans le menu"
+    },
+    "a11y": {
+      "theme": {
+        "dark": "Appliquer le thème sombre à l’App",
+        "light": "Appliquer le thème clair à l’App",
+        "system": "Laisser le système choisir le thème de l’App"
+      }
     }
   },
   "tabs": {

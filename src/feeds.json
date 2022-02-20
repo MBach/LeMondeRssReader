@@ -1,8 +1,11 @@
 [
   {
     "cat": "news",
-    "color": "#ffc400",
-    "feeds": [
+    "color": {
+      "dark": "#f7be00",
+      "light": "#775a00"
+    },
+    "subCats": [
       {
         "name": "latestNews",
         "active": true,
@@ -45,8 +48,11 @@
   },
   {
     "cat": "international",
-    "color": "#0386C3",
-    "feeds": [
+    "color": {
+      "dark": "#8dcdff",
+      "light": "#006493"
+    },
+    "subCats": [
       {
         "name": "international",
         "active": true,
@@ -87,8 +93,11 @@
   },
   {
     "cat": "france",
-    "color": "#1F0D67",
-    "feeds": [
+    "color": {
+      "dark": "#c8bfff",
+      "light": "#5d53a7"
+    },
+    "subCats": [
       {
         "name": "politics",
         "active": true,
@@ -135,8 +144,11 @@
   },
   {
     "cat": "economy",
-    "color": "#FE2F2F",
-    "feeds": [
+    "color": {
+      "dark": "#ffb4a8",
+      "light": "#c00100"
+    },
+    "subCats": [
       {
         "name": "economy",
         "active": true,
@@ -175,7 +187,7 @@
       },
       {
         "name": "realEstate",
-        "active": false,
+        "active": true,
         "uri": "immobilier/rss_full.xml",
         "subPath": "immobilier"
       },
@@ -189,8 +201,11 @@
   },
   {
     "cat": "culture",
-    "color": "#F20559",
-    "feeds": [
+    "color": {
+      "dark": "#ffb1c0",
+      "light": "#9a4057"
+    },
+    "subCats": [
       {
         "name": "culture",
         "active": true,
@@ -237,8 +252,11 @@
   },
   {
     "cat": "sports",
-    "color": "#30932E",
-    "feeds": [
+    "color": {
+      "dark": "#79dd6d",
+      "light": "#006e0f"
+    },
+    "subCats": [
       {
         "name": "sports",
         "active": true,
@@ -279,8 +297,11 @@
   },
   {
     "cat": "planet",
-    "color": "#30932E",
-    "feeds": [
+    "color": {
+      "dark": "#02e600",
+      "light": "#026e00"
+    },
+    "subCats": [
       {
         "name": "planet",
         "active": true,
@@ -309,8 +330,11 @@
   },
   {
     "cat": "pixels",
-    "color": "#06B586",
-    "feeds": [
+    "color": {
+      "dark": "#50deab",
+      "light": "#006c4e"
+    },
+    "subCats": [
       {
         "name": "pixels",
         "active": true,
@@ -333,8 +357,11 @@
   },
   {
     "cat": "sciences",
-    "color": "#0CB4AE",
-    "feeds": [
+    "color": {
+      "dark": "#4edad4",
+      "light": "#006a66"
+    },
+    "subCats": [
       {
         "name": "sciences",
         "active": true,
@@ -375,8 +402,11 @@
   },
   {
     "cat": "thought",
-    "color": "#F20559",
-    "feeds": [
+    "color": {
+      "dark": "#ffb95c",
+      "light": "#855400"
+    },
+    "subCats": [
       {
         "name": "thought",
         "active": true,
@@ -405,8 +435,11 @@
   },
   {
     "cat": "mag",
-    "color": "#212121",
-    "feeds": [
+    "color": {
+      "dark": "#b1cbd0",
+      "light": "#4a6267"
+    },
+    "subCats": [
       {
         "name": "mag",
         "active": true,

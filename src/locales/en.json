@@ -92,6 +92,7 @@
     "sexo": "Sexo"
   },
   "drawer": {
+    "app": "App",
     "fav": "Favorites",
     "feed": "Feed",
     "settings": "Settings"
@@ -104,6 +105,11 @@
     "view": "View"
   },
   "settings": {
+    "general": {
+      "title": "General",
+      "content1": "Remember last category",
+      "desc1": "When App is reopened, fetch news from previously opened category"
+    },
     "layout": {
       "title": "Layout",
       "content1": "Content of articles",
@@ -111,14 +117,29 @@
     },
     "display": {
       "title": "Display",
-      "styleTitle": "Style of the App",
-      "styleDesc": "Dark theme",
+      "theme": {
+        "title": "Theme",
+        "currentTheme": "Selected theme: {{theme}}",
+        "dark": "Dark",
+        "light": "Light",
+        "system": "System",
+        "system2": "Default theme from system"
+      },
+      "premiumColorTitle": "Change status bar color",
+      "premiumColorDesc": "Premium articles have a yellow status bar",
       "shareTitle": "Share icons",
       "shareDesc": "Activate sharing of an article (email, social networks, etc.)"
     },
     "menu": {
       "title": "Menu",
       "desc": "Select feeds that you’d like to be displayed in the menu"
+    },
+    "a11y": {
+      "theme": {
+        "dark": "Apply dark theme to the App",
+        "light": "Apply light theme to the App",
+        "system": "Let the system define the theme of the App"
+      }
     }
   },
   "tabs": {

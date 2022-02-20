@@ -44,9 +44,7 @@ public class DynamicNavbarModule extends ReactContextBaseJavaModule {
                         }
                         window.getDecorView().setSystemUiVisibility(flags);
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        window.setNavigationBarColor(Color.parseColor(isLight ? "#FFFFFF" : "#000000"));
-                    }
+                    window.setNavigationBarColor(Color.parseColor(isLight ? "#FFFFFF" : "#000000"));
                 });
             } catch (Exception e) {
                 //

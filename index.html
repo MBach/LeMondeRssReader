@@ -13,90 +13,37 @@
     <section class="page-header">
       <h1 class="project-name">LeMondeRssReader</h1>
       <h2 class="project-tagline">LeMondeRssReader for Android</h2>
-      
-        <a href="https://github.com/MBach/LeMondeRssReader" class="btn">View on GitHub</a>
-      
-      
+      <a href="https://github.com/MBach/LeMondeRssReader" class="btn">View on GitHub</a>
     </section>
-
     <section class="main-content">
-      <h2 id="introduction">Introduction</h2>
-
-<p>This App for Android 4.0.3 Ice Cream Sandwich and later (Android 9 Pie) features how to read RSS stream from one website, and does some complex <a href="https://en.wikipedia.org/wiki/Web_scraping" target="_blank">Web scraping</a>. It renders the items in the feed directly in native Android components, such as <a href="https://developer.android.com/reference/android/widget/TextView.html" target="_blank">TextView</a>, <a href="https://developer.android.com/reference/android/widget/ImageView.html" target="_blank">ImageView</a></p>
-
+<h2 id="introduction">Introduction</h2>
+<p>This App for Android 6.0 Marshmallow and later (Android 15) features how to read RSS stream from one website, and does some complex <a href="https://en.wikipedia.org/wiki/Web_scraping" target="_blank">Web scraping</a>. It renders the items in the feed directly in native Android components, such as <a href="https://developer.android.com/reference/android/widget/TextView.html" target="_blank">TextView</a>, <a href="https://developer.android.com/reference/android/widget/ImageView.html" target="_blank">ImageView</a></p>
 <p>This App was also built to be as fastest and simple as possible. <a href="https://material.io/guidelines/" target="_blank">Material design guidelines</a> were applied so you'll find:
-<ul>
-    <li>A navigation drawer with a header (see this <a href="https://developer.android.com/training/implementing-navigation/nav-drawer.html" target="_blank">tutorial</a>)</li>
-    <li>A <a href="https://developer.android.com/reference/android/support/v4/widget/SwipeRefreshLayout.htmlSwipeRefreshLayout" target="_blank">SwipeRefreshLayout</a> layout to simply refresh the RSS feed</li>
-    <li>A collapsing toolbar layout when you're reading an article from the feed: expanded toolbar with header image is fading to simple toolbar</li>
-    <li>Settings activity lets you customize the article you're currently reading, by excluding unnecessary content (like tweets), to leverage written content instead</li>
-    <li>ArticleActivity is using a <a href="https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html">RecyclerView</a> where items are layout vertically. It has a complex <a href="https://developer.android.com/reference/android/support/v7/widget/RecyclerView.Adapter.html">RecyclerView.Adapter</a> which holds at least more than one <a href="https://developer.android.com/reference/android/support/v7/widget/RecyclerView.ViewHolder.html">ViewHolder</a></li>
-	<li>For Android 7.1 (API 25): <a href="https://developer.android.com/guide/topics/ui/shortcuts.html#dynamic">dynamic App Shortcuts</a> to quickly open the category that you're reading the most!</li>
-</ul>
+  <ul>
+      <li>A menu with your favorites and all categories</li>
+      <li>The ability to refresh the feed with "Pull to refresh"</li>
+      <li>And to customize the feeds to display</li>
+      <li>In the settings, a dark mode or a light mode</li>
+  </ul>
 </p>
-
-<h3 id="comments">Comments</h3>
-
-<p>Comments are loaded automatically in the same view when one has reached the bottom of the article.</p>
-
-<h3 id="comments">Dynamic App Shortcuts</h3>
-
-<p>Introduced with Android 7.1, App Shortcuts are a way to provide a link to specific content with a long press on the App Icon. In LeMondeRssReader, it's implemented on how often one is using the navbar: every time one is clicking on a category, this action is tracked to make basic statistics.</p>
-
-<p>An embedded SQLite database stores this:</p>
-
-<code>
-    private static final String CREATE_DATABASE = "CREATE TABLE " + TABLE_STATS + " ("
-            + COL_CATEGORY + " INTEGER PRIMARY KEY, "
-            + COL_TIMES_OPENED + " INTEGER NOT NULL, "
-            + COL_LAST_OPENED + " INTEGER NOT NULL);";
-</code>
-
-<p>Another small class has only 2 methods in order to track just what is useful for the user:</p>
-
-<code>
-    void saveSelectedEntry(int categoryId) { ... }
-    List&lt;Integer&gt; getSavedEntries() { ... }
-</code>
-
 <h2 id="requirements">Requirements</h2>
-
 <ul>
-  <li>A smartphone at least on Android Ice Cream Sandwich (4.0.3)</li>
+  <li>A smartphone at least on Android Marshmallow (6.0)</li>
 </ul>
-
-<h2 id="videos">Videos</h2>
-<p>
-	<video width="384" height="640" controls="controls">
-		<source src="/LeMondeRssReader/video/video_1.mp4" type="video/mp4">
-	</video>
-</p>
-
 <h2 id="screenshots">Screenshots</h2>
 <p><img src="/LeMondeRssReader/screenshots/main.jpg" alt="Main" /></p>
-
 <p><img src="/LeMondeRssReader/screenshots/article.jpg" alt="Article" /></p>
-
-<p><img src="/LeMondeRssReader/screenshots/tweet.jpg" alt="Tweet" /></p>
-
-<p><img src="/LeMondeRssReader/screenshots/restricted_article.jpg" alt="Restricted article" /></p>
-
-<p><img src="/LeMondeRssReader/screenshots/favorites.jpg" alt="Favorites" /></p>
-
-<p><img src="/LeMondeRssReader/screenshots/dynamic_app_shortcut.jpg" alt="Dynamic App Shortcut" /></p>
-
+<p><img src="/LeMondeRssReader/screenshots/live.jpg" alt="Live" /></p>
+<p><img src="/LeMondeRssReader/screenshots/bottomsheet_1.jpg" alt="Bottom Sheet opened" /></p>
+<p><img src="/LeMondeRssReader/screenshots/bottomsheet_2.jpg" alt="Bottom Sheet fully opened" /></p>
+<p><img src="/LeMondeRssReader/screenshots/themes.jpg" alt="Dynamic theming" /></p>
 <h2 id="download">Download</h2>
-
 <p>
 	<a href="https://f-droid.org/packages/org.mbach.lemonde/">
 <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a>
 </p>
-<p>
-Or you can get the app directly on GitHub <a href="https://github.com/MBach/LeMondeRssReader/releases/download/v1.14/LeMondeRssReader-1.14.apk">v1.14</a>
-</p>
-
+<p>Or you can get the app directly on GitHub <a href="https://github.com/MBach/LeMondeRssReader/releases/download/v3.2.0/LeMondeRssReader-3.2.0.apk">v3.2.0</a></p>
 <h2 id="support-or-contact">Support or Contact</h2>
-
 <p>You would like to translate this App in your language, or submit a bug / feature request? Please contribute!</p>
 
 	<footer class="site-footer">

@@ -98,7 +98,8 @@
     "settings": "Settings"
   },
   "home": {
-    "fetchFailed": "Cannot fetch feed"
+    "fetchFailed": "Cannot fetch feed",
+    "retry": "Retry"
   },
   "live": {
     "newComments": "Show new comments",

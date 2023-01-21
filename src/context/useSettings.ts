@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import DeviceInfo from 'react-native-device-info'
 import { HTMLElement } from 'node-html-parser'
 
-import DynamicNavbar from '../DynamicNavbar'
+//import DynamicNavbar from '../DynamicNavbar'
 import { Category, ExtentedRssItem, MenuEntry } from '../types'
 import defaultFeeds from '../feeds.json'
 import { KEYS } from '../constants'
@@ -20,7 +20,8 @@ export interface UseSettingsType {
   theme: 'dark' | 'light'
   getFavorites: () => Promise<ExtentedRssItem[]>
   hasFavorite: (link: string) => Promise<boolean>
-  setCurrentCategory: (c: MenuEntry) => void
+  popCategories: () => void
+  setCurrentCategory: (c: MenuEntry) => Promise<void>
   setDoc: (d: HTMLElement | null) => void
   setDynamicStatusBarColor: (b: boolean) => Promise<void>
   setFeed: (feed: Category[]) => Promise<void>
@@ -32,6 +33,7 @@ export interface UseSettingsType {
 
 // Default values
 export const initialSettingsContext = {
+  currentCategory: null,
   hydrated: false,
   fontScale: 1,
   feed: defaultFeeds,
@@ -58,6 +60,7 @@ const useSettings = (): UseSettingsType => {
   const [hasDynamicStatusBarColor, _setDynamicStatusBarColor] = useState<boolean>(true)
   const [share, _setShare] = useState<boolean>(true)
   const [currentCategory, _setCurrentCategory] = useState<MenuEntry | null>(null)
+  const [categories, setCategories] = useState<MenuEntry[]>([])
 
   useEffect(() => {
     _init()
@@ -83,11 +86,14 @@ const useSettings = (): UseSettingsType => {
       if (last) {
         const menuEntry: MenuEntry = JSON.parse(last)
         _setCurrentCategory(menuEntry)
+        setCategories([...categories, menuEntry])
       } else {
         _setCurrentCategory(defaultMenuEntry)
+        setCategories([...categories, defaultMenuEntry])
       }
     } else {
-      _setCurrentCategory(defaultMenuEntry)
+      //_setCurrentCategory(defaultMenuEntry)
+      //setCategories([...categories, defaultMenuEntry])
     }
     setHydrated(true)
   }
@@ -125,9 +131,25 @@ const useSettings = (): UseSettingsType => {
     }
   }
 
+  const popCategories = (): void => {
+    console.log('popCategories A', categories.length, categories)
+    if (categories.length > 0) {
+      const lastCategory = categories[categories.length - 1]
+      if (lastCategory) {
+        let a = [...categories.splice(-1)]
+        setCategories(a)
+        console.log('popCategories B', a.length, a)
+        AsyncStorage.setItem(KEYS.LAST_SECTION_ENTRY, JSON.stringify(lastCategory))
+        _setCurrentCategory(lastCategory)
+      }
+    }
+  }
+
   const setCurrentCategory = async (m: MenuEntry): Promise<void> => {
+    setCategories([...categories, m])
     await AsyncStorage.setItem(KEYS.LAST_SECTION_ENTRY, JSON.stringify(m))
     _setCurrentCategory(m)
+    console.log('setCurrentCategory', categories)
   }
 
   /**
@@ -201,6 +223,7 @@ const useSettings = (): UseSettingsType => {
     theme,
     getFavorites,
     hasFavorite,
+    popCategories,
     setCurrentCategory,
     setDoc,
     setDynamicStatusBarColor,

@@ -62,11 +62,11 @@ export default function DrawerContent({ navigation, state, ...rest }: DrawerCont
               key={index}
               icon={() => <Icon name="circle" color={entry.color} size={28} />}
               label={i18n.t(`feeds.${entry.name}`)}
-              onPress={() => {
-                settingsContext.setCurrentCategory(entry)
+              onPress={async () => {
+                await settingsContext.setCurrentCategory(entry)
                 navigation.closeDrawer()
                 if (settingsContext.currentCategory?.uri !== entry.uri) {
-                  navigation.push('Home', entry)
+                  navigation.navigate('Home', entry)
                 }
               }}
               active={settingsContext.currentCategory?.uri === entry.uri}

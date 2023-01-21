@@ -4,6 +4,7 @@ import { DefaultTheme, NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { adaptNavigationTheme, Provider, Surface, TouchableRipple, useTheme } from 'react-native-paper'
+// @ts-ignore
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import HomeScreen from '../screens/Home'
@@ -19,7 +20,7 @@ import i18n from '../locales/i18n'
 import { darkTheme, KEYS, lightTheme } from '../constants'
 import { Appearance } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { ExtentedRssItem, ParsedRssItem } from '../types'
+import { ExtentedRssItem } from '../types'
 
 function LiveTabsNavigator() {
   const Tab = createBottomTabNavigator()

@@ -98,7 +98,8 @@
     "settings": "Préférences"
   },
   "home": {
-    "fetchFailed": "Impossible de récupérer le flux"
+    "fetchFailed": "Impossible de récupérer le flux",
+    "retry": "Réessayer"
   },
   "live": {
     "newComments": "Nouveaux commentaires disponibles",

@@ -5,6 +5,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -49,5 +50,25 @@ public class DynamicNavbarModule extends ReactContextBaseJavaModule {
             } catch (Exception e) {
                 //
             }
+    }
+
+    @ReactMethod
+    public void setKeepScreenOn(final boolean isOn) {
+        try {
+            UiThreadUtil.runOnUiThread(() -> {
+                if (getCurrentActivity() == null) {
+                    return;
+                }
+                if (getCurrentActivity().getWindow() != null) {
+                    if (isOn) {
+                        getCurrentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    } else {
+                        getCurrentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            //
+        }
     }
 }

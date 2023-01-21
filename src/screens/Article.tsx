@@ -4,6 +4,8 @@ import { useTheme, ActivityIndicator, Button, Card, Surface, Text } from 'react-
 import WebView from 'react-native-webview'
 import { useRoute } from '@react-navigation/core'
 import { RouteProp } from '@react-navigation/native'
+import parse from 'node-html-parser'
+import ky from 'ky'
 // @ts-ignore
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
@@ -12,8 +14,7 @@ import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
 import { HomeStackParamList } from '../navigation/AppContainer'
 import { ExtentedRssItem } from '../types'
-import parse from 'node-html-parser'
-import ky from 'ky'
+import DynamicNavbar from '../DynamicNavbar'
 
 const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.*/
 
@@ -57,6 +58,15 @@ export default function ArticleScreen() {
   useEffect(() => {
     init()
   }, [settingsContext.doc])
+
+  useEffect(() => {
+    console.log('setKeepScreenOn')
+    DynamicNavbar.setKeepScreenOn(true)
+    return () => {
+      console.log('unmounting setKeepScreenOn')
+      DynamicNavbar.setKeepScreenOn(false)
+    }
+  }, [])
 
   const extractContent = (node: any, contents: any) => {
     // recursive call

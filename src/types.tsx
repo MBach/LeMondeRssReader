@@ -8,6 +8,7 @@ export interface ParsedRssItem {
 }
 
 export interface ExtentedRssItem extends ParsedRssItem {
+  imgUri: any
   category: string
   authors: string
   date: string

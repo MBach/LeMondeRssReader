@@ -13,7 +13,7 @@ const translationGetters: any = {
 
 export const setI18nConfig = async () => {
   const fallback = { languageTag: 'fr', isRTL: false }
-  const { languageTag } = RNLocalize.findBestAvailableLanguage(Object.keys(translationGetters)) || fallback
+  const { languageTag } = RNLocalize.findBestLanguageTag(Object.keys(translationGetters)) || fallback
   i18n.translations = {
     [languageTag]: translationGetters[languageTag]()
   }

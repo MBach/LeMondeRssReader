@@ -1,15 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useWindowDimensions, FlatList, Image, RefreshControl, StatusBar, StyleSheet, View } from 'react-native'
+import { useWindowDimensions, FlatList, Image, RefreshControl, StatusBar, StyleSheet, View, BackHandler } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/core'
-import { useTheme, Appbar, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper'
+import { useTheme, Appbar, Surface, Text, TouchableRipple, IconButton, Button } from 'react-native-paper'
 import ContentLoader, { Rect } from 'react-content-loader/native'
-import ky from 'ky'
 import { parse } from 'node-html-parser'
-import { RouteProp } from '@react-navigation/native'
+import { RouteProp, useFocusEffect } from '@react-navigation/native'
 
 import { DefaultImageFeed, IconLive, IconMic, IconVideo, IconPremium } from '../assets'
 import { SettingsContext } from '../context/SettingsContext'
 import i18n from '../locales/i18n'
+import Api from '../api'
 import { ArticleType, MenuEntry, ParsedRssItem } from '../types'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
@@ -28,7 +28,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState<boolean>(false)
   const [fetchFailed, setFetchFailed] = useState<boolean>(false)
   const [items, setItems] = useState([])
-  const [category, setCategory] = useState<MenuEntry | null>(null)
+  //const [category, setCategory] = useState<MenuEntry | null>(null)
 
   const navigation = useNavigation()
   const route = useRoute<RouteProp<ParamList, 'params'>>()
@@ -72,18 +72,40 @@ export default function HomeScreen() {
       console.log('useEffect > already loading...')
       return
     }
-    if (category) {
+    console.log('useEffect > currentCategory changed')
+    console.log(settingsContext.currentCategory)
+    if (settingsContext.currentCategory) {
       fetchFeed(false)
     }
-  }, [category])
+  }, [settingsContext.currentCategory])
 
-  useEffect(() => {
-    if (route.params?.uri) {
-      setCategory(route.params)
-    } else if (settingsContext.currentCategory) {
-      setCategory(settingsContext.currentCategory)
-    }
-  }, [route.params, settingsContext.currentCategory])
+  /*
+  useEffect(
+    () =>
+      navigation.addListener('beforeRemove', () => {
+        settingsContext.popCategories()
+      }),
+    [navigation]
+  )
+  */
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (navigation.canGoBack()) {
+          console.log('can go back!')
+          return false
+        } else {
+          console.log('pop?')
+          settingsContext.popCategories()
+          return true
+        }
+      }
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress)
+
+      return () => subscription.remove()
+    }, [settingsContext.currentCategory])
+  )
 
   const refreshFeed = async () => {
     setRefreshing(true)
@@ -92,10 +114,14 @@ export default function HomeScreen() {
   }
 
   const fetchFeed = async (isRefreshing: boolean) => {
+    setFetchFailed(false)
     if (!isRefreshing) {
       setLoading(true)
     }
-    const response = await ky.get(`https://www.lemonde.fr/${category.uri}`)
+    const url = `https://www.lemonde.fr/${settingsContext.currentCategory?.uri}`
+    console.log(`About to fetch feed at ${url}`)
+    const response = await Api.get(url)
+    setLoading(false)
     if (!response.ok) {
       setFetchFailed(true)
       return
@@ -145,7 +171,7 @@ export default function HomeScreen() {
     if (route.params?.subPath) {
       subPath = '/' + route.params.subPath
     }
-    ky.get(`https://www.lemonde.fr${subPath}`)
+    Api.get(`https://www.lemonde.fr${subPath}`)
       .then((res) => res.text())
       .then((page) => {
         const doc = parse(page)
@@ -190,7 +216,7 @@ export default function HomeScreen() {
         borderless
         rippleColor={theme.colors.primary}
         onPress={async () => {
-          const response = await ky.get(item.link)
+          const response = await Api.get(item.link)
           const d = parse(await response.text())
           settingsContext.setDoc(d)
           switch (type) {
@@ -244,10 +270,26 @@ export default function HomeScreen() {
       <StatusBar backgroundColor={'rgba(0,0,0,0.5)'} translucent animated />
       <Appbar.Header>
         <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
-        {category && <Appbar.Content title={i18n.t(`feeds.${category.name}`)} />}
+        {settingsContext.currentCategory && <Appbar.Content title={i18n.t(`feeds.${settingsContext.currentCategory.name}`)} />}
       </Appbar.Header>
       {loading ? (
         renderContentLoader()
+      ) : fetchFailed ? (
+        <View style={{ flex: 1, paddingHorizontal: 12, justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}>
+          <Text variant="headlineSmall" numberOfLines={2} style={{ textAlign: 'center' }}>
+            {i18n.t('home.fetchFailed')}
+          </Text>
+          <IconButton icon="network-strength-1-alert" size={80} />
+          <Button
+            buttonColor={theme.colors.secondary}
+            textColor={theme.colors.onSecondary}
+            style={{ marginTop: 24, padding: 8 }}
+            onPress={() => {
+              fetchFeed(false)
+            }}>
+            {i18n.t('home.retry')}
+          </Button>
+        </View>
       ) : (
         <FlatList
           data={items}
@@ -257,9 +299,6 @@ export default function HomeScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshFeed} />}
         />
       )}
-      <Snackbar visible={fetchFailed} onDismiss={() => setFetchFailed(false)} duration={Snackbar.DURATION_LONG}>
-        {i18n.t('home.fetchFailed')}
-      </Snackbar>
     </Surface>
   )
 }

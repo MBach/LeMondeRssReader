@@ -20,14 +20,6 @@ A smartphone at least on Android 5.0
 
 ![Article](https://mbach.github.io/LeMondeRssReader/screenshots/article.jpg)
 
-![Tweet](https://mbach.github.io/LeMondeRssReader/screenshots/tweet.jpg)
-
-![Restricted content](https://mbach.github.io/LeMondeRssReader/screenshots/restricted_article.jpg)
-
-![Favorites](https://mbach.github.io/LeMondeRssReader/screenshots/favorites.jpg)
-
-![Dynamic App Shortcut](https://mbach.github.io/LeMondeRssReader/screenshots/dynamic_app_shortcut.jpg)
-
 ## Support or Contact
 
 You would like to translate this App in your language, or submit a bug / feature request? Please contribute!

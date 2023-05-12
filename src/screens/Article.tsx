@@ -60,13 +60,14 @@ export default function ArticleScreen() {
   }, [settingsContext.doc])
 
   useEffect(() => {
-    console.log('setKeepScreenOn')
-    DynamicNavbar.setKeepScreenOn(true)
-    return () => {
-      console.log('unmounting setKeepScreenOn')
-      DynamicNavbar.setKeepScreenOn(false)
+    if (settingsContext.keepScreenOn) {
+      console.log('ici?')
+      DynamicNavbar.setKeepScreenOn(true)
+      return () => {
+        DynamicNavbar.setKeepScreenOn(false)
+      }
     }
-  }, [])
+  }, [settingsContext.keepScreenOn])
 
   const extractContent = (node: any, contents: any) => {
     // recursive call
@@ -87,10 +88,10 @@ export default function ArticleScreen() {
               contents.push({ type: 'podcast', uri: dataWidgetSrc })
             }
           } else if (node.classNames.includes('twitter-tweet')) {
-            console.log('twitter!')
+            //console.log('twitter!')
           }
         }
-        console.log(node.classNames)
+        //console.log(node.classNames)
         break
       case 'h2':
         contents.push({ type: 'h2', text: node.text })

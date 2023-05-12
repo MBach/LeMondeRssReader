@@ -97,6 +97,7 @@ export const KEYS = {
   FAVORITES: 'favorites',
   FEED: 'feed',
   KEEP_LAST_SECTION: 'keepLastSection',
+  KEEP_SCREEN_ON: 'keepScreenOn',
   LAST_SECTION_ENTRY: 'lastSectionEntry',
   SHARE: 'share',
   THEME: 'theme'

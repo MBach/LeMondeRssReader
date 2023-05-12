@@ -40,6 +40,9 @@ export default function SettingsScreen() {
     flex: {
       flex: 1
     },
+    flexRow: {
+      flexDirection: 'row'
+    },
     surfaceContainer: {
       padding: 16
     },
@@ -131,12 +134,24 @@ export default function SettingsScreen() {
                 rippleColor={colors.primary}
                 style={styles.rippleMarginTop}
                 onPress={() => settingsContext.setKeepLastSection(!settingsContext.keepLastSection)}>
-                <View style={{ flexDirection: 'row' }}>
+                <View style={styles.flexRow}>
                   <View style={styles.flex}>
                     <Text variant="titleMedium">{i18n.t('settings.general.content1')}</Text>
                     <Text variant="bodyMedium">{i18n.t('settings.general.desc1')}</Text>
                   </View>
                   <Switch value={settingsContext.keepLastSection} onValueChange={settingsContext.setKeepLastSection} />
+                </View>
+              </TouchableRipple>
+              <TouchableRipple
+                rippleColor={colors.primary}
+                style={styles.rippleMarginTop}
+                onPress={() => settingsContext.setKeepScreenOn(!settingsContext.keepScreenOn)}>
+                <View style={styles.flexRow}>
+                  <View style={styles.flex}>
+                    <Text variant="titleMedium">{i18n.t('settings.general.content2')}</Text>
+                    <Text variant="bodyMedium">{i18n.t('settings.general.desc2')}</Text>
+                  </View>
+                  <Switch value={settingsContext.keepScreenOn} onValueChange={settingsContext.setKeepScreenOn} />
                 </View>
               </TouchableRipple>
             </Surface>
@@ -146,7 +161,7 @@ export default function SettingsScreen() {
                 {i18n.t('settings.layout.title')}
               </Text>
               <TouchableRipple rippleColor={colors.primary} style={styles.rippleMarginTop}>
-                <View style={{ flexDirection: 'row' }}>
+                <View style={styles.flexRow}>
                   <View style={styles.flex}>
                     <Text variant="titleMedium">{i18n.t('settings.layout.content1')}</Text>
                     <Text variant="bodyMedium">{i18n.t('settings.layout.desc1')}</Text>
@@ -161,7 +176,7 @@ export default function SettingsScreen() {
                 {i18n.t('settings.display.title')}
               </Text>
               <TouchableRipple rippleColor={colors.primary} style={styles.rippleMarginTop} onPress={() => setShowThemeDialog(true)}>
-                <View style={{ flexDirection: 'row' }}>
+                <View style={styles.flexRow}>
                   <View style={styles.flex}>
                     <Text variant="titleMedium">{i18n.t('settings.display.theme.title')}</Text>
                     <Text>{i18n.t('settings.display.theme.currentTheme', { theme: i18n.t(`settings.display.theme.${radioValue}`) })}</Text>
@@ -172,7 +187,7 @@ export default function SettingsScreen() {
                 rippleColor={colors.primary}
                 style={styles.rippleMarginTop}
                 onPress={() => settingsContext.setShare(!settingsContext.share)}>
-                <View style={{ flexDirection: 'row' }}>
+                <View style={styles.flexRow}>
                   <View style={styles.flex}>
                     <Text variant="titleMedium">{i18n.t('settings.display.shareTitle')}</Text>
                     <Text variant="bodySmall">{i18n.t('settings.display.shareDesc')}</Text>
@@ -184,7 +199,7 @@ export default function SettingsScreen() {
                 rippleColor={colors.primary}
                 style={styles.rippleMarginTop}
                 onPress={() => settingsContext.setDynamicStatusBarColor(!settingsContext.hasDynamicStatusBarColor)}>
-                <View style={{ flexDirection: 'row' }}>
+                <View style={styles.flexRow}>
                   <View style={styles.flex}>
                     <Text variant="titleMedium">{i18n.t('settings.display.premiumColorTitle')}</Text>
                     <Text variant="bodySmall">{i18n.t('settings.display.premiumColorDesc')}</Text>

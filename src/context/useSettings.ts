@@ -16,6 +16,7 @@ export interface UseSettingsType {
   hasDynamicStatusBarColor: boolean
   hydrated: boolean
   keepLastSection: boolean
+  keepScreenOn: boolean
   share: boolean
   theme: 'dark' | 'light'
   getFavorites: () => Promise<ExtentedRssItem[]>
@@ -26,6 +27,7 @@ export interface UseSettingsType {
   setDynamicStatusBarColor: (b: boolean) => Promise<void>
   setFeed: (feed: Category[]) => Promise<void>
   setKeepLastSection: (b: boolean) => Promise<void>
+  setKeepScreenOn: (b: boolean) => Promise<void>
   setShare: (b: boolean) => Promise<void>
   setTheme: (theme: 'dark' | 'light') => Promise<void>
   toggleFavorite: (item: ExtentedRssItem) => Promise<void>
@@ -40,6 +42,7 @@ export const initialSettingsContext = {
   doc: null,
   share: true,
   keepLastSection: true,
+  keepScreenOn: true,
   hasDynamicStatusBarColor: true
 } as UseSettingsType
 
@@ -57,6 +60,7 @@ const useSettings = (): UseSettingsType => {
   const [feed, _setFeed] = useState<Category[]>(defaultFeeds)
   const [doc, setDoc] = useState<HTMLElement | null>(null)
   const [keepLastSection, _setKeepLastSection] = useState<boolean>(true)
+  const [keepScreenOn, _setKeepScreenOn] = useState<boolean>(true)
   const [hasDynamicStatusBarColor, _setDynamicStatusBarColor] = useState<boolean>(true)
   const [share, _setShare] = useState<boolean>(true)
   const [currentCategory, _setCurrentCategory] = useState<MenuEntry | null>(null)
@@ -95,6 +99,9 @@ const useSettings = (): UseSettingsType => {
       //_setCurrentCategory(defaultMenuEntry)
       //setCategories([...categories, defaultMenuEntry])
     }
+    ///
+    const kso = await AsyncStorage.getItem(KEYS.KEEP_SCREEN_ON)
+    _setKeepScreenOn(kso === '1' || kso === null)
     setHydrated(true)
   }
 
@@ -183,6 +190,15 @@ const useSettings = (): UseSettingsType => {
    *
    * @param b
    */
+  const setKeepScreenOn = async (b: boolean): Promise<void> => {
+    await AsyncStorage.setItem(KEYS.KEEP_SCREEN_ON, b ? '1' : '0')
+    _setKeepScreenOn(b)
+  }
+
+  /**
+   *
+   * @param b
+   */
   const setShare = async (b: boolean): Promise<void> => {
     await AsyncStorage.setItem(KEYS.SHARE, b ? '1' : '0')
     _setShare(b)
@@ -219,6 +235,7 @@ const useSettings = (): UseSettingsType => {
     hasDynamicStatusBarColor,
     hydrated,
     keepLastSection,
+    keepScreenOn,
     share,
     theme,
     getFavorites,
@@ -229,6 +246,7 @@ const useSettings = (): UseSettingsType => {
     setDynamicStatusBarColor,
     setFeed,
     setKeepLastSection,
+    setKeepScreenOn,
     setShare,
     setTheme,
     toggleFavorite

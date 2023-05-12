@@ -109,7 +109,9 @@
     "general": {
       "title": "Général",
       "content1": "Se souvenir de la dernière catégorie",
-      "desc1": "Quand l’App est réouverte, récupérer les actualités de la dernière catégorie consultée"
+      "desc1": "Quand l’App est réouverte, récupérer les actualités de la dernière catégorie consultée",
+      "content2": "Garder l’écran toujours actif",
+      "desc2": "Quand un article est en cours de lecture, ne jamais éteindre l’écran"
     },
     "layout": {
       "title": "Mise en page",

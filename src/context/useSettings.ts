@@ -4,9 +4,10 @@ import DeviceInfo from 'react-native-device-info'
 import { HTMLElement } from 'node-html-parser'
 
 //import DynamicNavbar from '../DynamicNavbar'
-import { Category, ExtentedRssItem, MenuEntry } from '../types'
+import { Category, ExtentedRssItem, MenuEntry, Theme } from '../types'
 import defaultFeeds from '../feeds.json'
 import { KEYS } from '../constants'
+import { Appearance } from 'react-native'
 
 export interface UseSettingsType {
   currentCategory: MenuEntry | null
@@ -18,7 +19,7 @@ export interface UseSettingsType {
   keepLastSection: boolean
   keepScreenOn: boolean
   share: boolean
-  theme: 'dark' | 'light'
+  theme: Theme
   getFavorites: () => Promise<ExtentedRssItem[]>
   hasFavorite: (link: string) => Promise<boolean>
   popCategories: () => void
@@ -29,7 +30,7 @@ export interface UseSettingsType {
   setKeepLastSection: (b: boolean) => Promise<void>
   setKeepScreenOn: (b: boolean) => Promise<void>
   setShare: (b: boolean) => Promise<void>
-  setTheme: (theme: 'dark' | 'light') => Promise<void>
+  setTheme: (theme: Theme) => Promise<void>
   toggleFavorite: (item: ExtentedRssItem) => Promise<void>
 }
 
@@ -56,7 +57,7 @@ const defaultMenuEntry: MenuEntry = {
 const useSettings = (): UseSettingsType => {
   const [hydrated, setHydrated] = useState<boolean>(false)
   const [fontScale, setFontScale] = useState<number>(1)
-  const [theme, _setTheme] = useState<'dark' | 'light'>('dark')
+  const [theme, _setTheme] = useState<Theme>(Theme.DARK)
   const [feed, _setFeed] = useState<Category[]>(defaultFeeds)
   const [doc, setDoc] = useState<HTMLElement | null>(null)
   const [keepLastSection, _setKeepLastSection] = useState<boolean>(true)
@@ -81,6 +82,31 @@ const useSettings = (): UseSettingsType => {
     ///
     const d = await AsyncStorage.getItem(KEYS.DYNAMIC_STATUSBAR_COLOR)
     _setDynamicStatusBarColor(d === '1' || d === null)
+    ///
+    let themeStr: string | null = await AsyncStorage.getItem(KEYS.THEME)
+    const colorScheme = Appearance.getColorScheme()
+    if (themeStr) {
+      switch (themeStr) {
+        default:
+        case 'dark':
+          _setTheme(Theme.DARK)
+          break
+        case 'light':
+          _setTheme(Theme.LIGHT)
+          break
+
+        case 'system':
+          _setTheme(Theme.SYSTEM)
+          break
+      }
+    } else {
+      if (colorScheme === 'light') {
+        _setTheme(Theme.LIGHT)
+      } else {
+        _setTheme(Theme.DARK)
+      }
+    }
+
     ///
     const k = await AsyncStorage.getItem(KEYS.KEEP_LAST_SECTION)
     const keep: boolean = k === '1' || k === null
@@ -208,7 +234,7 @@ const useSettings = (): UseSettingsType => {
    *
    * @param theme
    */
-  const setTheme = async (theme: 'dark' | 'light'): Promise<void> => {
+  const setTheme = async (theme: Theme): Promise<void> => {
     _setTheme(theme)
   }
 

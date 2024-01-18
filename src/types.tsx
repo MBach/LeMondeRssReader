@@ -52,10 +52,8 @@ export enum ArticleType {
   VIDEO = 'video'
 }
 
-export class LiveCommentNode {
-  type!: 'br' | 'paragraph' | 'img'
-  text?: string
-  fontWeight: undefined | 'bold'
-  fontStyle: undefined | 'italic'
-  quote?: boolean
+export enum Theme {
+  DARK = 'dark',
+  LIGHT = 'light',
+  SYSTEM = 'system'
 }

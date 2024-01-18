@@ -61,7 +61,6 @@ export default function ArticleScreen() {
 
   useEffect(() => {
     if (settingsContext.keepScreenOn) {
-      console.log('ici?')
       DynamicNavbar.setKeepScreenOn(true)
       return () => {
         DynamicNavbar.setKeepScreenOn(false)
@@ -88,10 +87,8 @@ export default function ArticleScreen() {
               contents.push({ type: 'podcast', uri: dataWidgetSrc })
             }
           } else if (node.classNames.includes('twitter-tweet')) {
-            //console.log('twitter!')
           }
         }
-        //console.log(node.classNames)
         break
       case 'h2':
         contents.push({ type: 'h2', text: node.text })
@@ -136,18 +133,16 @@ export default function ArticleScreen() {
     setLoading(true)
     if (!settingsContext.doc) {
       if (route.params?.item.link) {
-        console.log('Article > no doc > link in params, refetching...')
         const response = await ky.get(route.params.item.link)
         const d = parse(await response.text())
         settingsContext.setDoc(d)
       } else {
-        console.log('Article > no doc > no params?')
         return
       }
     }
 
     let d: ExtentedRssItem = { ...item }
-    const main = settingsContext.doc.querySelector('main')
+    const main = settingsContext?.doc?.querySelector('main')
 
     // Header
     // Check if user has open this Article from the Home or from an external App like Firefox
@@ -155,24 +150,37 @@ export default function ArticleScreen() {
       d.link = route.params.item.link
       d.title = route.params.item.title
       d.description = route.params.item.description
-    } else {
+    } else if (!!main) {
       /// fixme
-      d.link = url
+      //d.link = url
       d.title = main.querySelector('h1')?.rawText
       d.description = main.querySelector('p.article__desc')?.text.trim()
     }
 
     // Category
-    const metas = settingsContext.doc.querySelectorAll('meta')
+    const metas = settingsContext?.doc.querySelectorAll('meta')
     for (const meta of metas) {
       const property = meta.getAttribute('property')
       if ('og:article:section' === property) {
         d.category = meta.getAttribute('content')
       } else if ('og:article:author' === property) {
         d.authors = meta.getAttribute('content')
+      } else if ('og:article:content_tier' === property) {
+        const isLocked = meta.getAttribute('content')
+        d.isRestricted = isLocked === 'locked'
       }
       if (!route.params?.item?.uri && 'og:image' === property) {
         d.imgUri = meta.getAttribute('content')
+        console.log(d.imgUri)
+      }
+    }
+
+    const longform: HTMLElement | null = settingsContext?.doc?.getElementById('Longform')
+    if (!!longform) {
+      d.authors = ''
+      const metasAuthors = settingsContext?.doc?.doc.querySelectorAll('.meta__authors')
+      for (const metasAuthor of metasAuthors) {
+        d.authors = d.authors.concat(metasAuthor.querySelector('a.article__author-link')?.text.trim())
       }
     }
 
@@ -183,7 +191,6 @@ export default function ArticleScreen() {
       d.date = main.querySelector('p.meta__publisher')?.text
     }
     d.readTime = main.querySelector('.meta__reading-time')?.lastChild.rawText
-    d.isRestricted = main.querySelector('p.article__status') !== null
 
     // Paragraphes and images
     const article = main.querySelector('article')

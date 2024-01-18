@@ -120,50 +120,55 @@ export default function HomeScreen() {
     }
     const url = `https://www.lemonde.fr/${settingsContext.currentCategory?.uri}`
     console.log(`About to fetch feed at ${url}`)
-    const response = await Api.get(url)
-    setLoading(false)
-    if (!response.ok) {
-      setFetchFailed(true)
-      return
-    }
-    const text = await response.text()
-    const doc = parse(text)
-    const nodeItems = doc.querySelectorAll('item')
-
-    let map = new Map()
-    for (const index in nodeItems) {
-      let item: ParsedRssItem = { id: index, title: '', description: '', isRestricted: false, link: '', uri: '' }
-      for (let i = 0; i < nodeItems[index].childNodes.length; i++) {
-        const node = nodeItems[index].childNodes[i]
-        if (!(node && node.tagName)) {
-          continue
-        }
-        switch (node.tagName.toLowerCase()) {
-          case 'guid':
-            item.link = node.text
-            break
-          case 'title':
-            const title = regex.exec(node.text)
-            item.title = title && title.length === 2 ? title[1] : ''
-            break
-          case 'description':
-            const description = regex.exec(node.text)
-            item.description = description?.length === 2 ? description[1] : ''
-            break
-          case 'media:content':
-            if (node.getAttribute('url')) {
-              item.uri = node.getAttribute('url')
-            }
-            break
-        }
-      }
-      map.set(item.link, item)
-    }
-    setItems(Array.from(map.values()))
-    if (!isRefreshing) {
+    try {
+      const response = await Api.get(url)
       setLoading(false)
+      if (!response.ok) {
+        setFetchFailed(true)
+        return
+      }
+      const text = await response.text()
+      const doc = parse(text)
+      const nodeItems = doc.querySelectorAll('item')
+
+      let map = new Map()
+      for (const index in nodeItems) {
+        let item: ParsedRssItem = { id: index, title: '', description: '', isRestricted: false, link: '', uri: '' }
+        for (let i = 0; i < nodeItems[index].childNodes.length; i++) {
+          const node = nodeItems[index].childNodes[i]
+          if (!(node && node.tagName)) {
+            continue
+          }
+          switch (node.tagName.toLowerCase()) {
+            case 'guid':
+              item.link = node.text
+              break
+            case 'title':
+              const title = regex.exec(node.text)
+              item.title = title && title.length === 2 ? title[1] : ''
+              break
+            case 'description':
+              const description = regex.exec(node.text)
+              item.description = description?.length === 2 ? description[1] : ''
+              break
+            case 'media:content':
+              if (node.getAttribute('url')) {
+                item.uri = node.getAttribute('url')
+              }
+              break
+          }
+        }
+        map.set(item.link, item)
+      }
+      setItems(Array.from(map.values()))
+      if (!isRefreshing) {
+        setLoading(false)
+      }
+      getPremiumIcons(map)
+    } catch (error) {
+      setLoading(false)
+      setFetchFailed(true)
     }
-    getPremiumIcons(map)
   }
 
   const getPremiumIcons = (map: Map<string, ParsedRssItem>) => {
@@ -226,7 +231,7 @@ export default function HomeScreen() {
               navigation.navigate('Article', { item })
               break
             case ArticleType.LIVE:
-              navigation.navigate('LiveTabs', { screen: 'LiveFact', params: { item } })
+              navigation.navigate('Live', { item })
               break
             case ArticleType.VIDEO:
               navigation.navigate('Video', { item })

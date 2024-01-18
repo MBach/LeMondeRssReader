@@ -43,7 +43,7 @@ export default function Header({ article, loading }: Props) {
 
   const shareContent = async () => {
     try {
-      await Share.share({ title: `Le monde.fr : ${article.title}`, message: article.link })
+      await Share.share({ title: `Lemonde.fr : ${article.title}`, message: article.link })
     } catch (error) {
       // nothing
     }

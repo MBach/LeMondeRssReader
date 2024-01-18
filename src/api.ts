@@ -1,4 +1,3 @@
-import { Platform } from 'react-native'
 import ky from 'ky'
 
 const k = ky.create({

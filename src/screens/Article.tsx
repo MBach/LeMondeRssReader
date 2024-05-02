@@ -143,6 +143,10 @@ export default function ArticleScreen() {
 
     let d: ExtentedRssItem = { ...item }
     const main = settingsContext?.doc?.querySelector('main')
+    if (!main) {
+      console.warn('cannot find <main> tag')
+      return
+    }
 
     // Header
     // Check if user has open this Article from the Home or from an external App like Firefox
@@ -193,10 +197,9 @@ export default function ArticleScreen() {
     d.readTime = main.querySelector('.meta__reading-time')?.lastChild.rawText
 
     // Paragraphes and images
-    const article = main.querySelector('article')
     let par: any[] = []
-    for (let i = 0; i < article.childNodes.length; i++) {
-      extractContent(article.childNodes[i], par)
+    for (let i = 0; i < main.childNodes.length; i++) {
+      extractContent(main.childNodes[i], par)
     }
 
     setItem(d)
@@ -252,7 +255,7 @@ export default function ArticleScreen() {
     )
 
   return (
-    <Surface style={{ flex: 1 }}>
+    <Surface elevation={0} style={{ flex: 1 }}>
       {settingsContext.hasDynamicStatusBarColor && item.isRestricted && (
         <StatusBar backgroundColor={'rgba(255,196,0,1.0)'} barStyle="dark-content" animated />
       )}

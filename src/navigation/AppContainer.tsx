@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { createDrawerNavigator } from '@react-navigation/drawer'
-import { DefaultTheme, NavigationContainer } from '@react-navigation/native'
+import { DefaultTheme, LinkingOptions, NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { adaptNavigationTheme, Provider, Surface } from 'react-native-paper'
 import { useMaterial3Theme } from '@pchmn/expo-material3-theme'
@@ -60,15 +60,34 @@ function DrawerNavigator() {
 
 type RootStackParamList = {
   Drawer: undefined
+  HomeStack: undefined
 }
 
-export default function AppContainer({ url }: { url: string | null }) {
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: ['https://www.lemonde.fr', 'lmfr://'],
+  config: {
+    screens: {
+      Drawer: {
+        screens: {
+          HomeStack: {
+            screens: {
+              Home: 'home',
+              Article: ':category/article',
+              Live: 'live',
+              Video: 'video'
+            }
+          },
+          Favorites: 'favorites',
+          Settings: 'settings'
+        }
+      }
+    }
+  }
+}
+
+export default function AppContainer() {
   const Stack = createNativeStackNavigator<RootStackParamList>()
   const settingsContext = useContext(SettingsContext)
-
-  useEffect(() => {
-    console.log('useEffect >', settingsContext.theme)
-  }, [settingsContext.theme])
 
   const { LightTheme } = adaptNavigationTheme({ reactNavigationLight: DefaultTheme })
   const { DarkTheme } = adaptNavigationTheme({ reactNavigationDark: DefaultTheme })
@@ -79,7 +98,7 @@ export default function AppContainer({ url }: { url: string | null }) {
   return (
     <Provider theme={settingsContext.theme === Theme.SYSTEM ? paperTheme : settingsContext.theme === Theme.LIGHT ? lightTheme : darkTheme}>
       <Surface style={{ flex: 1 }}>
-        <NavigationContainer theme={settingsContext.theme === Theme.LIGHT ? LightTheme : DarkTheme}>
+        <NavigationContainer linking={linking} theme={settingsContext.theme === Theme.LIGHT ? LightTheme : DarkTheme}>
           <Stack.Navigator
             screenOptions={{
               headerShown: false

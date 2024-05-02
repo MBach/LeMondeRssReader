@@ -1,5 +1,4 @@
 export interface ParsedRssItem {
-  id: string
   title: string
   description: string
   isRestricted: boolean

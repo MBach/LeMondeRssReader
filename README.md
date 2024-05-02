@@ -1,10 +1,10 @@
 ## Introduction
 
-This App for Android 5.0 Lollipop and later (Android 13) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping).
+This App for Android 6.0 Marshmallow and later (Android 14) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping).
 
 ## Requirements
 
-A smartphone at least on Android 5.0
+A smartphone at least on Android 6.0
 
 ## Download
 

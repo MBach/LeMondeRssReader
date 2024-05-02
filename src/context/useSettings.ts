@@ -1,37 +1,36 @@
 import React, { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import DeviceInfo from 'react-native-device-info'
-import { HTMLElement } from 'node-html-parser'
 
-//import DynamicNavbar from '../DynamicNavbar'
-import { Category, ExtentedRssItem, MenuEntry, Theme } from '../types'
+import DynamicNavbar from '../DynamicNavbar'
+import { ArticleHeader, Category, MenuEntry, Theme } from '../types'
 import defaultFeeds from '../feeds.json'
 import { KEYS } from '../constants'
 import { Appearance } from 'react-native'
 
 export interface UseSettingsType {
   currentCategory: MenuEntry | null
-  doc: HTMLElement | null
   feed: Category[]
   fontScale: number
   hasDynamicStatusBarColor: boolean
+  hasReadAlso: boolean
   hydrated: boolean
   keepLastSection: boolean
   keepScreenOn: boolean
   share: boolean
   theme: Theme
-  getFavorites: () => Promise<ExtentedRssItem[]>
+  getFavorites: () => Promise<ArticleHeader[]>
   hasFavorite: (link: string) => Promise<boolean>
   popCategories: () => void
   setCurrentCategory: (c: MenuEntry) => Promise<void>
-  setDoc: (d: HTMLElement | null) => void
   setDynamicStatusBarColor: (b: boolean) => Promise<void>
   setFeed: (feed: Category[]) => Promise<void>
   setKeepLastSection: (b: boolean) => Promise<void>
   setKeepScreenOn: (b: boolean) => Promise<void>
+  setReadAlso: (b: boolean) => Promise<void>
   setShare: (b: boolean) => Promise<void>
   setTheme: (theme: Theme) => Promise<void>
-  toggleFavorite: (item: ExtentedRssItem) => Promise<void>
+  toggleFavorite: (article: ArticleHeader) => Promise<void>
 }
 
 // Default values
@@ -40,7 +39,6 @@ export const initialSettingsContext = {
   hydrated: false,
   fontScale: 1,
   feed: defaultFeeds,
-  doc: null,
   share: true,
   keepLastSection: true,
   keepScreenOn: true,
@@ -59,9 +57,9 @@ const useSettings = (): UseSettingsType => {
   const [fontScale, setFontScale] = useState<number>(1)
   const [theme, _setTheme] = useState<Theme>(Theme.DARK)
   const [feed, _setFeed] = useState<Category[]>(defaultFeeds)
-  const [doc, setDoc] = useState<HTMLElement | null>(null)
   const [keepLastSection, _setKeepLastSection] = useState<boolean>(true)
   const [keepScreenOn, _setKeepScreenOn] = useState<boolean>(true)
+  const [hasReadAlso, _setReadAlso] = useState<boolean>(true)
   const [hasDynamicStatusBarColor, _setDynamicStatusBarColor] = useState<boolean>(true)
   const [share, _setShare] = useState<boolean>(true)
   const [currentCategory, _setCurrentCategory] = useState<MenuEntry | null>(null)
@@ -73,7 +71,6 @@ const useSettings = (): UseSettingsType => {
 
   const _init = async (): Promise<void> => {
     setFontScale(await DeviceInfo.getFontScale())
-    //DynamicNavbar.setLightNavigationBar(!isDark)
     const f = await AsyncStorage.getItem(KEYS.FEED)
     _setFeed(f ? JSON.parse(f) : defaultFeeds)
     ///
@@ -85,24 +82,28 @@ const useSettings = (): UseSettingsType => {
     ///
     let themeStr: string | null = await AsyncStorage.getItem(KEYS.THEME)
     const colorScheme = Appearance.getColorScheme()
+
     if (themeStr) {
       switch (themeStr) {
-        default:
-        case 'dark':
-          _setTheme(Theme.DARK)
-          break
         case 'light':
+          DynamicNavbar.setLightNavigationBar(true)
           _setTheme(Theme.LIGHT)
           break
-
+        default:
+        case 'dark':
+          DynamicNavbar.setLightNavigationBar(false)
+          _setTheme(Theme.DARK)
+          break
         case 'system':
           _setTheme(Theme.SYSTEM)
           break
       }
     } else {
       if (colorScheme === 'light') {
+        DynamicNavbar.setLightNavigationBar(true)
         _setTheme(Theme.LIGHT)
       } else {
+        DynamicNavbar.setLightNavigationBar(false)
         _setTheme(Theme.DARK)
       }
     }
@@ -128,6 +129,9 @@ const useSettings = (): UseSettingsType => {
     ///
     const kso = await AsyncStorage.getItem(KEYS.KEEP_SCREEN_ON)
     _setKeepScreenOn(kso === '1' || kso === null)
+    ///
+    const r = await AsyncStorage.getItem(KEYS.READ_ALSO)
+    _setReadAlso(r === '1' || r === null)
     setHydrated(true)
   }
 
@@ -135,7 +139,7 @@ const useSettings = (): UseSettingsType => {
    *
    * @returns
    */
-  const getFavorites = async (): Promise<ExtentedRssItem[]> => {
+  const getFavorites = async (): Promise<ArticleHeader[]> => {
     let favorites = await AsyncStorage.getItem(KEYS.FAVORITES)
     if (favorites) {
       return JSON.parse(favorites)
@@ -152,9 +156,9 @@ const useSettings = (): UseSettingsType => {
   const hasFavorite = async (link: string): Promise<boolean> => {
     const favorites: string | null = await AsyncStorage.getItem(KEYS.FAVORITES)
     if (favorites) {
-      const fav: ExtentedRssItem[] = JSON.parse(favorites)
+      const fav: string[] = JSON.parse(favorites)
       for (const f of fav) {
-        if (f.link === link) {
+        if (f === link) {
           return true
         }
       }
@@ -225,6 +229,15 @@ const useSettings = (): UseSettingsType => {
    *
    * @param b
    */
+  const setReadAlso = async (b: boolean): Promise<void> => {
+    await AsyncStorage.setItem(KEYS.READ_ALSO, b ? '1' : '0')
+    _setReadAlso(b)
+  }
+
+  /**
+   *
+   * @param b
+   */
   const setShare = async (b: boolean): Promise<void> => {
     await AsyncStorage.setItem(KEYS.SHARE, b ? '1' : '0')
     _setShare(b)
@@ -235,6 +248,23 @@ const useSettings = (): UseSettingsType => {
    * @param theme
    */
   const setTheme = async (theme: Theme): Promise<void> => {
+    switch (theme) {
+      default:
+      case Theme.DARK:
+        DynamicNavbar.setLightNavigationBar(false)
+        break
+      case Theme.LIGHT:
+        DynamicNavbar.setLightNavigationBar(true)
+        break
+      case Theme.SYSTEM:
+        const colorScheme = Appearance.getColorScheme()
+        if (colorScheme === 'light') {
+          DynamicNavbar.setLightNavigationBar(true)
+        } else {
+          DynamicNavbar.setLightNavigationBar(false)
+        }
+        break
+    }
     _setTheme(theme)
   }
 
@@ -242,9 +272,9 @@ const useSettings = (): UseSettingsType => {
    *
    * @param item
    */
-  const toggleFavorite = async (item: ExtentedRssItem): Promise<void> => {
+  const toggleFavorite = async (item: ArticleHeader): Promise<void> => {
     let favorites = await getFavorites()
-    const index = favorites.findIndex((f) => f.link === item.link)
+    const index = favorites.findIndex((f) => f.url === item.url)
     if (index === -1) {
       favorites.push(item)
     } else {
@@ -255,9 +285,9 @@ const useSettings = (): UseSettingsType => {
 
   return {
     currentCategory,
-    doc,
     feed,
     fontScale,
+    hasReadAlso,
     hasDynamicStatusBarColor,
     hydrated,
     keepLastSection,
@@ -268,11 +298,11 @@ const useSettings = (): UseSettingsType => {
     hasFavorite,
     popCategories,
     setCurrentCategory,
-    setDoc,
     setDynamicStatusBarColor,
     setFeed,
     setKeepLastSection,
     setKeepScreenOn,
+    setReadAlso,
     setShare,
     setTheme,
     toggleFavorite

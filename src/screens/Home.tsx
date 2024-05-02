@@ -3,14 +3,16 @@ import { useWindowDimensions, FlatList, Image, RefreshControl, StatusBar, StyleS
 import { useNavigation, useRoute } from '@react-navigation/core'
 import { useTheme, Appbar, Surface, Text, TouchableRipple, IconButton, Button } from 'react-native-paper'
 import ContentLoader, { Rect } from 'react-content-loader/native'
-import { parse } from 'node-html-parser'
+import { parse, HTMLElement } from 'node-html-parser'
 import { RouteProp, useFocusEffect } from '@react-navigation/native'
+import { KyResponse } from 'ky'
 
-import { DefaultImageFeed, IconLive, IconMic, IconVideo, IconPremium } from '../assets'
+import { DefaultImageFeed, IconMic, IconVideo, IconPremium } from '../assets'
 import { SettingsContext } from '../context/SettingsContext'
 import i18n from '../locales/i18n'
 import Api from '../api'
-import { ArticleType, MenuEntry, ParsedRssItem } from '../types'
+import { ArticleType, MenuEntry, ParsedRssItem, parseAndGuessURL } from '../types'
+import { DrawerNavigation } from '../navigation/AppContainer'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
 
@@ -27,13 +29,13 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState<boolean>(false)
   const [refreshing, setRefreshing] = useState<boolean>(false)
   const [fetchFailed, setFetchFailed] = useState<boolean>(false)
-  const [items, setItems] = useState([])
-  //const [category, setCategory] = useState<MenuEntry | null>(null)
+  const [items, setItems] = useState<ParsedRssItem[]>([])
+  const [checkPremiumIcons, setCheckPremiumIcons] = useState<boolean>(false)
 
-  const navigation = useNavigation()
+  const navigation = useNavigation<DrawerNavigation>()
   const route = useRoute<RouteProp<ParamList, 'params'>>()
 
-  const theme = useTheme()
+  const { colors } = useTheme()
   const window = useWindowDimensions()
   const settingsContext = useContext(SettingsContext)
 
@@ -42,7 +44,11 @@ export default function HomeScreen() {
       flex: 1,
       flexDirection: settingsContext.fontScale > 1.5 ? 'column' : 'row',
       borderBottomWidth: 1,
-      borderBottomColor: theme.colors.elevation.level5
+      borderBottomColor: colors.elevation.level5
+    },
+    extraIconContainer: {
+      flexDirection: 'row-reverse',
+      margin: 4
     },
     imageBG: {
       resizeMode: 'cover',
@@ -52,18 +58,11 @@ export default function HomeScreen() {
       paddingTop: 4,
       paddingRight: 8
     },
-    image: {
-      width: 32,
-      height: 32
-    },
     iconPremium: {
-      position: 'absolute',
       width: 24,
       height: 24,
-      bottom: 4,
-      right: 4,
-      backgroundColor: theme.colors.primaryContainer,
-      tintColor: theme.colors.onPrimaryContainer
+      backgroundColor: colors.primaryContainer,
+      tintColor: colors.onPrimaryContainer
     }
   })
 
@@ -72,14 +71,12 @@ export default function HomeScreen() {
       console.log('useEffect > already loading...')
       return
     }
-    console.log('useEffect > currentCategory changed')
-    console.log(settingsContext.currentCategory)
+    console.log('useEffect > currentCategory changed', settingsContext.currentCategory)
     if (settingsContext.currentCategory) {
       fetchFeed(false)
     }
   }, [settingsContext.currentCategory])
 
-  /*
   useEffect(
     () =>
       navigation.addListener('beforeRemove', () => {
@@ -87,7 +84,6 @@ export default function HomeScreen() {
       }),
     [navigation]
   )
-  */
 
   useFocusEffect(
     React.useCallback(() => {
@@ -102,13 +98,13 @@ export default function HomeScreen() {
         }
       }
       const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress)
-
       return () => subscription.remove()
     }, [settingsContext.currentCategory])
   )
 
   const refreshFeed = async () => {
     setRefreshing(true)
+    setCheckPremiumIcons(false)
     await fetchFeed(true)
     setRefreshing(false)
   }
@@ -119,7 +115,6 @@ export default function HomeScreen() {
       setLoading(true)
     }
     const url = `https://www.lemonde.fr/${settingsContext.currentCategory?.uri}`
-    console.log(`About to fetch feed at ${url}`)
     try {
       const response = await Api.get(url)
       setLoading(false)
@@ -129,123 +124,136 @@ export default function HomeScreen() {
       }
       const text = await response.text()
       const doc = parse(text)
-      const nodeItems = doc.querySelectorAll('item')
-
-      let map = new Map()
-      for (const index in nodeItems) {
-        let item: ParsedRssItem = { id: index, title: '', description: '', isRestricted: false, link: '', uri: '' }
-        for (let i = 0; i < nodeItems[index].childNodes.length; i++) {
-          const node = nodeItems[index].childNodes[i]
-          if (!(node && node.tagName)) {
+      const items: HTMLElement[] = doc.querySelectorAll('item')
+      let rssItems: ParsedRssItem[] = []
+      for (const item of items) {
+        let rssItem: ParsedRssItem = { title: '', description: '', isRestricted: false, link: '', uri: '' }
+        for (let i = 0; i < item.childNodes.length; i++) {
+          const htmlElement = item.childNodes[i] as HTMLElement
+          if (!(htmlElement && htmlElement.rawTagName)) {
             continue
           }
-          switch (node.tagName.toLowerCase()) {
+          switch (htmlElement.rawTagName.toLowerCase()) {
             case 'guid':
-              item.link = node.text
+              rssItem.link = htmlElement.text
               break
             case 'title':
-              const title = regex.exec(node.text)
-              item.title = title && title.length === 2 ? title[1] : ''
+              const title = regex.exec(htmlElement.text)
+              rssItem.title = title && title.length === 2 ? title[1] : ''
               break
             case 'description':
-              const description = regex.exec(node.text)
-              item.description = description?.length === 2 ? description[1] : ''
+              const description = regex.exec(htmlElement.text)
+              rssItem.description = description?.length === 2 ? description[1] : ''
               break
             case 'media:content':
-              if (node.getAttribute('url')) {
-                item.uri = node.getAttribute('url')
+              let url = htmlElement.getAttribute('url')
+              if (url) {
+                rssItem.uri = url
               }
               break
           }
         }
-        map.set(item.link, item)
+        rssItems.push(rssItem)
       }
-      setItems(Array.from(map.values()))
+      setItems(rssItems)
       if (!isRefreshing) {
         setLoading(false)
       }
-      getPremiumIcons(map)
     } catch (error) {
       setLoading(false)
       setFetchFailed(true)
     }
   }
 
-  const getPremiumIcons = (map: Map<string, ParsedRssItem>) => {
-    let subPath = ''
-    if (route.params?.subPath) {
-      subPath = '/' + route.params.subPath
-    }
-    Api.get(`https://www.lemonde.fr${subPath}`)
-      .then((res) => res.text())
-      .then((page) => {
-        const doc = parse(page)
-        const articles = doc.querySelectorAll('.article, .teaser')
-        for (const article of articles) {
-          if (article.querySelector('span.icon__premium')) {
-            const link = article.querySelector('a')
-            const href = link?.getAttribute('href')
-            if (link && href && map.has(href)) {
-              let item = map.get(href)
-              if (item) {
-                item.isRestricted = true
-                map.set(href, item)
+  useEffect(() => {
+    if (items.length > 0 && !checkPremiumIcons) {
+      let subPath = ''
+      if (route.params?.subPath) {
+        subPath = '/' + route.params.subPath
+      }
+      Api.get(`https://www.lemonde.fr${subPath}`)
+        .then((res: KyResponse) => res.text())
+        .then((page: string) => {
+          const doc = parse(page)
+          const premiumIcons = doc.querySelectorAll('span.icon__premium')
+          const rssItemListWithIcon: ParsedRssItem[] = [...items]
+          premiumIcons.forEach((premiumIcon) => {
+            const parentAnchor = premiumIcon.parentNode
+            if (parentAnchor && parentAnchor.tagName === 'A') {
+              const href = parentAnchor.getAttribute('href')
+              if (href) {
+                const rssItem = rssItemListWithIcon.find((item) => item.link === href)
+                if (rssItem) {
+                  rssItem.isRestricted = true
+                }
               }
             }
-          }
-        }
-        setItems(Array.from(map.values()))
-      })
+          })
+          setCheckPremiumIcons(true)
+          setItems(rssItemListWithIcon)
+        })
+        .catch((error) => {
+          console.warn('Error fetching premium icons:', error)
+        })
+    }
+  }, [items])
+
+  const navigateTo = async (item: ParsedRssItem, type: ArticleType) => {
+    const parsed = parseAndGuessURL(item.link)
+    if (parsed) {
+      navigation.navigate(type, parsed)
+    }
   }
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
+  const renderItem = ({ item }: { item: ParsedRssItem }) => {
     // Check if 2nd capture group is live/video/other
     const regex = /https:\/\/www\.lemonde\.fr\/([\w-]+)\/(\w+)\/.*/g
     const b = regex.exec(item.link)
-    let icon = null
     let type: ArticleType = ArticleType.ARTICLE
     if (b && b.length === 3) {
       if (b[2] === 'live') {
-        icon = IconLive
         type = ArticleType.LIVE
       } else if (b[2] === 'video') {
-        icon = IconVideo
         type = ArticleType.VIDEO
       } else if (b[1] === 'podcasts') {
-        icon = IconMic
         type = ArticleType.PODCAST
       }
     }
+    let extraIcons: React.JSX.Element[] = []
+    if (item.isRestricted) {
+      extraIcons.push(
+        <View key="premiumIcon" style={styles.extraIconContainer}>
+          <Image source={IconPremium} style={styles.iconPremium} />
+        </View>
+      )
+    }
+    if (type === ArticleType.LIVE) {
+      extraIcons.push(
+        <View key="liveIcon" style={styles.extraIconContainer}>
+          <Text variant="labelMedium" style={{ padding: 2, backgroundColor: colors.onError, color: colors.onErrorContainer }}>
+            • Live
+          </Text>
+        </View>
+      )
+    } else if (type === ArticleType.VIDEO || type === ArticleType.PODCAST) {
+      extraIcons.push(
+        <View key="mediaIcon" style={styles.extraIconContainer}>
+          <Image source={type === ArticleType.VIDEO ? IconVideo : IconMic} style={{ width: 24, height: 24, tintColor: colors.tertiary }} />
+        </View>
+      )
+    }
+
     return (
-      <TouchableRipple
-        borderless
-        rippleColor={theme.colors.primary}
-        onPress={async () => {
-          const response = await Api.get(item.link)
-          const d = parse(await response.text())
-          settingsContext.setDoc(d)
-          switch (type) {
-            default:
-            case ArticleType.ARTICLE:
-            case ArticleType.PODCAST:
-              navigation.navigate('Article', { item })
-              break
-            case ArticleType.LIVE:
-              navigation.navigate('Live', { item })
-              break
-            case ArticleType.VIDEO:
-              navigation.navigate('Video', { item })
-              break
-          }
-        }}>
-        <Surface style={styles.itemContainer}>
+      <TouchableRipple borderless rippleColor={colors.primary} onPress={() => navigateTo(item, type)}>
+        <Surface elevation={0} style={styles.itemContainer}>
           <View style={{ display: 'flex', flexDirection: 'row' }}>
             <Image source={item.uri ? { uri: item.uri } : DefaultImageFeed} style={styles.imageBG} />
-            {icon && <Image source={icon} style={{ position: 'absolute', width: 32, height: 32, right: 8, top: 8 }} />}
           </View>
-          <View style={{ display: 'flex' }}>
-            <Text style={{ padding: 8, width: settingsContext.fontScale > 1.5 ? window.width : window.width - 120 }}>{item.title}</Text>
-            {index > 0 && item.isRestricted && <Image source={IconPremium} style={styles.iconPremium} />}
+          <View style={{ flex: 1 }}>
+            <Text style={{ flex: 1, padding: 8, width: settingsContext.fontScale > 1.5 ? window.width : window.width - 120 }}>
+              {item.title}
+            </Text>
+            <View style={{ flexDirection: 'row-reverse' }}>{extraIcons}</View>
           </View>
         </Surface>
       </TouchableRipple>
@@ -253,7 +261,7 @@ export default function HomeScreen() {
   }
 
   const renderContentLoader = () => {
-    let loaders = []
+    let loaders: JSX.Element[] = []
     const d = (window.height - 26) / 6
     for (let i = 0; i < 7; i++) {
       loaders.push(<Rect key={'r1-' + i} x="0" y={`${i * d}`} rx="0" ry="0" width="126" height={Math.floor(d)} />)
@@ -261,17 +269,14 @@ export default function HomeScreen() {
       loaders.push(<Rect key={'r3-' + i} x="130" y={`${40 + i * d}`} rx="0" ry="0" width="170" height="12" />)
     }
     return (
-      <ContentLoader
-        backgroundColor={theme.colors.outline}
-        foregroundColor={theme.colors.background}
-        viewBox={`6 0 ${window.width} ${window.height}`}>
+      <ContentLoader backgroundColor={colors.outline} foregroundColor={colors.background} viewBox={`6 0 ${window.width} ${window.height}`}>
         {loaders}
       </ContentLoader>
     )
   }
 
   return (
-    <Surface style={{ flex: 1 }}>
+    <Surface elevation={0} style={{ flex: 1 }}>
       <StatusBar backgroundColor={'rgba(0,0,0,0.5)'} translucent animated />
       <Appbar.Header>
         <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
@@ -286,8 +291,8 @@ export default function HomeScreen() {
           </Text>
           <IconButton icon="network-strength-1-alert" size={80} />
           <Button
-            buttonColor={theme.colors.secondary}
-            textColor={theme.colors.onSecondary}
+            buttonColor={colors.secondary}
+            textColor={colors.onSecondary}
             style={{ marginTop: 24, padding: 8 }}
             onPress={() => {
               fetchFeed(false)

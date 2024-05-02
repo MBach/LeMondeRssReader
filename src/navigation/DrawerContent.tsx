@@ -25,11 +25,11 @@ const styles = StyleSheet.create({
  */
 export default function DrawerContent({ navigation, state, ...rest }: DrawerContentComponentProps) {
   const settingsContext: UseSettingsType = useContext(SettingsContext)
-  const [categories, setCategories] = useState<Map<String, MenuEntry[]>>(new Map())
+  const [categories, setCategories] = useState<Map<string, MenuEntry[]>>(new Map())
   const theme = useTheme()
 
   useEffect(() => {
-    let cats = new Map<String, MenuEntry[]>()
+    let cats = new Map<string, MenuEntry[]>()
     for (const d of settingsContext.feed) {
       for (const f of d.subCats) {
         if (f.active) {
@@ -66,7 +66,7 @@ export default function DrawerContent({ navigation, state, ...rest }: DrawerCont
                 await settingsContext.setCurrentCategory(entry)
                 navigation.closeDrawer()
                 if (settingsContext.currentCategory?.uri !== entry.uri) {
-                  navigation.navigate('Home', entry)
+                  navigation.push('Home', entry)
                 }
               }}
               active={settingsContext.currentCategory?.uri === entry.uri}

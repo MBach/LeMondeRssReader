@@ -5,7 +5,8 @@ import { ActivityIndicator, Appbar, IconButton, List, Snackbar, Surface, Text } 
 
 import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
-import { ExtentedRssItem } from '../types'
+import { ArticleHeader, parseAndGuessURL } from '../types'
+import { HomeStackNavigation } from '../navigation/AppContainer'
 
 /**
  * @author Matthieu BACHELIER
@@ -16,8 +17,8 @@ export default function FavScreen() {
   const settingsContext = useContext(SettingsContext)
   const [loading, setLoading] = useState(true)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
-  const [favorites, setFavorites] = useState<ExtentedRssItem[]>([])
-  const navigation = useNavigation()
+  const [favorites, setFavorites] = useState<ArticleHeader[]>([])
+  const navigation = useNavigation<HomeStackNavigation>()
 
   useEffect(() => {
     getFavorites()
@@ -38,12 +39,17 @@ export default function FavScreen() {
   /**
    * Render a single favorite in the FlatList.
    */
-  const renderFavorite = ({ item }: { item: ExtentedRssItem }) => (
+  const renderFavorite = ({ item }: { item: ArticleHeader }) => (
     <List.Item
       title={item.title}
       titleNumberOfLines={3}
       description={item.category}
-      onPress={() => navigation.navigate('Article', { item })}
+      onPress={() => {
+        const parsed = parseAndGuessURL(item.url)
+        if (parsed) {
+          navigation.navigate(parsed.type, parsed)
+        }
+      }}
       right={() => (
         <IconButton
           icon="delete"
@@ -75,7 +81,7 @@ export default function FavScreen() {
           style={{ paddingTop: StatusBar.currentHeight }}
           data={favorites}
           renderItem={renderFavorite}
-          keyExtractor={(item: ExtentedRssItem) => item.link}
+          keyExtractor={(item: ArticleHeader) => item.url}
         />
       )}
       <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={Snackbar.DURATION_SHORT}>

@@ -1,0 +1,23 @@
+package org.mbach.lemonde
+
+import android.view.View
+import com.facebook.react.ReactPackage
+import com.facebook.react.bridge.NativeModule
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.uimanager.ReactShadowNode
+import com.facebook.react.uimanager.ViewManager
+
+/**
+ * @author Matthieu BACHELIER
+ * @version 1.0
+ * @since 2020-04
+ */
+class DynamicNavbarPackage : ReactPackage {
+    override fun createViewManagers(
+        reactContext: ReactApplicationContext
+    ): MutableList<ViewManager<View, ReactShadowNode<*>>> = mutableListOf()
+
+    override fun createNativeModules(
+        reactContext: ReactApplicationContext
+    ): MutableList<NativeModule> = listOf(DynamicNavbarModule(reactContext)).toMutableList()
+}

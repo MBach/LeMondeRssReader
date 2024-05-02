@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Appearance, ScrollView, StyleSheet, StatusBar, View } from 'react-native'
+import { ScrollView, StyleSheet, StatusBar, View } from 'react-native'
 import {
   useTheme,
   ActivityIndicator,
@@ -20,7 +20,7 @@ import { KEYS } from '../constants'
 import { SettingsContext } from '../context/SettingsContext'
 import { UseSettingsType } from '../context/useSettings'
 import i18n from '../locales/i18n'
-import { Category } from '../types'
+import { Category, Theme } from '../types'
 
 /**
  * @author Matthieu BACHELIER
@@ -32,7 +32,7 @@ export default function SettingsScreen() {
 
   const [data, setData] = useState<Category[]>([])
   const [showThemeDialog, setShowThemeDialog] = useState<boolean>(false)
-  const [radioValue, setRadioValue] = useState<'light' | 'dark' | 'system'>('system')
+  const [radioValue, setRadioValue] = useState<Theme>(Theme.SYSTEM)
 
   const { colors } = useTheme()
 
@@ -108,15 +108,9 @@ export default function SettingsScreen() {
   }
 
   const changeTheme = (newTheme: string) => {
-    setRadioValue(newTheme as 'light' | 'dark' | 'system')
-    if (newTheme === 'system') {
-      const colorScheme = Appearance.getColorScheme()
-      settingsContext.setTheme(colorScheme ?? 'light')
-      AsyncStorage.removeItem(KEYS.THEME)
-    } else {
-      settingsContext.setTheme(newTheme as 'light' | 'dark')
-      AsyncStorage.setItem(KEYS.THEME, newTheme)
-    }
+    setRadioValue(newTheme as Theme)
+    settingsContext.setTheme(newTheme as Theme)
+    AsyncStorage.setItem(KEYS.THEME, newTheme)
     setShowThemeDialog(false)
   }
 
@@ -167,6 +161,18 @@ export default function SettingsScreen() {
                     <Text variant="bodyMedium">{i18n.t('settings.layout.desc1')}</Text>
                   </View>
                   <Switch value={true} disabled />
+                </View>
+              </TouchableRipple>
+              <TouchableRipple
+                rippleColor={colors.primary}
+                style={styles.rippleMarginTop}
+                onPress={() => settingsContext.setReadAlso(!settingsContext.hasReadAlso)}>
+                <View style={styles.flexRow}>
+                  <View style={styles.flex}>
+                    <Text variant="titleMedium">{i18n.t('settings.layout.content2')}</Text>
+                    <Text variant="bodyMedium">{i18n.t('settings.layout.desc2')}</Text>
+                  </View>
+                  <Switch value={settingsContext.hasReadAlso} onValueChange={settingsContext.setReadAlso} />
                 </View>
               </TouchableRipple>
             </Surface>

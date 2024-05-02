@@ -116,7 +116,9 @@
     "layout": {
       "title": "Layout",
       "content1": "Content of articles",
-      "desc1": "Include tweets in the body of an article"
+      "desc1": "Include tweets in the body of an article",
+      "content2": "Links « Read also »",
+      "desc2": "Display a touchable area to read other articles"
     },
     "display": {
       "title": "Display",

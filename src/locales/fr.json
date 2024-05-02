@@ -116,7 +116,9 @@
     "layout": {
       "title": "Mise en page",
       "content1": "Contenu des articles",
-      "desc1": "Inclure les tweets dans le corps d’un article"
+      "desc1": "Inclure les tweets dans le corps d’un article",
+      "content2": "Liens « Lire aussi »",
+      "desc2": "Afficher une zone cliquable vers d’autres articles"
     },
     "display": {
       "title": "Affichage",

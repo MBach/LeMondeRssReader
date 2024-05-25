@@ -1,10 +1,6 @@
 [
   {
     "cat": "news",
-    "color": {
-      "dark": "#f7be00",
-      "light": "#775a00"
-    },
     "subCats": [
       {
         "name": "latestNews",
@@ -12,7 +8,7 @@
         "uri": "rss/une.xml"
       },
       {
-        "name": "continuousNews",
+        "name": "stream",
         "active": false,
         "uri": "rss/en_continu.xml"
       },
@@ -24,34 +20,103 @@
       },
       {
         "name": "podcasts",
-        "active": false,
+        "active": true,
         "uri": "podcasts/rss_full.xml",
         "subPath": "podcasts"
       },
       {
-        "name": "portfolios",
-        "active": false,
-        "uri": "photo/rss_full.xml",
-        "subPath": "photo"
+        "name": "pixels",
+        "active": true,
+        "uri": "pixels/rss_full.xml",
+        "subPath": "pixels"
       },
       {
-        "name": "mostRead",
+        "name": "planet",
         "active": false,
-        "uri": "rss/plus-lus.xml"
+        "uri": "planete/rss_full.xml",
+        "subPath": "planete"
       },
       {
-        "name": "mostShared",
+        "name": "weather",
         "active": false,
-        "uri": "rss/plus-partages.xml"
+        "uri": "climat/rss_full.xml",
+        "subPath": "climat"
+      },
+      {
+        "name": "sports",
+        "active": false,
+        "uri": "sport/rss_full.xml",
+        "subPath": "sport"
+      },
+      {
+        "name": "health",
+        "active": false,
+        "uri": "sante/rss_full.xml",
+        "subPath": "sante"
+      },
+      {
+        "name": "sciences",
+        "active": false,
+        "uri": "sciences/rss_full.xml",
+        "subPath": "sciences"
+      }
+    ]
+  },
+  {
+    "cat": "economy",
+    "subCats": [
+      {
+        "name": "economy",
+        "active": true,
+        "uri": "economie/rss_full.xml",
+        "subPath": "economie"
+      },
+      {
+        "name": "worldEconomy",
+        "active": false,
+        "uri": "economie-mondialee/rss_full.xml",
+        "subPath": "economie-mondiale"
+      },
+      {
+        "name": "frenchEconomy",
+        "active": false,
+        "uri": "economie-francaise/rss_full.xml",
+        "subPath": "economie-francaise"
+      },
+      {
+        "name": "realEstate",
+        "active": true,
+        "uri": "immobilier/rss_full.xml",
+        "subPath": "immobilier"
+      },
+      {
+        "name": "medias",
+        "active": true,
+        "uri": "medias/rss_full.xml",
+        "subPath": "medias"
+      },
+      {
+        "name": "jobs",
+        "active": true,
+        "uri": "emploi/rss_full.xml",
+        "subPath": "emploi"
+      },
+      {
+        "name": "money",
+        "active": true,
+        "uri": "argent/rss_full.xml",
+        "subPath": "argent"
+      },
+      {
+        "name": "economyColumns",
+        "active": true,
+        "uri": "tribunes-eco/rss_full.xml",
+        "subPath": "tribunes-eco"
       }
     ]
   },
   {
     "cat": "international",
-    "color": {
-      "dark": "#8dcdff",
-      "light": "#006493"
-    },
     "subCats": [
       {
         "name": "international",
@@ -61,21 +126,21 @@
       },
       {
         "name": "europe",
-        "active": false,
+        "active": true,
         "uri": "europe/rss_full.xml",
         "subPath": "europe"
       },
       {
         "name": "america",
-        "active": false,
+        "active": true,
         "uri": "ameriques/rss_full.xml",
         "subPath": "ameriques"
       },
       {
-        "name": "africa",
-        "active": true,
-        "uri": "afrique/rss_full.xml",
-        "subPath": "afrique"
+        "name": "middleEast",
+        "active": false,
+        "uri": "proche-orient/rss_full.xml",
+        "subPath": "proche-orient"
       },
       {
         "name": "asia",
@@ -84,19 +149,33 @@
         "subPath": "asie-pacifique"
       },
       {
-        "name": "middleEast",
+        "name": "africa",
         "active": false,
-        "uri": "proche-orient/rss_full.xml",
-        "subPath": "proche-orient"
+        "uri": "afrique/rss_full.xml",
+        "subPath": "afrique"
+      },
+      {
+        "name": "lettersFrom",
+        "active": false,
+        "uri": "lettres-de/rss_full.xml",
+        "subPath": "lettres-de"
+      },
+      {
+        "name": "geopolitics",
+        "active": false,
+        "uri": "géopolitique/rss_full.xml",
+        "subPath": "géopolitique"
+      },
+      {
+        "name": "internationalJustice",
+        "active": false,
+        "uri": "justice-internationale/rss_full.xml",
+        "subPath": "justice-internationale"
       }
     ]
   },
   {
     "cat": "france",
-    "color": {
-      "dark": "#c8bfff",
-      "light": "#5d53a7"
-    },
     "subCats": [
       {
         "name": "politics",
@@ -130,7 +209,7 @@
       },
       {
         "name": "campus",
-        "active": true,
+        "active": false,
         "uri": "campus/rss_full.xml",
         "subPath": "campus"
       },
@@ -143,68 +222,7 @@
     ]
   },
   {
-    "cat": "economy",
-    "color": {
-      "dark": "#ffb4a8",
-      "light": "#c00100"
-    },
-    "subCats": [
-      {
-        "name": "economy",
-        "active": true,
-        "uri": "economie/rss_full.xml",
-        "subPath": "economie"
-      },
-      {
-        "name": "companies",
-        "active": false,
-        "uri": "entreprises/rss_full.xml",
-        "subPath": "entreprises"
-      },
-      {
-        "name": "money",
-        "active": false,
-        "uri": "argent/rss_full.xml",
-        "subPath": "argent"
-      },
-      {
-        "name": "frenchEconomy",
-        "active": false,
-        "uri": "economie-francaise/rss_full.xml",
-        "subPath": "economie-francaise"
-      },
-      {
-        "name": "industry",
-        "active": false,
-        "uri": "industrie/rss_full.xml",
-        "subPath": "industrie"
-      },
-      {
-        "name": "jobs",
-        "active": false,
-        "uri": "emploi/rss_full.xml",
-        "subPath": "emploi"
-      },
-      {
-        "name": "realEstate",
-        "active": true,
-        "uri": "immobilier/rss_full.xml",
-        "subPath": "immobilier"
-      },
-      {
-        "name": "medias",
-        "active": true,
-        "uri": "medias/rss_full.xml",
-        "subPath": "medias"
-      }
-    ]
-  },
-  {
     "cat": "culture",
-    "color": {
-      "dark": "#ffb1c0",
-      "light": "#9a4057"
-    },
     "subCats": [
       {
         "name": "culture",
@@ -214,19 +232,13 @@
       },
       {
         "name": "cinema",
-        "active": false,
+        "active": true,
         "uri": "cinema/rss_full.xml",
         "subPath": "cinema"
       },
       {
-        "name": "music",
-        "active": false,
-        "uri": "musiques/rss_full.xml",
-        "subPath": "musiques"
-      },
-      {
         "name": "tv-radio",
-        "active": false,
+        "active": true,
         "uri": "televisions-radio/rss_full.xml",
         "subPath": "televisions-radio"
       },
@@ -235,6 +247,12 @@
         "active": false,
         "uri": "livres/rss_full.xml",
         "subPath": "livres"
+      },
+      {
+        "name": "music",
+        "active": false,
+        "uri": "musiques/rss_full.xml",
+        "subPath": "musiques"
       },
       {
         "name": "arts",
@@ -251,161 +269,7 @@
     ]
   },
   {
-    "cat": "sports",
-    "color": {
-      "dark": "#79dd6d",
-      "light": "#006e0f"
-    },
-    "subCats": [
-      {
-        "name": "sports",
-        "active": true,
-        "uri": "sport/rss_full.xml",
-        "subPath": "sport"
-      },
-      {
-        "name": "football",
-        "active": false,
-        "uri": "football/rss_full.xml",
-        "subPath": "football"
-      },
-      {
-        "name": "rugby",
-        "active": false,
-        "uri": "rugby/rss_full.xml",
-        "subPath": "rugby"
-      },
-      {
-        "name": "tennis",
-        "active": false,
-        "uri": "tennis/rss_full.xml",
-        "subPath": "tennis"
-      },
-      {
-        "name": "cycling",
-        "active": false,
-        "uri": "cyclisme/rss_full.xml",
-        "subPath": "cyclisme"
-      },
-      {
-        "name": "basket",
-        "active": false,
-        "uri": "basket/rss_full.xml",
-        "subPath": "basket"
-      }
-    ]
-  },
-  {
-    "cat": "planet",
-    "color": {
-      "dark": "#02e600",
-      "light": "#026e00"
-    },
-    "subCats": [
-      {
-        "name": "planet",
-        "active": true,
-        "uri": "planete/rss_full.xml",
-        "subPath": "planete"
-      },
-      {
-        "name": "weather",
-        "active": false,
-        "uri": "climat/rss_full.xml",
-        "subPath": "climat"
-      },
-      {
-        "name": "agriculture",
-        "active": false,
-        "uri": "agriculture/rss_full.xml",
-        "subPath": "agriculture"
-      },
-      {
-        "name": "environment",
-        "active": false,
-        "uri": "environnement/rss_full.xml",
-        "subPath": "environnement"
-      }
-    ]
-  },
-  {
-    "cat": "pixels",
-    "color": {
-      "dark": "#50deab",
-      "light": "#006c4e"
-    },
-    "subCats": [
-      {
-        "name": "pixels",
-        "active": true,
-        "uri": "pixels/rss_full.xml",
-        "subPath": "pixels"
-      },
-      {
-        "name": "video-games",
-        "active": false,
-        "uri": "jeux-video/rss_full.xml",
-        "subPath": "jeux-video"
-      },
-      {
-        "name": "web",
-        "active": false,
-        "uri": "cultures-web/rss_full.xml",
-        "subPath": "cultures-web"
-      }
-    ]
-  },
-  {
-    "cat": "sciences",
-    "color": {
-      "dark": "#4edad4",
-      "light": "#006a66"
-    },
-    "subCats": [
-      {
-        "name": "sciences",
-        "active": true,
-        "uri": "sciences/rss_full.xml",
-        "subPath": "sciences"
-      },
-      {
-        "name": "space",
-        "active": false,
-        "uri": "espace/rss_full.xml",
-        "subPath": "espace"
-      },
-      {
-        "name": "biology",
-        "active": false,
-        "uri": "biologie/rss_full.xml",
-        "subPath": "biologie"
-      },
-      {
-        "name": "medicine",
-        "active": false,
-        "uri": "medecine/rss_full.xml",
-        "subPath": "medecine"
-      },
-      {
-        "name": "physics",
-        "active": false,
-        "uri": "physique/rss_full.xml",
-        "subPath": "physique"
-      },
-      {
-        "name": "health",
-        "active": false,
-        "uri": "sante/rss_full.xml",
-        "subPath": "sante"
-      }
-    ]
-  },
-  {
     "cat": "thought",
-    "color": {
-      "dark": "#ffb95c",
-      "light": "#855400"
-    },
     "subCats": [
       {
         "name": "thought",
@@ -415,66 +279,80 @@
       },
       {
         "name": "editorials",
-        "active": false,
+        "active": true,
         "uri": "editoriaux/rss_full.xml",
         "subPath": "editoriaux"
+      },
+      {
+        "name": "grandstands",
+        "active": true,
+        "uri": "tribunes/rss_full.xml",
+        "subPath": "tribunes"
       },
       {
         "name": "chronicles",
         "active": false,
         "uri": "chroniques/rss_full.xml",
         "subPath": "chroniques"
-      },
-      {
-        "name": "grandstands",
-        "active": false,
-        "uri": "tribunes/rss_full.xml",
-        "subPath": "tribunes"
       }
     ]
   },
   {
-    "cat": "mag",
-    "color": {
-      "dark": "#b1cbd0",
-      "light": "#4a6267"
-    },
+    "cat": "m-styles",
     "subCats": [
       {
-        "name": "mag",
+        "name": "m-styles",
         "active": true,
-        "uri": "m-le-mag/rss_full.xml",
-        "subPath": "m-le-mag"
-      },
-      {
-        "name": "the-time",
-        "active": false,
-        "uri": "m-perso/rss_full.xml",
-        "subPath": "m-perso"
-      },
-      {
-        "name": "styles",
-        "active": false,
         "uri": "m-styles/rss_full.xml",
         "subPath": "m-styles"
       },
       {
-        "name": "gastronomy",
+        "name": "le-monde-passe-a-table",
         "active": false,
-        "uri": "gastronomie/rss_full.xml",
-        "subPath": "m-gastronomie"
+        "uri": "le-monde-passe-a-table/rss_full.xml",
+        "subPath": "le-monde-passe-a-table"
       },
       {
-        "name": "recipes",
+        "name": "voyage",
         "active": false,
-        "uri": "les-recettes-du-monde/rss_full.xml",
-        "subPath": "les-recettes-du-monde"
+        "uri": "m-voyage/rss_full.xml",
+        "subPath": "m-voyage"
       },
       {
-        "name": "sexo",
+        "name": "design",
         "active": false,
-        "uri": "sexo/rss_full.xml",
-        "subPath": "sexo"
+        "uri": "m-design-deco/rss_full.xml",
+        "subPath": "m-design-deco"
+      },
+      {
+        "name": "fashion",
+        "active": false,
+        "uri": "m-mode/rss_full.xml",
+        "subPath": "m-mode"
+      },
+      {
+        "name": "beauty",
+        "active": false,
+        "uri": "m-beaute/rss_full.xml",
+        "subPath": "m-beaute"
+      },
+      {
+        "name": "jewelry",
+        "active": false,
+        "uri": "m-horlogerie-joaillerie/rss_full.xml",
+        "subPath": "m-horlogerie-joaillerie"
+      },
+      {
+        "name": "mag",
+        "active": false,
+        "uri": "m-le-mag/rss_full.xml",
+        "subPath": "m-le-mag"
+      },
+      {
+        "name": "m-perso",
+        "active": false,
+        "uri": "m-perso/rss_full.xml",
+        "subPath": "m-perso"
       }
     ]
   }

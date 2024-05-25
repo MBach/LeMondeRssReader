@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useWindowDimensions, Image, Linking, StatusBar, StyleSheet, View, ActivityIndicator } from 'react-native'
-import { useTheme, Button, Card, Surface, Text, Icon } from 'react-native-paper'
+import { useWindowDimensions, Image, Linking, StyleSheet, View, ActivityIndicator, SafeAreaView } from 'react-native'
+import { useTheme, Button, Card, Text } from 'react-native-paper'
 import { useRoute } from '@react-navigation/core'
 import { useNavigation } from '@react-navigation/native'
 import parse, { HTMLElement, Node } from 'node-html-parser'
@@ -8,38 +8,24 @@ import { FlatListWithHeaders } from '@codeherence/react-native-header'
 
 import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
-import { HomeStackNavigation } from '../navigation/AppContainer'
-import { ArticleHeader, ArticleHeaderParser, ContentType, ImgContent, ParsedLink, SeeAlsoButtonContent, parseAndGuessURL } from '../types'
+import {
+  ArticleHeader,
+  ArticleHeaderParser,
+  ContentType,
+  ImgContent,
+  MainStackNavigation,
+  ParsedLink,
+  SeeAlsoButtonContent,
+  parseAndGuessURL
+} from '../types'
 import DynamicNavbar from '../DynamicNavbar'
 import Api from '../api'
 import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
 import { IconPremium } from '../assets'
+import FetchError from '../components/FetchError'
+import CustomStatusBar from '../components/CustomStatusBar'
 
 const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.*/
-
-const styles = StyleSheet.create({
-  subtitle: {
-    paddingHorizontal: 8,
-    marginVertical: 8
-  },
-  paragraph: {
-    paddingHorizontal: 8,
-    marginTop: 8
-  },
-  paddingH: {
-    paddingHorizontal: 8
-  },
-  imgCaption: {
-    position: 'absolute',
-    bottom: -2,
-    padding: 4,
-    backgroundColor: 'rgba(0,0,0,0.5)'
-  },
-  podcastContainer: {
-    width: '100%',
-    height: 460
-  }
-})
 
 /**
  * @author Matthieu BACHELIER
@@ -51,11 +37,47 @@ export default function ArticleScreen() {
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
   const window = useWindowDimensions()
-  const navigation = useNavigation<HomeStackNavigation>()
+  const navigation = useNavigation<MainStackNavigation>()
 
   const [loading, setLoading] = useState(true)
+  const [fetchFailed, setFetchFailed] = useState<boolean>(false)
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
   const [paragraphes, setParagraphes] = useState<ContentType[]>([])
+
+  const styles = StyleSheet.create({
+    subtitle: {
+      paddingHorizontal: 8,
+      marginVertical: 8
+    },
+    paragraph: {
+      paddingHorizontal: 8,
+      marginTop: 8
+    },
+    paddingH: {
+      paddingHorizontal: 8
+    },
+    imgCaption: {
+      position: 'absolute',
+      bottom: -2,
+      padding: 4,
+      backgroundColor: 'rgba(0,0,0,0.5)'
+    },
+    podcastContainer: {
+      width: '100%',
+      height: 460
+    },
+    activityIndicator: {
+      flexGrow: 1,
+      justifyContent: 'center'
+    },
+    card: {
+      margin: 8,
+      backgroundColor: colors.elevation.level2
+    },
+    footerPadding: {
+      paddingBottom: 40
+    }
+  })
 
   useEffect(() => {
     init()
@@ -111,11 +133,13 @@ export default function ArticleScreen() {
    * @param node
    * @returns
    */
-  const extractContent = (node: Node) => {
+  const extractContent = (node: Node): ContentType | null => {
     if (!node.rawTagName) {
-      return
+      return null
     }
+
     const htmlElement: HTMLElement = node as HTMLElement
+
     switch (htmlElement.rawTagName.toLowerCase()) {
       case 'div':
         if (htmlElement.classNames && htmlElement.classNames.length > 0) {
@@ -128,7 +152,8 @@ export default function ArticleScreen() {
               }
             }
           } else if (htmlElement.classNames.includes('twitter-tweet')) {
-            /// TODO
+            // TODO: Handle twitter-tweet case
+            return null
           }
         }
         break
@@ -150,7 +175,7 @@ export default function ArticleScreen() {
           if (catcherDesc) {
             const readAlso = catcherDesc.querySelector('.js-article-read-also')
             if (settingsContext.hasReadAlso && readAlso) {
-              const seeAlso = {
+              const seeAlso: SeeAlsoButtonContent = {
                 type: 'seeAlsoButton',
                 data: readAlso.getAttribute('title') || readAlso.textContent,
                 url: readAlso.attrs['href'],
@@ -164,6 +189,8 @@ export default function ArticleScreen() {
       case 'figure':
         return extractFigureContent(htmlElement)
     }
+
+    return null
   }
 
   const init = async () => {
@@ -171,99 +198,103 @@ export default function ArticleScreen() {
       console.warn('no params!')
       return
     }
-    let l: ParsedLink = route.params as ParsedLink
-    const response = await Api.get(`https://www.lemonde.fr/${l.category}/article/${l.yyyy}/${l.mm}/${l.dd}/${l.title}`)
-    const doc = parse(await response.text())
+    setFetchFailed(false)
+    try {
+      const l: ParsedLink = route.params as ParsedLink
+      const response = await Api.get(`${l.category}/article/${l.yyyy}/${l.mm}/${l.dd}/${l.title}`)
+      const doc = parse(await response.text())
 
-    // Category and other infos in the header
-    const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
-    const parser = new ArticleHeaderParser()
-    const a = parser.parse(metas)
+      // Category and other infos in the header
+      const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
+      const parser = new ArticleHeaderParser()
+      const a = parser.parse(metas)
 
-    const longform: HTMLElement | null = doc.getElementById('Longform')
-    if (!!longform) {
-      a.authors = ''
-      const metasAuthors = doc.querySelectorAll('.meta__authors')
-      for (const metasAuthor of metasAuthors) {
-        let author = metasAuthor.querySelector('a.article__author-link')
-        if (author) {
-          a.authors = a.authors.concat(author.text.trim())
+      const longform: HTMLElement | null = doc.getElementById('Longform')
+      if (!!longform) {
+        a.authors = ''
+        const metasAuthors = doc.querySelectorAll('.meta__authors')
+        for (const metasAuthor of metasAuthors) {
+          let author = metasAuthor.querySelector('a.article__author-link')
+          if (author) {
+            a.authors = a.authors.concat(author.text.trim())
+          }
         }
       }
-    }
 
-    const main = doc.querySelector('main')
-    if (!main) {
-      console.warn('cannot find <main> tag')
-      return
-    }
-
-    let date = main.querySelector('span.meta__date')
-    if (date) {
-      a.date = date.rawText
-    } else {
-      let d = main.querySelector('p.meta__publisher')
-      if (d) {
-        a.date = d.text
+      const main = doc.querySelector('main')
+      if (!main) {
+        console.warn('cannot find <main> tag')
+        return
       }
-    }
 
-    let readTime: HTMLElement | null = main.querySelector('.meta__reading-time')
-    if (readTime !== null && readTime.childNodes.length > 0) {
-      let s = readTime.rawText.trim()
-      if (s.startsWith('Temps de Lecture ')) {
-        s = s.replace('Temps de Lecture ', '')
+      let date = main.querySelector('span.meta__date')
+      if (date) {
+        a.date = date.rawText
+      } else {
+        let d = main.querySelector('p.meta__publisher')
+        if (d) {
+          a.date = d.text
+        }
       }
-      a.readingTime = s
-    }
 
-    // Paragraphes and images
-    let par: ContentType[] = []
-    par.push({ type: 'h3', data: a.description })
+      let readTime: HTMLElement | null = main.querySelector('.meta__reading-time')
+      if (readTime !== null && readTime.childNodes.length > 0) {
+        let s = readTime.rawText.trim()
+        if (s.startsWith('Temps de Lecture ')) {
+          s = s.replace('Temps de Lecture ', '')
+        }
+        a.readingTime = s
+      }
 
-    const footers = main.getElementsByTagName('footer')
-    if (footers && footers.length > 0) {
-      footers[0].remove()
-    }
+      // Paragraphes and images
+      let par: ContentType[] = []
+      par.push({ type: 'h3', data: a.description })
 
-    if (longform) {
-      for (const child of longform.childNodes) {
-        let c = child as HTMLElement
-        if (c.classNames?.includes('article__content')) {
-          for (let j = 0; j < c.childNodes.length; j++) {
-            console.log('about to extract content II')
-            let p = extractContent(c.childNodes[j])
+      const footers = main.getElementsByTagName('footer')
+      if (footers && footers.length > 0) {
+        footers[0].remove()
+      }
+
+      if (longform) {
+        for (const child of longform.childNodes) {
+          let c = child as HTMLElement
+          if (c.classNames?.includes('article__content')) {
+            for (let j = 0; j < c.childNodes.length; j++) {
+              let p = extractContent(c.childNodes[j])
+              if (p) {
+                par.push(p)
+              }
+            }
+          }
+        }
+      }
+      const articles = main.getElementsByTagName('article')
+      if (articles.length > 0) {
+        for (const a of articles) {
+          for (let j = 0; j < a.childNodes.length; j++) {
+            let p = extractContent(a.childNodes[j])
             if (p) {
               par.push(p)
             }
           }
         }
       }
-    }
-    const articles = main.getElementsByTagName('article')
-    if (articles.length > 0) {
-      for (const a of articles) {
-        for (let j = 0; j < a.childNodes.length; j++) {
-          let p = extractContent(a.childNodes[j])
+      if (par.length === 1) {
+        for (let i = 0; i < main.childNodes.length; i++) {
+          let p = extractContent(main.childNodes[i])
           if (p) {
             par.push(p)
+            console.log(par.length, p)
           }
         }
       }
+      setArticle(a)
+      setParagraphes(par)
+      setLoading(false)
+    } catch (error) {
+      setFetchFailed(true)
+      setLoading(false)
     }
-    if (par.length === 1) {
-      for (let i = 0; i < main.childNodes.length; i++) {
-        console.log('about to extract content I', main.childNodes.length, i)
-        let p = extractContent(main.childNodes[i])
-        if (p) {
-          par.push(p)
-          console.log(par.length, p)
-        }
-      }
-    }
-    setArticle(a)
-    setParagraphes(par)
-    setLoading(false)
   }
 
   const renderItem = ({ item }) => {
@@ -336,41 +367,57 @@ export default function ArticleScreen() {
     }
   }
 
+  const renderCustomStatusBar = (article: ArticleHeader) => {
+    const dynamicColor = settingsContext.hasDynamicStatusBarColor && article.isRestricted
+    return (
+      <CustomStatusBar
+        animated={dynamicColor}
+        backgroundColor={dynamicColor ? colors.primaryContainer : 'transparent'}
+        translucent={!dynamicColor}
+      />
+    )
+  }
+
+  const renderFooter = (article: ArticleHeader) => (
+    <>
+      {article.isRestricted && (
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text variant="bodyMedium">{i18n.t('article.restricted')}</Text>
+          </Card.Content>
+          <Card.Actions>
+            <Button mode="contained" onPress={() => Linking.openURL('https://abo.lemonde.fr/')}>
+              {i18n.t('article.register')}
+            </Button>
+          </Card.Actions>
+        </Card>
+      )}
+      <View style={styles.footerPadding} />
+    </>
+  )
+
   return (
-    <Surface elevation={0} style={{ flex: 1, paddingTop: StatusBar.currentHeight }}>
-      {settingsContext.hasDynamicStatusBarColor && article?.isRestricted && (
-        <StatusBar backgroundColor={'rgba(255,196,0,1.0)'} barStyle="dark-content" animated />
-      )}
-      {loading ? (
-        <ActivityIndicator />
+    <SafeAreaView style={{ flex: 1 }}>
+      {fetchFailed ? (
+        <FetchError onRetry={init} />
+      ) : loading || !article ? (
+        <ActivityIndicator style={styles.activityIndicator} color={colors.primary} size={40} />
       ) : (
-        <FlatListWithHeaders
-          disableAutoFixScroll
-          //headerFadeInThreshold={0.8}
-          data={paragraphes}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-          HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}
-          LargeHeaderComponent={(props) => <LargeHeaderComponent {...props} article={article!} />}
-          ListFooterComponent={
-            <>
-              {article?.isRestricted && (
-                <Card style={{ margin: 8, backgroundColor: colors.elevation.level2 }}>
-                  <Card.Content>
-                    <Text variant="bodyMedium">{i18n.t('article.restricted')}</Text>
-                  </Card.Content>
-                  <Card.Actions>
-                    <Button mode="contained" onPress={() => Linking.openURL('https://abo.lemonde.fr/')}>
-                      {i18n.t('article.register')}
-                    </Button>
-                  </Card.Actions>
-                </Card>
-              )}
-              <View style={{ paddingBottom: 40 }} />
-            </>
-          }
-        />
+        <>
+          {renderCustomStatusBar(article)}
+          <FlatListWithHeaders
+            disableAutoFixScroll
+            headerFadeInThreshold={0.8}
+            disableLargeHeaderFadeAnim={false}
+            data={paragraphes}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}
+            LargeHeaderComponent={(props) => <LargeHeaderComponent {...props} article={article} />}
+            ListFooterComponent={renderFooter(article)}
+          />
+        </>
       )}
-    </Surface>
+    </SafeAreaView>
   )
 }

@@ -99,6 +99,7 @@ export const KEYS = {
   KEEP_LAST_SECTION: 'keepLastSection',
   KEEP_SCREEN_ON: 'keepScreenOn',
   LAST_SECTION_ENTRY: 'lastSectionEntry',
+  LAST_FIVE_CATEGORIES: 'lastFiveCategories',
   READ_ALSO: 'readAlso',
   SHARE: 'share',
   THEME: 'theme'

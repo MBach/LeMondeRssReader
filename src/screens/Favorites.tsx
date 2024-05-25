@@ -1,12 +1,11 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { FlatList, StatusBar, View } from 'react-native'
+import { FlatList, SafeAreaView, StatusBar, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import { ActivityIndicator, Appbar, IconButton, List, Snackbar, Surface, Text } from 'react-native-paper'
+import { ActivityIndicator, IconButton, List, Snackbar, Text } from 'react-native-paper'
 
 import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
-import { ArticleHeader, parseAndGuessURL } from '../types'
-import { HomeStackNavigation } from '../navigation/AppContainer'
+import { ArticleHeader, MainStackNavigation, parseAndGuessURL } from '../types'
 
 /**
  * @author Matthieu BACHELIER
@@ -18,7 +17,7 @@ export default function FavScreen() {
   const [loading, setLoading] = useState(true)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [favorites, setFavorites] = useState<ArticleHeader[]>([])
-  const navigation = useNavigation<HomeStackNavigation>()
+  const navigation = useNavigation<MainStackNavigation>()
 
   useEffect(() => {
     getFavorites()
@@ -64,11 +63,7 @@ export default function FavScreen() {
   )
 
   return (
-    <Surface style={{ flex: 1 }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={navigation.goBack} />
-        <Appbar.Content title={i18n.t('drawer.fav')} />
-      </Appbar.Header>
+    <SafeAreaView style={{ flex: 1 }}>
       {loading ? (
         <ActivityIndicator style={{ flex: 1, justifyContent: 'center', alignContent: 'center', height: '100%' }} />
       ) : favorites.length === 0 ? (
@@ -87,6 +82,6 @@ export default function FavScreen() {
       <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={Snackbar.DURATION_SHORT}>
         {i18n.t('favorites.deleted')}
       </Snackbar>
-    </Surface>
+    </SafeAreaView>
   )
 }

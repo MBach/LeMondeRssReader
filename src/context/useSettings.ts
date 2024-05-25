@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Appearance } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import DeviceInfo from 'react-native-device-info'
 
@@ -6,7 +7,6 @@ import DynamicNavbar from '../DynamicNavbar'
 import { ArticleHeader, Category, MenuEntry, Theme } from '../types'
 import defaultFeeds from '../feeds.json'
 import { KEYS } from '../constants'
-import { Appearance } from 'react-native'
 
 export interface UseSettingsType {
   currentCategory: MenuEntry | null
@@ -17,11 +17,11 @@ export interface UseSettingsType {
   hydrated: boolean
   keepLastSection: boolean
   keepScreenOn: boolean
+  lastFiveCategories: MenuEntry[]
   share: boolean
   theme: Theme
   getFavorites: () => Promise<ArticleHeader[]>
   hasFavorite: (link: string) => Promise<boolean>
-  popCategories: () => void
   setCurrentCategory: (c: MenuEntry) => Promise<void>
   setDynamicStatusBarColor: (b: boolean) => Promise<void>
   setFeed: (feed: Category[]) => Promise<void>
@@ -47,7 +47,6 @@ export const initialSettingsContext = {
 
 const defaultMenuEntry: MenuEntry = {
   cat: 'news',
-  color: '#775a00',
   name: 'latestNews',
   uri: 'rss/une.xml'
 }
@@ -55,7 +54,7 @@ const defaultMenuEntry: MenuEntry = {
 const useSettings = (): UseSettingsType => {
   const [hydrated, setHydrated] = useState<boolean>(false)
   const [fontScale, setFontScale] = useState<number>(1)
-  const [theme, _setTheme] = useState<Theme>(Theme.DARK)
+  const [theme, _setTheme] = useState<Theme>(Theme.SYSTEM)
   const [feed, _setFeed] = useState<Category[]>(defaultFeeds)
   const [keepLastSection, _setKeepLastSection] = useState<boolean>(true)
   const [keepScreenOn, _setKeepScreenOn] = useState<boolean>(true)
@@ -63,7 +62,7 @@ const useSettings = (): UseSettingsType => {
   const [hasDynamicStatusBarColor, _setDynamicStatusBarColor] = useState<boolean>(true)
   const [share, _setShare] = useState<boolean>(true)
   const [currentCategory, _setCurrentCategory] = useState<MenuEntry | null>(null)
-  const [categories, setCategories] = useState<MenuEntry[]>([])
+  const [lastFiveCategories, setLastFiveCategories] = useState<MenuEntry[]>([])
 
   useEffect(() => {
     _init()
@@ -81,31 +80,19 @@ const useSettings = (): UseSettingsType => {
     _setDynamicStatusBarColor(d === '1' || d === null)
     ///
     let themeStr: string | null = await AsyncStorage.getItem(KEYS.THEME)
-    const colorScheme = Appearance.getColorScheme()
-
-    if (themeStr) {
-      switch (themeStr) {
-        case 'light':
-          DynamicNavbar.setLightNavigationBar(true)
-          _setTheme(Theme.LIGHT)
-          break
-        default:
-        case 'dark':
-          DynamicNavbar.setLightNavigationBar(false)
-          _setTheme(Theme.DARK)
-          break
-        case 'system':
-          _setTheme(Theme.SYSTEM)
-          break
-      }
-    } else {
-      if (colorScheme === 'light') {
+    switch (themeStr) {
+      case 'light':
         DynamicNavbar.setLightNavigationBar(true)
         _setTheme(Theme.LIGHT)
-      } else {
+        break
+      case 'dark':
         DynamicNavbar.setLightNavigationBar(false)
         _setTheme(Theme.DARK)
-      }
+        break
+      default:
+      case 'system':
+        _setTheme(Theme.SYSTEM)
+        break
     }
 
     ///
@@ -117,14 +104,17 @@ const useSettings = (): UseSettingsType => {
       if (last) {
         const menuEntry: MenuEntry = JSON.parse(last)
         _setCurrentCategory(menuEntry)
-        setCategories([...categories, menuEntry])
       } else {
         _setCurrentCategory(defaultMenuEntry)
-        setCategories([...categories, defaultMenuEntry])
       }
     } else {
-      //_setCurrentCategory(defaultMenuEntry)
-      //setCategories([...categories, defaultMenuEntry])
+      _setCurrentCategory(defaultMenuEntry)
+    }
+    ///
+    const lfc = await AsyncStorage.getItem(KEYS.LAST_FIVE_CATEGORIES)
+    if (lfc) {
+      const lastCategories = JSON.parse(lfc)
+      setLastFiveCategories(lastCategories)
     }
     ///
     const kso = await AsyncStorage.getItem(KEYS.KEEP_SCREEN_ON)
@@ -168,25 +158,20 @@ const useSettings = (): UseSettingsType => {
     }
   }
 
-  const popCategories = (): void => {
-    console.log('popCategories A', categories.length, categories)
-    if (categories.length > 0) {
-      const lastCategory = categories[categories.length - 1]
-      if (lastCategory) {
-        let a = [...categories.splice(-1)]
-        setCategories(a)
-        console.log('popCategories B', a.length, a)
-        AsyncStorage.setItem(KEYS.LAST_SECTION_ENTRY, JSON.stringify(lastCategory))
-        _setCurrentCategory(lastCategory)
-      }
-    }
-  }
-
   const setCurrentCategory = async (m: MenuEntry): Promise<void> => {
-    setCategories([...categories, m])
     await AsyncStorage.setItem(KEYS.LAST_SECTION_ENTRY, JSON.stringify(m))
     _setCurrentCategory(m)
-    console.log('setCurrentCategory', categories)
+
+    const lastCategoriesStr = await AsyncStorage.getItem(KEYS.LAST_FIVE_CATEGORIES)
+    let lastCategories: MenuEntry[] = lastCategoriesStr ? JSON.parse(lastCategoriesStr) : []
+    lastCategories = lastCategories.filter((category: MenuEntry) => category.uri !== m.uri)
+    lastCategories.unshift(m)
+    if (lastCategories.length > 5) {
+      lastCategories = lastCategories.slice(0, 5)
+    }
+    const newestLastCategoriesStr = JSON.stringify(lastCategories)
+    await AsyncStorage.setItem(KEYS.LAST_FIVE_CATEGORIES, newestLastCategoriesStr)
+    setLastFiveCategories(lastCategories)
   }
 
   /**
@@ -292,11 +277,11 @@ const useSettings = (): UseSettingsType => {
     hydrated,
     keepLastSection,
     keepScreenOn,
+    lastFiveCategories,
     share,
     theme,
     getFavorites,
     hasFavorite,
-    popCategories,
     setCurrentCategory,
     setDynamicStatusBarColor,
     setFeed,

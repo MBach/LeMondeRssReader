@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { FlatList, Image, StatusBar, StyleSheet, View, useWindowDimensions } from 'react-native'
+import { Image, StatusBar, StyleSheet, useWindowDimensions } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
-import { ActivityIndicator, Button, Card, List, Surface, Text, useTheme } from 'react-native-paper'
+import { ActivityIndicator, Card, List, Surface, Text, useTheme } from 'react-native-paper'
 import parse, { HTMLElement, Node, NodeType } from 'node-html-parser'
 import ky from 'ky'
 import WebView from 'react-native-webview'
+import { FlatListWithHeaders } from '@codeherence/react-native-header'
 
 import { SettingsContext } from '../context/SettingsContext'
 import {
@@ -14,13 +15,15 @@ import {
   SectionContent,
   ParsedLink,
   parseAndGuessURL,
-  SeeAlsoButtonContent
+  SeeAlsoButtonContent,
+  MainStackNavigation
 } from '../types'
-import { HomeStackNavigation } from '../navigation/AppContainer'
 import DynamicNavbar from '../DynamicNavbar'
 import Api from '../api'
-import CustomHeader from '../components/Header'
+import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
 import { IconPremium } from '../assets'
+import FetchError from '../components/FetchError'
+import CustomStatusBar from '../components/CustomStatusBar'
 
 /*
 function useInterval(callback: (() => Promise<void>) | undefined, delay: number) {
@@ -54,15 +57,17 @@ class GetPostsRes {
 export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => void }*/) {
   const route = useRoute()
   const settingsContext = useContext(SettingsContext)
-  const [sections, setSections] = useState<SectionContent[]>([])
+  const { colors } = useTheme()
+  const window = useWindowDimensions()
+  const navigation = useNavigation<MainStackNavigation>()
+
   const [loading, setLoading] = useState(true)
+  const [fetchFailed, setFetchFailed] = useState<boolean>(false)
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
+  const [sections, setSections] = useState<SectionContent[]>([])
 
   //const [latestPostId, setLatestPostId] = useState(null)
   //const [newCommentsReceived, setNewCommentsReceived] = useState(false)
-  const window = useWindowDimensions()
-  const navigation = useNavigation<HomeStackNavigation>()
-  const { colors } = useTheme()
 
   const styles = StyleSheet.create({
     imageHeader: {
@@ -124,64 +129,70 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
       console.warn('no params!')
       return
     }
-    const l = route.params as ParsedLink
-    const response = await Api.get(`https://www.lemonde.fr/${l.category}/live/${l.yyyy}/${l.mm}/${l.dd}/${l.title}`)
-    const doc = parse(await response.text())
-    const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
-    const parser = new ArticleHeaderParser()
-    const a = parser.parse(metas)
+    setFetchFailed(false)
+    try {
+      const l = route.params as ParsedLink
+      const response = await Api.get(`${l.category}/live/${l.yyyy}/${l.mm}/${l.dd}/${l.title}`)
+      const doc = parse(await response.text())
+      const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
+      const parser = new ArticleHeaderParser()
+      const a = parser.parse(metas)
 
-    let s: SectionContent[] = []
-    const hero: HTMLElement | null = doc.querySelector('section.hero__live-content')
-    if (hero !== null) {
-      let section: SectionContent = {
-        id: '',
-        hero: false,
-        hasBorder: false,
-        contents: []
-      }
-      //const banner: HTMLElement | null = hero.querySelector('img')
-      //if (banner && banner.hasAttribute('src')) {
-      //  section.hero = true
-      //}
-      const title: HTMLElement | null = hero.querySelector('section.title')
-      if (title) {
-        const h1: HTMLElement | null = title.querySelector('h1')
-        if (h1) {
-          section.contents.push({ type: 'h1', data: h1.textContent })
+      let s: SectionContent[] = []
+      const hero: HTMLElement | null = doc.querySelector('section.hero__live-content')
+      if (hero !== null) {
+        let section: SectionContent = {
+          id: '',
+          hero: false,
+          hasBorder: false,
+          contents: []
         }
-        const p: HTMLElement | null = title.querySelector('p')
-        if (p) {
-          section.contents.push({ type: 'h2', data: p.textContent })
+        //const banner: HTMLElement | null = hero.querySelector('img')
+        //if (banner && banner.hasAttribute('src')) {
+        //  section.hero = true
+        //}
+        const title: HTMLElement | null = hero.querySelector('section.title')
+        if (title) {
+          const h1: HTMLElement | null = title.querySelector('h1')
+          if (h1) {
+            section.contents.push({ type: 'h1', data: h1.textContent })
+          }
+          const p: HTMLElement | null = title.querySelector('p')
+          if (p) {
+            section.contents.push({ type: 'h2', data: p.textContent })
+          }
         }
+        s.push(section)
       }
-      s.push(section)
-    }
-    const posts: HTMLElement | null = doc.querySelector('#post-container')
-    // list of
-    // <section ?border="color">
-    //  <header>time + title</header>
-    //  <content>
-    //    <h2></h2> (once, usually)
-    //    <ul><li></li></ul> (multiple)
-    //    <div></div> (multiple)
-    //  </content>
-    // </section>
-    if (posts !== null) {
-      for (let i = 0; i < posts.childNodes.length; i++) {
-        const node = posts.childNodes[i]
-        if (node.nodeType === NodeType.ELEMENT_NODE && node.rawTagName.toLowerCase() === 'section') {
-          const section = await exctractSection(node)
-          if (section && section.contents.length > 0) {
-            s.push(section)
+      const posts: HTMLElement | null = doc.querySelector('#post-container')
+      // list of
+      // <section ?border="color">
+      //  <header>time + title</header>
+      //  <content>
+      //    <h2></h2> (once, usually)
+      //    <ul><li></li></ul> (multiple)
+      //    <div></div> (multiple)
+      //  </content>
+      // </section>
+      if (posts !== null) {
+        for (let i = 0; i < posts.childNodes.length; i++) {
+          const node = posts.childNodes[i]
+          if (node.nodeType === NodeType.ELEMENT_NODE && node.rawTagName.toLowerCase() === 'section') {
+            const section = await exctractSection(node)
+            if (section && section.contents.length > 0) {
+              s.push(section)
+            }
           }
         }
       }
+      //setLatestPostId(id)
+      setSections(s)
+      setArticle(a)
+      setLoading(false)
+    } catch (error) {
+      setFetchFailed(true)
+      setLoading(false)
     }
-    //setLatestPostId(id)
-    setSections(s)
-    setArticle(a)
-    setLoading(false)
   }
 
   /**
@@ -436,9 +447,12 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
   }
 
   return (
-    <Surface elevation={0} style={{ flex: 1, paddingTop: StatusBar.currentHeight }}>
-      {loading ? (
-        <ActivityIndicator style={{ flex: 1, flexGrow: 1, justifyContent: 'center', alignContent: 'center' }} />
+    <Surface elevation={0} style={{ flex: 1 }}>
+      <StatusBar translucent />
+      {fetchFailed ? (
+        <FetchError onRetry={init} />
+      ) : loading || !article ? (
+        <ActivityIndicator style={{ flexGrow: 1, justifyContent: 'center' }} color={colors.primary} size={40} />
       ) : (
         <>
           {/*
@@ -458,13 +472,18 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
             {i18n.t('live.newComments')}
           </Banner>
           */}
-          <FlatList
-            ListHeaderComponent={<CustomHeader article={article} loading={loading} />}
+          <CustomStatusBar animated translucent backgroundColor={'transparent'} />
+          <FlatListWithHeaders
+            disableAutoFixScroll
+            headerFadeInThreshold={0.8}
+            disableLargeHeaderFadeAnim={false}
             data={sections}
             extraData={sections}
-            renderItem={renderSection}
-            onEndReached={fetchLastPosts}
             keyExtractor={(item: any, index: number) => index.toString()}
+            renderItem={renderSection}
+            HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}
+            LargeHeaderComponent={(props) => <LargeHeaderComponent {...props} article={article} />}
+            onEndReached={fetchLastPosts}
           />
         </>
       )}

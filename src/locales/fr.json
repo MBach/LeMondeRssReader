@@ -16,7 +16,11 @@
     "pixels": "Pixels",
     "sciences": "Sciences",
     "thought": "Opinions",
-    "mag": "M le mag"
+    "m-styles": "Le goût du Monde",
+    "recent": {
+      "one": "Consultée dernièrement",
+      "other": "Consultées dernièrement"
+    }
   },
   "comments": {
     "fetchMore": "Commentaires page %{page} chargés"
@@ -27,18 +31,18 @@
   },
   "feeds": {
     "latestNews": "À la une",
-    "continuousNews": "En continu",
+    "stream": "En continu",
     "videos": "Vidéos",
     "podcasts": "Podcasts",
-    "portfolios": "Portfolios",
-    "mostRead": "Les plus lus",
-    "mostShared": "Les plus partagés",
     "international": "International",
     "europe": "Europe",
     "america": "Amériques",
-    "africa": "Le Monde Afrique",
-    "asia": "Asie Pacifique",
     "middleEast": "Proche-Orient",
+    "asia": "Asie Pacifique",
+    "africa": "Le Monde Afrique",
+    "lettersFrom": "Lettres de",
+    "geopolitics": "Géopolitique",
+    "internationalJustice": "Justice internationale",
     "politics": "Politique",
     "society": "Société",
     "decoders": "Les décodeurs",
@@ -47,17 +51,18 @@
     "campus": "Campus",
     "education": "Éducation",
     "economy": "Économie",
-    "companies": "Entreprises",
     "money": "Argent",
     "frenchEconomy": "Économie française",
+    "worldEconomy": "Économie mondiale",
     "industry": "Industrie",
     "jobs": "Emplois",
     "realEstate": "Immobilier",
+    "economyColumns": "Tribunes éco",
     "medias": "Médias",
     "culture": "Culture",
     "cinema": "Cinéma",
     "music": "Musiques",
-    "tv-radio": "Télévision et radio",
+    "tv-radio": "Télévision",
     "books": "Le Monde des livres",
     "arts": "Arts",
     "scene": "Scènes",
@@ -84,17 +89,18 @@
     "editorials": "Éditoriaux",
     "chronicles": "Chroniques",
     "grandstands": "Tribunes",
-    "mag": "M le mag",
-    "the-time": "L'époque",
-    "styles": "Styles",
-    "gastronomy": "Gastronomie",
-    "recipes": "Recettes du Monde",
-    "sexo": "Sexo"
+    "m-styles": "Le goût du Monde",
+    "le-monde-passe-a-table": "Le Monde passe à table",
+    "voyage": "Voyage",
+    "design": "Design & déco",
+    "fashion": "Mode",
+    "beauty": "Beauté",
+    "jewelry": "Horlogerie & joaillerie",
+    "mag": "M Le mag",
+    "m-perso": "L’époque"
   },
-  "drawer": {
-    "app": "App",
+  "bottomBar": {
     "fav": "Favoris",
-    "feed": "Flux",
     "settings": "Préférences"
   },
   "home": {
@@ -131,7 +137,7 @@
         "system2": "Thème par défaut du système"
       },
       "premiumColorTitle": "Changer la barre de statut",
-      "premiumColorDesc": "Les articles protégés affichent une barre de statut jaune",
+      "premiumColorDesc": "Les articles protégés affichent une barre de statut colorée",
       "shareTitle": "Icône de partage",
       "shareDesc": "Activer le partage d’un article (email, réseaux sociaux, etc.)"
     },

@@ -7,6 +7,7 @@ buildscript {
         targetSdkVersion = 34
         ndkVersion = "26.1.10909125"
         kotlinVersion = "1.9.22"
+        useExoplayerIMA = false
     }
     repositories {
         google()

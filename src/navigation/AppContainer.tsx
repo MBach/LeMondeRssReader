@@ -1,74 +1,22 @@
 import React, { useContext } from 'react'
-import { createDrawerNavigator } from '@react-navigation/drawer'
+import { Appearance, SafeAreaView } from 'react-native'
 import { DefaultTheme, LinkingOptions, NavigationContainer } from '@react-navigation/native'
-import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { DrawerNavigationProp } from '@react-navigation/drawer'
-import { adaptNavigationTheme, Provider, Surface } from 'react-native-paper'
+import { adaptNavigationTheme, Provider } from 'react-native-paper'
+import { useMaterial3Theme } from '@pchmn/expo-material3-theme'
 
-import { darkTheme, lightTheme } from '../constants'
 import { SettingsContext } from '../context/SettingsContext'
-import HomeScreen from '../screens/Home'
-import FavScreen from '../screens/Favorites'
-import SettingsScreen from '../screens/Settings'
-import ArticleScreen from '../screens/Article'
-import LiveScreen from '../screens/Live'
-import PodcastScreen from '../screens/Podcast'
-import VideoScreen from '../screens/Video'
-import { Theme, ParsedLink } from '../types'
-import DrawerContent from './DrawerContent'
-
-export type HomeScreenNames = ['Home', 'Article', 'Live', 'Podcast', 'Video']
-export type HomeStackParamList = Record<HomeScreenNames[number], ParsedLink>
-export type HomeStackNavigation = NativeStackNavigationProp<HomeStackParamList>
-export type DrawerNavigation = DrawerNavigationProp<HomeStackParamList>
-
-function HomeStack() {
-  const Stack = createNativeStackNavigator<HomeStackParamList>()
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false
-      }}>
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Article" component={ArticleScreen} />
-      <Stack.Screen name="Live" component={LiveScreen} />
-      <Stack.Screen name="Podcast" component={PodcastScreen} />
-      <Stack.Screen name="Video" component={VideoScreen} />
-    </Stack.Navigator>
-  )
-}
-
-function DrawerNavigator() {
-  type DrawerParamList = {
-    HomeStack: undefined
-    Favorites: undefined
-    Settings: undefined
-  }
-  const Drawer = createDrawerNavigator<DrawerParamList>()
-  return (
-    <Drawer.Navigator
-      screenOptions={{
-        headerShown: false
-      }}
-      drawerContent={(props) => <DrawerContent {...props} />}>
-      <Drawer.Screen name="HomeStack" component={HomeStack} />
-      <Drawer.Screen name="Favorites" component={FavScreen} />
-      <Drawer.Screen name="Settings" component={SettingsScreen} />
-    </Drawer.Navigator>
-  )
-}
-
-export type RootStackParamList = {
-  Drawer: undefined
-}
+import { BottomSheetProvider } from '../context/useBottomSheet'
+import { darkTheme, lightTheme } from '../constants'
+import RootStack from './RootStack'
+import { RootStackParamList, Theme } from '../types'
 
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['https://www.lemonde.fr'],
   config: {
     screens: {
-      Drawer: {
+      Root: {
         screens: {
-          HomeStack: {
+          MainStack: {
             screens: {
               Home: 'home',
               Article: ':category/article/:yyyy/:mm/:dd/:title',
@@ -86,26 +34,38 @@ const linking: LinkingOptions<RootStackParamList> = {
 }
 
 export default function AppContainer() {
-  const Stack = createNativeStackNavigator<RootStackParamList>()
+  const { LightTheme, DarkTheme } = adaptNavigationTheme({ reactNavigationLight: DefaultTheme, reactNavigationDark: DefaultTheme })
   const settingsContext = useContext(SettingsContext)
+  const { theme } = useMaterial3Theme({ fallbackSourceColor: '#FABD00' })
 
-  const { LightTheme } = adaptNavigationTheme({ reactNavigationLight: DefaultTheme })
-  const { DarkTheme } = adaptNavigationTheme({ reactNavigationDark: DefaultTheme })
+  const isLight = Appearance.getColorScheme() === 'light'
+  const paperTheme =
+    settingsContext.theme === Theme.SYSTEM
+      ? isLight
+        ? { ...lightTheme, colors: theme.light }
+        : { ...darkTheme, colors: theme.dark }
+      : settingsContext.theme === Theme.LIGHT
+        ? lightTheme
+        : darkTheme
 
-  const paperTheme = settingsContext.theme === Theme.LIGHT ? { ...lightTheme } : { ...darkTheme }
+  const navigationContainerTheme =
+    settingsContext.theme === Theme.SYSTEM
+      ? isLight
+        ? LightTheme
+        : DarkTheme
+      : settingsContext.theme === Theme.LIGHT
+        ? LightTheme
+        : DarkTheme
 
   return (
-    <Provider theme={settingsContext.theme === Theme.SYSTEM ? paperTheme : settingsContext.theme === Theme.LIGHT ? lightTheme : darkTheme}>
-      <Surface style={{ flex: 1 }}>
-        <NavigationContainer linking={linking} theme={settingsContext.theme === Theme.LIGHT ? LightTheme : DarkTheme}>
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: false
-            }}>
-            <Stack.Screen name="Drawer" component={DrawerNavigator} />
-          </Stack.Navigator>
+    <Provider theme={paperTheme}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <NavigationContainer linking={linking} theme={navigationContainerTheme}>
+          <BottomSheetProvider>
+            <RootStack />
+          </BottomSheetProvider>
         </NavigationContainer>
-      </Surface>
+      </SafeAreaView>
     </Provider>
   )
 }

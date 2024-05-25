@@ -1,6 +1,7 @@
 import ky from 'ky'
 
 const k = ky.create({
+  prefixUrl: 'https://www.lemonde.fr',
   throwHttpErrors: false,
   timeout: 5000
 })

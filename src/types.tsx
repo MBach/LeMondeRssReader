@@ -1,3 +1,4 @@
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HTMLElement } from 'node-html-parser'
 
 export interface ParsedRssItem {
@@ -15,14 +16,8 @@ export interface SubCategory {
   subPath?: string
 }
 
-interface ColorCategory {
-  dark: string
-  light: string
-}
-
 export interface Category {
   cat: string
-  color: ColorCategory
   subCats: SubCategory[]
 }
 
@@ -32,7 +27,6 @@ export interface Feed {
 
 export interface MenuEntry {
   cat: string
-  color: string
   name: string
   uri: string
   subPath?: string
@@ -49,6 +43,24 @@ export enum ArticleType {
   LIVE = 'Live',
   PODCAST = 'Podcast',
   VIDEO = 'Video'
+}
+
+export type MainScreenNames = 'Home' | 'Article' | 'Live' | 'Podcast' | 'Video'
+export type MainStackParamList = Record<MainScreenNames, ParsedLink>
+export type RootStackParamList = {
+  MainStack: undefined
+  Favorites: undefined
+  Settings: undefined
+  Root: undefined
+}
+export type MainStackNavigation = NativeStackNavigationProp<MainStackParamList>
+
+export interface ParsedLink {
+  category: string
+  yyyy: string
+  mm: string
+  dd: string
+  title: string
 }
 
 // Deep linking
@@ -132,9 +144,7 @@ export class ArticleHeaderParser {
         const width = widthItem.getAttribute('content')
         const height = heightItem.getAttribute('content')
         if (width && height) {
-          const imgRatio: number = parseInt(height) / parseInt(width)
-          console.log('imgRatio', imgRatio)
-          articleHeader.imgRatio = imgRatio
+          articleHeader.imgRatio = parseInt(height) / parseInt(width)
         }
       }
     }

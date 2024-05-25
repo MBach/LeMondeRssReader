@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useWindowDimensions, FlatList, Image, RefreshControl, StatusBar, StyleSheet, View, BackHandler } from 'react-native'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useWindowDimensions, FlatList, Image, RefreshControl, StyleSheet, View } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/core'
-import { useTheme, Appbar, Surface, Text, TouchableRipple, IconButton, Button } from 'react-native-paper'
+import { useTheme, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { parse, HTMLElement } from 'node-html-parser'
 import { RouteProp, useFocusEffect } from '@react-navigation/native'
@@ -9,10 +9,12 @@ import { KyResponse } from 'ky'
 
 import { DefaultImageFeed, IconMic, IconVideo, IconPremium } from '../assets'
 import { SettingsContext } from '../context/SettingsContext'
-import i18n from '../locales/i18n'
 import Api from '../api'
-import { ArticleType, MenuEntry, ParsedRssItem, parseAndGuessURL } from '../types'
-import { DrawerNavigation } from '../navigation/AppContainer'
+import { ArticleType, MainStackNavigation, MenuEntry, ParsedRssItem, parseAndGuessURL } from '../types'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import FetchError from '../components/FetchError'
+import CustomStatusBar from '../components/CustomStatusBar'
+import { useBottomSheet } from '../context/useBottomSheet'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
 
@@ -31,8 +33,9 @@ export default function HomeScreen() {
   const [fetchFailed, setFetchFailed] = useState<boolean>(false)
   const [items, setItems] = useState<ParsedRssItem[]>([])
   const [checkPremiumIcons, setCheckPremiumIcons] = useState<boolean>(false)
+  const sheetRef = useBottomSheet()
 
-  const navigation = useNavigation<DrawerNavigation>()
+  const navigation = useNavigation<MainStackNavigation>()
   const route = useRoute<RouteProp<ParamList, 'params'>>()
 
   const { colors } = useTheme()
@@ -66,41 +69,38 @@ export default function HomeScreen() {
     }
   })
 
+  useFocusEffect(
+    useCallback(() => {
+      sheetRef?.current?.snapToIndex(0)
+    }, [sheetRef?.current])
+  )
+
+  /*
+  useEffect(() => {
+    const backAction = () => {
+      console.log('back', navigation.getState())
+      sheetRef?.current?.snapToIndex(0)
+      return false
+    }
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction)
+    return () => backHandler.remove()
+  }, [sheetRef?.current])
+  */
+
   useEffect(() => {
     if (loading) {
       console.log('useEffect > already loading...')
       return
     }
-    console.log('useEffect > currentCategory changed', settingsContext.currentCategory)
     if (settingsContext.currentCategory) {
-      fetchFeed(false)
+      fetchAndCollapse()
     }
   }, [settingsContext.currentCategory])
 
-  useEffect(
-    () =>
-      navigation.addListener('beforeRemove', () => {
-        settingsContext.popCategories()
-      }),
-    [navigation]
-  )
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        if (navigation.canGoBack()) {
-          console.log('can go back!')
-          return false
-        } else {
-          console.log('pop?')
-          settingsContext.popCategories()
-          return true
-        }
-      }
-      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress)
-      return () => subscription.remove()
-    }, [settingsContext.currentCategory])
-  )
+  const fetchAndCollapse = async () => {
+    await fetchFeed(false)
+    sheetRef?.current?.collapse()
+  }
 
   const refreshFeed = async () => {
     setRefreshing(true)
@@ -111,13 +111,17 @@ export default function HomeScreen() {
 
   const fetchFeed = async (isRefreshing: boolean) => {
     setFetchFailed(false)
+    if (loading) {
+      console.log('fetchFeed, alreading loading...')
+      return
+    }
     if (!isRefreshing) {
       setLoading(true)
     }
-    const url = `https://www.lemonde.fr/${settingsContext.currentCategory?.uri}`
+
+    const url = `${settingsContext.currentCategory?.uri}`
     try {
       const response = await Api.get(url)
-      setLoading(false)
       if (!response.ok) {
         setFetchFailed(true)
         return
@@ -167,11 +171,11 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (items.length > 0 && !checkPremiumIcons) {
-      let subPath = ''
+      let subPath: string = ''
       if (route.params?.subPath) {
-        subPath = '/' + route.params.subPath
+        subPath = route.params.subPath
       }
-      Api.get(`https://www.lemonde.fr${subPath}`)
+      Api.get(subPath)
         .then((res: KyResponse) => res.text())
         .then((page: string) => {
           const doc = parse(page)
@@ -201,6 +205,7 @@ export default function HomeScreen() {
   const navigateTo = async (item: ParsedRssItem, type: ArticleType) => {
     const parsed = parseAndGuessURL(item.link)
     if (parsed) {
+      sheetRef?.current?.close()
       navigation.navigate(type, parsed)
     }
   }
@@ -269,39 +274,22 @@ export default function HomeScreen() {
       loaders.push(<Rect key={'r3-' + i} x="130" y={`${40 + i * d}`} rx="0" ry="0" width="170" height="12" />)
     }
     return (
-      <ContentLoader backgroundColor={colors.outline} foregroundColor={colors.background} viewBox={`6 0 ${window.width} ${window.height}`}>
+      <ContentLoader backgroundColor={colors.outline} foregroundColor={colors.background} viewBox={`24 0 ${window.width} ${window.height}`}>
         {loaders}
       </ContentLoader>
     )
   }
 
   return (
-    <Surface elevation={0} style={{ flex: 1 }}>
-      <StatusBar backgroundColor={'rgba(0,0,0,0.5)'} translucent animated />
-      <Appbar.Header>
-        <Appbar.Action icon="menu" onPress={navigation.openDrawer} />
-        {settingsContext.currentCategory && <Appbar.Content title={i18n.t(`feeds.${settingsContext.currentCategory.name}`)} />}
-      </Appbar.Header>
+    <SafeAreaView style={{ flex: 1 }}>
+      <CustomStatusBar animated backgroundColor={colors.surface} />
       {loading ? (
-        renderContentLoader()
+        <View style={{ flex: 1 }}>{renderContentLoader()}</View>
       ) : fetchFailed ? (
-        <View style={{ flex: 1, paddingHorizontal: 12, justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}>
-          <Text variant="headlineSmall" numberOfLines={2} style={{ textAlign: 'center' }}>
-            {i18n.t('home.fetchFailed')}
-          </Text>
-          <IconButton icon="network-strength-1-alert" size={80} />
-          <Button
-            buttonColor={colors.secondary}
-            textColor={colors.onSecondary}
-            style={{ marginTop: 24, padding: 8 }}
-            onPress={() => {
-              fetchFeed(false)
-            }}>
-            {i18n.t('home.retry')}
-          </Button>
-        </View>
+        <FetchError onRetry={fetchFeed.bind(null, false)} />
       ) : (
         <FlatList
+          contentContainerStyle={{ paddingBottom: 32 }}
           data={items}
           extraData={items}
           renderItem={renderItem}
@@ -309,6 +297,6 @@ export default function HomeScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshFeed} />}
         />
       )}
-    </Surface>
+    </SafeAreaView>
   )
 }

@@ -1,4 +1,4 @@
-This App for Android 6.0 Marshmallow and later (Android 14) reads RSS stream from LeMonde.fr.
+This App for Android 6.0 Marshmallow and later (Android 15) reads RSS stream from LeMonde.fr.
 
 Thanks to Web scraping, it renders the article and its comments in the feed directly in native Android components.
 

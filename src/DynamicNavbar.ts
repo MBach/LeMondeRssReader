@@ -16,21 +16,29 @@ declare module 'react-native' {
   }
 }
 
+const defaultImplementation: DynamicNavbarInterface = {
+  setLightNavigationBar: (): Promise<void> => {
+    console.warn('DynamicNavbar > setLightNavigationBar: not implemented')
+    return Promise.resolve()
+  },
+  setKeepScreenOn: (): Promise<void> => {
+    console.warn('DynamicNavbar > setKeepScreenOn: not implemented')
+    return Promise.resolve()
+  }
+}
+
 let DynamicNavbar: DynamicNavbarInterface
+
 if (Platform.OS === 'android') {
   const { DynamicNavbarModule } = NativeModules
-  const { setLightNavigationBar, setKeepScreenOn } = DynamicNavbarModule
-  DynamicNavbar = { setLightNavigationBar, setKeepScreenOn }
+  if (DynamicNavbarModule) {
+    const { setLightNavigationBar, setKeepScreenOn } = DynamicNavbarModule
+    DynamicNavbar = { setLightNavigationBar, setKeepScreenOn }
+  } else {
+    DynamicNavbar = defaultImplementation
+  }
 } else {
-  const setLightNavigationBar = (): Promise<void> => {
-    console.warn('DynamicNavbar > setLightNavigationBar: not implemented')
-    return new Promise(() => {})
-  }
-  const setKeepScreenOn = (): Promise<void> => {
-    console.warn('DynamicNavbar > setKeepScreenOn: not implemented')
-    return new Promise(() => {})
-  }
-  DynamicNavbar = { setLightNavigationBar, setKeepScreenOn }
+  DynamicNavbar = defaultImplementation
 }
 
 export default DynamicNavbar

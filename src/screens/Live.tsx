@@ -472,7 +472,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
             {i18n.t('live.newComments')}
           </Banner>
           */}
-          <CustomStatusBar animated translucent backgroundColor={'transparent'} />
+          <CustomStatusBar translucent backgroundColor={'transparent'} />
           <FlatListWithHeaders
             disableAutoFixScroll
             headerFadeInThreshold={0.8}

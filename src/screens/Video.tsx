@@ -99,7 +99,7 @@ export default function VideoScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {article?.isRestricted && <StatusBar backgroundColor={'rgba(255,196,0,1.0)'} barStyle="dark-content" animated />}
+      {article?.isRestricted && <StatusBar backgroundColor={'rgba(255,196,0,1.0)'} barStyle="dark-content" />}
       {fetchFailed ? (
         <FetchError onRetry={init} />
       ) : loading || !article ? (

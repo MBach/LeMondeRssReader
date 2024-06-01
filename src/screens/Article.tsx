@@ -5,6 +5,7 @@ import { useRoute } from '@react-navigation/core'
 import { useNavigation } from '@react-navigation/native'
 import parse, { HTMLElement, Node } from 'node-html-parser'
 import { FlatListWithHeaders } from '@codeherence/react-native-header'
+import WebView from 'react-native-webview'
 
 import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
@@ -76,6 +77,11 @@ export default function ArticleScreen() {
     },
     footerPadding: {
       paddingBottom: 40
+    },
+    videoContainer: {
+      marginTop: 20,
+      width: window.width,
+      height: (window.width * 9) / 16
     }
   })
 
@@ -154,6 +160,15 @@ export default function ArticleScreen() {
           } else if (htmlElement.classNames.includes('twitter-tweet')) {
             // TODO: Handle twitter-tweet case
             return null
+          } else if (htmlElement.classNames.startsWith('article__video-container')) {
+            const videoContainer = htmlElement.querySelector('.js_player')
+            if (videoContainer) {
+              const provider = videoContainer.getAttribute('data-provider')
+              const id = videoContainer.getAttribute('data-id')
+              if (provider && id) {
+                return { type: 'webview-video', provider, data: id }
+              }
+            }
           }
         }
         break
@@ -284,7 +299,6 @@ export default function ArticleScreen() {
           let p = extractContent(main.childNodes[i])
           if (p) {
             par.push(p)
-            console.log(par.length, p)
           }
         }
       }
@@ -362,6 +376,13 @@ export default function ArticleScreen() {
             </Card.Content>
           </Card>
         )
+      case 'webview-video':
+        switch (item.provider) {
+          case 'dailymotion':
+            return <WebView source={{ uri: `https://www.dailymotion.com/embed/video/${item.data}` }} style={styles.videoContainer} />
+          case 'youtube':
+            return <WebView source={{ uri: `https://www.youtube.com/embed/${item.data}` }} style={styles.videoContainer} />
+        }
       default:
         return null
     }
@@ -369,13 +390,7 @@ export default function ArticleScreen() {
 
   const renderCustomStatusBar = (article: ArticleHeader) => {
     const dynamicColor = settingsContext.hasDynamicStatusBarColor && article.isRestricted
-    return (
-      <CustomStatusBar
-        animated={dynamicColor}
-        backgroundColor={dynamicColor ? colors.primaryContainer : 'transparent'}
-        translucent={!dynamicColor}
-      />
-    )
+    return <CustomStatusBar backgroundColor={dynamicColor ? colors.primaryContainer : 'transparent'} translucent={!dynamicColor} />
   }
 
   const renderFooter = (article: ArticleHeader) => (

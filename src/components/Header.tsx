@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, Image, Share, View } from 'react-native'
 import { useTheme, IconButton, Portal, Snackbar, Text } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
-import Animated, { Extrapolation, interpolate, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import Animated, { Extrapolation, SharedValue, interpolate, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated'
 import { FadingView, Header, LargeHeader, ScalingView } from '@codeherence/react-native-header'
 
 import { SettingsContext } from '../context/SettingsContext'
 import i18n from '../locales/i18n'
-import { ArticleHeader, MainStackNavigation } from '../types'
+import { ArticleHeader, RootStackParamList } from '../types'
 
 const useFavoriteStatus = (article: ArticleHeader) => {
   const settingsContext = useContext(SettingsContext)
@@ -60,7 +61,7 @@ const FavoriteButton = ({ isFavorite, toggleFavorite, setSnackbarVisible }) => {
   )
 }
 
-const BannerImage = ({ article, scrollY }: { article: ArticleHeader; scrollY: Animated.SharedValue<number> }) => {
+const BannerImage = ({ article, scrollY }: { article: ArticleHeader; scrollY: SharedValue<number> }) => {
   const { width } = useWindowDimensions()
   const bannerTranslationStyle = useAnimatedStyle(() => {
     const bannerTranslation = interpolate(
@@ -98,18 +99,20 @@ const BannerImage = ({ article, scrollY }: { article: ArticleHeader; scrollY: An
   )
 }
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>
+
 export const HeaderComponent = ({
   showNavBar,
   scrollY,
   article
 }: {
-  showNavBar: Animated.SharedValue<number>
-  scrollY: Animated.SharedValue<number>
+  showNavBar: SharedValue<number>
+  scrollY: SharedValue<number>
   article: ArticleHeader
 }) => {
   const [isFavorite, toggleFavorite] = useFavoriteStatus(article)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
-  const navigation = useNavigation<MainStackNavigation>()
+  const navigation = useNavigation<NavigationProp>()
   const opacity = useDerivedValue(() => 1 - showNavBar.value)
 
   return (
@@ -125,9 +128,7 @@ export const HeaderComponent = ({
           <IconButton
             icon="arrow-left"
             size={20}
-            onPress={() => {
-              navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')
-            }}
+            onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
           />
         }
         headerCenter={<Text numberOfLines={2}>{article?.title}</Text>}

@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { BottomNavigation } from 'react-native-paper'
-// @ts-ignore
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { SettingsContext } from '../context/SettingsContext'

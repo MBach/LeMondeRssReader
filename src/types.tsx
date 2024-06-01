@@ -52,16 +52,9 @@ export type RootStackParamList = {
   Favorites: undefined
   Settings: undefined
   Root: undefined
+  Home: undefined
 }
 export type MainStackNavigation = NativeStackNavigationProp<MainStackParamList>
-
-export interface ParsedLink {
-  category: string
-  yyyy: string
-  mm: string
-  dd: string
-  title: string
-}
 
 // Deep linking
 
@@ -90,7 +83,7 @@ export const parseAndGuessURL = (url: string): ParsedLink | null => {
 
 // Article
 
-export type ArticleHeader = {
+export interface ArticleHeader {
   id?: string
   url: string
   imgUrl?: string
@@ -166,75 +159,83 @@ export class ArticleHeaderParser {
   }
 }
 
-/// Article and Live
+// BaseContent Interface
 
-export type BaseContent = {
+export interface BaseContent {
   type: string
   data: string
 }
+
+// Derived Content Types
 
 export class WebviewVideo implements BaseContent {
   type: string = 'webview-video'
   data: string
   provider: string
+
   constructor(data: string, provider: string) {
     this.data = data
     this.provider = provider
   }
 }
 
-export type CaptionContent = {
+export interface CaptionContent {
   type: 'caption'
   data: string
 }
 
-export type H1Content = {
+export interface H1Content {
   type: 'h1'
   data: string
 }
 
-export type H2Content = {
+export interface H2Content {
   type: 'h2'
   data: string
 }
 
-export type H3Content = {
+export interface H3Content {
   type: 'h3'
   data: string
 }
 
-export type DivContent = {
+export interface DivContent {
   type: 'div'
   data: string
 }
 
-export type ImgContent = {
+export interface ImgContent {
   type: 'img'
   uri: string
   ratio?: number
   caption?: string | null
 }
 
-export type ListContent = {
+export interface ListContent {
   type: 'list'
   data: string
 }
 
-export type IframeContent = {
+export interface IframeContent {
   type: 'iframe'
   data: string
 }
 
-export type ParagraphContent = {
+export interface ParagraphContent {
   type: 'paragraph'
   data: string
 }
 
-export type SeeAlsoButtonContent = {
+export interface SeeAlsoButtonContent {
   type: 'seeAlsoButton'
   data: string
   url: string
   isRestricted: boolean
+}
+
+export interface WebviewVideoContent extends BaseContent {
+  type: 'webview-video'
+  provider: string
 }
 
 export type ContentType =
@@ -248,24 +249,19 @@ export type ContentType =
   | ListContent
   | ParagraphContent
   | SeeAlsoButtonContent
+  | WebviewVideoContent
 
-// Live
+// Live Content
 
-export type QuoteContent = {
+export interface QuoteContent {
   type: 'quote'
   data: string
   author: string
 }
 
-export type WebviewVideoContent = {
-  type: 'webview-video'
-  provider: string
-  data: string
-}
+export type LiveContentType = ContentType | QuoteContent
 
-export type LiveContentType = ContentType | QuoteContent | WebviewVideoContent
-
-export type SectionContent = {
+export interface SectionContent {
   id: string
   hero: boolean
   hasBorder: boolean

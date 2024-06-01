@@ -1,26 +1,22 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, FlatList, Image, RefreshControl, StyleSheet, View } from 'react-native'
-import { useNavigation, useRoute } from '@react-navigation/core'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useNavigation } from '@react-navigation/core'
 import { useTheme, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { parse, HTMLElement } from 'node-html-parser'
-import { RouteProp, useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect } from '@react-navigation/native'
 import { KyResponse } from 'ky'
 
 import { DefaultImageFeed, IconMic, IconVideo, IconPremium } from '../assets'
 import { SettingsContext } from '../context/SettingsContext'
 import Api from '../api'
-import { ArticleType, MainStackNavigation, MenuEntry, ParsedRssItem, parseAndGuessURL } from '../types'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ArticleType, MainStackNavigation, ParsedRssItem, parseAndGuessURL } from '../types'
 import FetchError from '../components/FetchError'
 import CustomStatusBar from '../components/CustomStatusBar'
 import { useBottomSheet } from '../context/useBottomSheet'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
-
-type ParamList = {
-  params: MenuEntry | undefined
-}
 
 /**
  * @author Matthieu BACHELIER
@@ -29,6 +25,7 @@ type ParamList = {
  */
 export default function HomeScreen() {
   const [loading, setLoading] = useState<boolean>(false)
+  const [loadingPremium, setLoadingPremium] = useState<boolean>(false)
   const [refreshing, setRefreshing] = useState<boolean>(false)
   const [fetchFailed, setFetchFailed] = useState<boolean>(false)
   const [items, setItems] = useState<ParsedRssItem[]>([])
@@ -36,7 +33,6 @@ export default function HomeScreen() {
   const sheetRef = useBottomSheet()
 
   const navigation = useNavigation<MainStackNavigation>()
-  const route = useRoute<RouteProp<ParamList, 'params'>>()
 
   const { colors } = useTheme()
   const window = useWindowDimensions()
@@ -100,6 +96,7 @@ export default function HomeScreen() {
   const fetchAndCollapse = async () => {
     await fetchFeed(false)
     sheetRef?.current?.collapse()
+    setCheckPremiumIcons(false)
   }
 
   const refreshFeed = async () => {
@@ -170,12 +167,9 @@ export default function HomeScreen() {
   }
 
   useEffect(() => {
-    if (items.length > 0 && !checkPremiumIcons) {
-      let subPath: string = ''
-      if (route.params?.subPath) {
-        subPath = route.params.subPath
-      }
-      Api.get(subPath)
+    if (items.length > 0 && !checkPremiumIcons && !loadingPremium) {
+      setLoadingPremium(true)
+      Api.get(settingsContext.currentCategory?.subPath || '')
         .then((res: KyResponse) => res.text())
         .then((page: string) => {
           const doc = parse(page)
@@ -193,14 +187,16 @@ export default function HomeScreen() {
               }
             }
           })
-          setCheckPremiumIcons(true)
           setItems(rssItemListWithIcon)
         })
         .catch((error) => {
           console.warn('Error fetching premium icons:', error)
         })
+        .finally(() => {
+          setLoadingPremium(false)
+        })
     }
-  }, [items])
+  }, [items, checkPremiumIcons])
 
   const navigateTo = async (item: ParsedRssItem, type: ArticleType) => {
     const parsed = parseAndGuessURL(item.link)

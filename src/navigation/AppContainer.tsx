@@ -14,21 +14,17 @@ const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['https://www.lemonde.fr'],
   config: {
     screens: {
-      Root: {
+      MainStack: {
         screens: {
-          MainStack: {
-            screens: {
-              Home: 'home',
-              Article: ':category/article/:yyyy/:mm/:dd/:title',
-              Live: ':category/live/:yyyy/:mm/:dd/:title',
-              Podcast: 'podcast',
-              Video: ':category/video/:yyyy/:mm/:dd/:title'
-            }
-          },
-          Favorites: 'favorites',
-          Settings: 'settings'
+          Home: 'home',
+          Article: ':category/article/:yyyy/:mm/:dd/:title',
+          Live: ':category/live/:yyyy/:mm/:dd/:title',
+          Podcast: 'podcast',
+          Video: ':category/video/:yyyy/:mm/:dd/:title'
         }
-      }
+      },
+      Favorites: 'favorites',
+      Settings: 'settings'
     }
   }
 }

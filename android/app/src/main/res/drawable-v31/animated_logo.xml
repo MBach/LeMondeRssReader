@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="192dp"
+            android:height="192dp"
+            android:viewportWidth="192"
+            android:viewportHeight="192">
+            <group
+                android:translateX="24"
+                android:translateY="24"
+                android:scaleX="0.75"
+                android:scaleY="0.75">
+                <group android:name="common_properties">
+                    <path
+                        android:name="path_shadow_1"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/logo_outline_stroke"
+                        android:pathData="m 32.506761,47.223483 c -1.386072,3.465179 -1.178161,6.930361 0.485125,9.702503 1.52468,2.425626 4.296824,4.158219 7.484788,4.851252 -9.979718,0.762342 -14.415148,-6.445234 -7.969913,-14.553755"
+                        android:strokeWidth="1"
+                        android:strokeColor="@color/logo_outline_stroke" />
+                    <path
+                        android:name="path_shadow_2"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/logo_outline_stroke"
+                        android:pathData="m 56.069984,124.15047 c 0.693037,-2.49492 0.900948,-5.33637 0.900948,-8.31643 V 69.816459 c 0,-5.54429 -0.207911,-6.168024 -1.801896,-7.900613 h 0.277215 c 2.217715,-0.485126 3.395878,0 3.395878,4.781949 v 46.086895 c 0,5.33638 -0.831645,8.80155 -2.772145,11.36578"
+                        android:strokeWidth="1"
+                        android:strokeColor="@color/logo_outline_stroke" />
+                    <path
+                        android:name="path_shadow_3"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/logo_outline_stroke"
+                        android:pathData="m 60.020289,157.13899 c -1.316768,-4.36613 -5.267072,-7.96992 -12.197433,-9.00946 0.970252,-0.13862 2.009804,-0.13862 2.980056,-0.13862 8.524343,0.13862 11.088574,5.47499 11.504396,7.13828 l 0.207911,0.48513 z"
+                        android:strokeWidth="1"
+                        android:strokeColor="@color/logo_outline_stroke" />
+                    <path
+                        android:name="path_shadow_4"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/logo_outline_stroke"
+                        android:pathData="m 97.305627,156.65387 -0.831647,0.48512 H 95.087912 V 68.430385 c 0,-4.296824 -0.277214,-4.296824 -3.049362,-6.237324 l -3.881,-2.772145 2.564237,-1.316767 c 2.079105,1.593982 5.059162,3.811697 5.059162,4.019608 1.247464,1.10886 1.524678,1.732589 1.524678,4.296823 v 90.3026 z"
+                        android:strokeWidth="1"
+                        android:strokeColor="@color/logo_outline_stroke" />
+                    <path
+                        android:name="path_shadow_5"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/logo_outline_stroke"
+                        android:pathData="m 138.05615,65.450332 -13.1677,-7.831309 1.94051,-1.386071 12.68256,7.623394 c -0.48512,0.415823 -0.97025,0.900949 -1.45537,1.593986"
+                        android:strokeWidth="1"
+                        android:strokeColor="@color/logo_outline_stroke" />
+                    <path
+                        android:name="path_shadow_6"
+                        android:fillAlpha="0"
+                        android:fillColor="@color/logo_outline_stroke"
+                        android:pathData="m 135.76912,153.32729 c -3.57815,-2.74818 -5.59482,-7.06593 -5.40568,-11.57369 V 88.667037 c 0,-7.276879 1.52468,-12.405343 4.01961,-15.870525 -1.47779,4.060894 -2.18295,8.362378 -2.0791,12.682558 l 0.20791,54.33402 c 0,5.89081 1.66328,9.7025 5.68289,12.54396 l 4.98986,3.46517 -2.04446,1.31677 z"
+                        android:strokeWidth="1"
+                        android:strokeColor="@color/logo_outline_stroke" />
+                </group>
+                <path
+                    android:name="path_letter"
+                    android:fillColor="@color/logo_fill_letter_m"
+                    android:fillType="evenOdd"
+                    android:pathData="m 65.452206,153.8011 c -1.600454,-4.52302 -6.262645,-9.18521 -14.612837,-9.53312 a 48.639871,48.639871 0 0 0 -28.529826,10.0202 l -1.809207,-2.29629 c 6.749737,-7.376 22.545518,-19.34461 39.17632,-19.48377 8.69812,0 14.821594,2.92256 19.135863,7.58475 l 7.306419,-4.03594 2.087542,4.17509 z M 164.8891,54.990503 c -6.26266,3.757586 -8.35021,8.767703 -8.35021,16.491628 v 61.652239 c 0,3.89677 0.41751,5.63637 2.50508,6.81932 l 2.08755,1.11338 5.84513,-3.40968 1.94838,3.89676 -20.17964,12.03822 -6.9585,-4.66222 c -2.99218,-2.08754 -4.31427,-4.66217 -4.31427,-9.6723 V 84.21618 c 0,-10.298574 3.20091,-15.795781 7.72393,-19.205449 l 2.57464,-1.878791 -18.99669,-11.133592 -8.55893,5.149287 v 80.161835 c 0,6.81931 -0.90463,7.79353 -6.95851,10.85526 0,0 -4.59259,2.2267 -11.06401,5.5668 h -1.25253 V 64.941148 c 0,-4.314264 -0.48708,-5.288451 -2.922561,-7.236834 l -6.749734,-5.497211 -8.211023,4.662194 v 46.065243 c 0,8.07184 -1.322124,13.91696 -7.79352,17.88331 l -16.074121,10.1594 -1.600451,-2.78341 c 5.010114,-3.82718 6.123476,-9.32439 6.123476,-15.72617 V 65.358659 c 0,-6.958496 -0.974193,-9.672309 -8.211028,-8.350192 -2.783395,0.417509 -6.958491,1.113355 -9.533136,1.391696 -10.646494,1.461283 -15.169515,-6.123475 -7.863098,-15.587035 0,0 1.739624,-2.435454 6.262647,-8.211012 l 3.479245,2.435472 -2.50506,3.687993 c -3.409659,4.870961 -0.695844,7.376003 4.870947,5.427633 A 462.73984,462.73984 0 0 0 61.27711,41.838943 c 15.308687,-5.984306 20.945064,3.896758 21.780092,9.672309 l 18.996688,-11.411932 16.42204,12.525296 20.31878,-12.525296 15.58705,8.83729 c 5.35804,3.061736 7.93269,1.739623 11.6207,-0.208747 l 3.06173,-1.600464 2.43547,4.035936 z"
+                    android:strokeWidth="1" />
+            </group>
+        </vector>
+
+
+    </aapt:attr>
+    <target
+        android:name="path_shadow_1"
+        android:animation="@animator/common_animation" />
+    <target
+        android:name="path_shadow_2"
+        android:animation="@animator/common_animation" />
+    <target
+        android:name="path_shadow_3"
+        android:animation="@animator/common_animation" />
+    <target
+        android:name="path_shadow_4"
+        android:animation="@animator/common_animation" />
+    <target
+        android:name="path_shadow_5"
+        android:animation="@animator/common_animation" />
+    <target
+        android:name="path_shadow_6"
+        android:animation="@animator/common_animation" />
+</animated-vector>

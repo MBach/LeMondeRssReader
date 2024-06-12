@@ -1,5 +1,6 @@
 {
   "article": {
+    "authors": "By {{authors}}",
     "favAdded": "Favorite added",
     "favRemoved": "Favorite removed",
     "register": "Register",

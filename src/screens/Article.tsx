@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native'
 import parse, { HTMLElement, Node } from 'node-html-parser'
 import { FlatListWithHeaders } from '@codeherence/react-native-header'
 import WebView from 'react-native-webview'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
@@ -48,7 +49,7 @@ export default function ArticleScreen() {
   const styles = StyleSheet.create({
     subtitle: {
       paddingHorizontal: 8,
-      marginVertical: 8
+      marginTop: 8
     },
     paragraph: {
       paddingHorizontal: 8,
@@ -234,6 +235,9 @@ export default function ArticleScreen() {
             a.authors = a.authors.concat(author.text.trim())
           }
         }
+      } else if (a.authors === '' || a.authors === 'Le Monde') {
+        let authors = doc.querySelectorAll('a.article__author-link')
+        a.authors = authors.map((author: HTMLElement) => author.textContent.trim()).join(', ')
       }
 
       const main = doc.querySelector('main')
@@ -263,7 +267,11 @@ export default function ArticleScreen() {
 
       // Paragraphes and images
       let par: ContentType[] = []
-      par.push({ type: 'h3', data: a.description })
+      par.push({ type: 'description', data: a.description })
+      a.authors && par.push({ type: 'authors', data: a.authors })
+      if (a.date || a.readingTime) {
+        par.push({ type: 'dateReadingTime', date: a.date, readingTime: a.readingTime })
+      }
 
       const footers = main.getElementsByTagName('footer')
       if (footers && footers.length > 0) {
@@ -318,6 +326,36 @@ export default function ArticleScreen() {
           <Text variant="titleLarge" style={styles.subtitle}>
             {item.data}
           </Text>
+        )
+      case 'description':
+        return (
+          <Card mode="elevated" style={{ margin: 8 }}>
+            <Card.Content>
+              <Text variant="titleMedium">{item.data}</Text>
+            </Card.Content>
+          </Card>
+        )
+      case 'authors':
+        return (
+          <Text variant="bodyMedium" style={styles.subtitle}>
+            {i18n.t('article.authors', { authors: item.data })}
+          </Text>
+        )
+      case 'dateReadingTime':
+        return (
+          <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+            {item.date && (
+              <Text variant="bodyMedium" numberOfLines={2} style={{ paddingStart: 8, marginTop: 8, color: colors.outline, flexShrink: 1 }}>
+                {item.date}
+              </Text>
+            )}
+            {item.readingTime && (
+              <Text variant="bodyMedium" style={[styles.subtitle, { minWidth: 100 }]}>
+                <Icon name="timer-sand" size={16} />
+                {item.readingTime}
+              </Text>
+            )}
+          </View>
         )
       case 'h3':
         return (

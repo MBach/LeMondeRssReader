@@ -1,5 +1,6 @@
 {
   "article": {
+    "authors": "Par {{authors}}",
     "favAdded": "Favori ajouté",
     "favRemoved": "Favori supprimé",
     "register": "S’abonner",

@@ -199,6 +199,22 @@ export interface H3Content {
   data: string
 }
 
+export interface AuthorsContent {
+  type: 'authors'
+  data: string
+}
+
+export interface DateReadingTime {
+  type: 'dateReadingTime'
+  date?: string
+  readingTime?: string
+}
+
+export interface DescContent {
+  type: 'description'
+  data: string
+}
+
 export interface DivContent {
   type: 'div'
   data: string
@@ -239,7 +255,10 @@ export interface WebviewVideoContent extends BaseContent {
 }
 
 export type ContentType =
+  | AuthorsContent
   | CaptionContent
+  | DateReadingTime
+  | DescContent
   | DivContent
   | H1Content
   | H2Content

@@ -67,7 +67,11 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      sheetRef?.current?.snapToIndex(0)
+      // Small fix to avoid layout issues
+      const timer = setTimeout(() => {
+        sheetRef?.current?.snapToIndex(0)
+      }, 350)
+      return () => clearTimeout(timer)
     }, [sheetRef?.current])
   )
 
@@ -278,7 +282,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <CustomStatusBar animated backgroundColor={colors.surface} />
+      <CustomStatusBar translucent={true} backgroundColor={colors.surface} />
       {loading ? (
         <View style={{ flex: 1 }}>{renderContentLoader()}</View>
       ) : fetchFailed ? (

@@ -6,6 +6,7 @@ import { ActivityIndicator, IconButton, List, Snackbar, Text } from 'react-nativ
 import i18n from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
 import { ArticleHeader, MainStackNavigation, parseAndGuessURL } from '../types'
+import { useBottomSheet } from '../context/useBottomSheet'
 
 /**
  * @author Matthieu BACHELIER
@@ -18,6 +19,7 @@ export default function FavScreen() {
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [favorites, setFavorites] = useState<ArticleHeader[]>([])
   const navigation = useNavigation<MainStackNavigation>()
+  const sheetRef = useBottomSheet()
 
   useEffect(() => {
     getFavorites()
@@ -46,6 +48,7 @@ export default function FavScreen() {
       onPress={() => {
         const parsed = parseAndGuessURL(item.url)
         if (parsed) {
+          sheetRef?.current?.close()
           navigation.navigate(parsed.type, parsed)
         }
       }}

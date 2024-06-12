@@ -91,6 +91,7 @@ const useSettings = (): UseSettingsType => {
         break
       default:
       case 'system':
+        DynamicNavbar.setLightNavigationBar(Appearance.getColorScheme() === 'light')
         _setTheme(Theme.SYSTEM)
         break
     }
@@ -242,12 +243,7 @@ const useSettings = (): UseSettingsType => {
         DynamicNavbar.setLightNavigationBar(true)
         break
       case Theme.SYSTEM:
-        const colorScheme = Appearance.getColorScheme()
-        if (colorScheme === 'light') {
-          DynamicNavbar.setLightNavigationBar(true)
-        } else {
-          DynamicNavbar.setLightNavigationBar(false)
-        }
+        DynamicNavbar.setLightNavigationBar(Appearance.getColorScheme() === 'light')
         break
     }
     _setTheme(theme)

@@ -1,14 +1,16 @@
-import React, { useContext } from 'react'
-import { Appearance, SafeAreaView } from 'react-native'
-import { DefaultTheme, LinkingOptions, NavigationContainer } from '@react-navigation/native'
+import { useContext } from 'react'
+import { Appearance } from 'react-native'
+import { DefaultTheme, type LinkingOptions, NavigationContainer } from '@react-navigation/native'
 import { adaptNavigationTheme, Provider } from 'react-native-paper'
 import { useMaterial3Theme } from '@pchmn/expo-material3-theme'
 
 import { SettingsContext } from '../context/SettingsContext'
 import { BottomSheetProvider } from '../context/useBottomSheet'
 import { darkTheme, lightTheme } from '../constants'
-import RootStack from './RootStack'
+import { RootStack } from './RootStack'
 import { RootStackParamList, Theme } from '../types'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['https://www.lemonde.fr'],
@@ -29,7 +31,9 @@ const linking: LinkingOptions<RootStackParamList> = {
   }
 }
 
-export default function AppContainer() {
+const queryClient = new QueryClient()
+
+export function AppContainer() {
   const { LightTheme, DarkTheme } = adaptNavigationTheme({ reactNavigationLight: DefaultTheme, reactNavigationDark: DefaultTheme })
   const settingsContext = useContext(SettingsContext)
   const { theme } = useMaterial3Theme({ fallbackSourceColor: '#FABD00' })
@@ -54,14 +58,14 @@ export default function AppContainer() {
         : DarkTheme
 
   return (
-    <Provider theme={paperTheme}>
-      <SafeAreaView style={{ flex: 1 }}>
+    <QueryClientProvider client={queryClient}>
+      <Provider theme={paperTheme}>
         <NavigationContainer linking={linking} theme={navigationContainerTheme}>
           <BottomSheetProvider>
             <RootStack />
           </BottomSheetProvider>
         </NavigationContainer>
-      </SafeAreaView>
-    </Provider>
+      </Provider>
+    </QueryClientProvider>
   )
 }

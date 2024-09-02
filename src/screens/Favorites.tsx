@@ -1,24 +1,26 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { FlatList, SafeAreaView, StatusBar, View } from 'react-native'
+import { useCallback, useContext, useEffect, useState } from 'react'
+import { FlatList, StatusBar, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { ActivityIndicator, IconButton, List, Snackbar, Text } from 'react-native-paper'
 
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
-import { ArticleHeader, MainStackNavigation, parseAndGuessURL } from '../types'
+import { ArticleHeader, parseAndGuessURL, RootStackParamList } from '../types'
 import { useBottomSheet } from '../context/useBottomSheet'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
  * @version 2.0
  */
-export default function FavScreen() {
+export function FavScreen() {
   const settingsContext = useContext(SettingsContext)
   const [loading, setLoading] = useState(true)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [favorites, setFavorites] = useState<ArticleHeader[]>([])
-  const navigation = useNavigation<MainStackNavigation>()
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const sheetRef = useBottomSheet()
 
   useEffect(() => {
@@ -49,7 +51,10 @@ export default function FavScreen() {
         const parsed = parseAndGuessURL(item.url)
         if (parsed) {
           sheetRef?.current?.close()
-          navigation.navigate(parsed.type, parsed)
+          navigation.navigate('MainStack', {
+            screen: 'Article',
+            params: parsed
+          })
         }
       }}
       right={() => (

@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Image, StatusBar, StyleSheet, useWindowDimensions } from 'react-native'
-import { useNavigation, useRoute } from '@react-navigation/native'
-import { ActivityIndicator, Card, List, Surface, Text, useTheme } from 'react-native-paper'
-import parse, { HTMLElement, Node, NodeType } from 'node-html-parser'
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { ActivityIndicator, Banner, Card, Chip, List, Surface, Text, useTheme } from 'react-native-paper'
+import parse, { HTMLElement, Node } from 'node-html-parser'
 import ky from 'ky'
 import WebView from 'react-native-webview'
 import { FlatListWithHeaders } from '@codeherence/react-native-header'
@@ -19,34 +20,31 @@ import {
   MainStackNavigation
 } from '../types'
 import DynamicNavbar from '../DynamicNavbar'
-import Api from '../api'
+import { Api } from '../api'
 import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
 import { IconPremium } from '../assets'
-import FetchError from '../components/FetchError'
-import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { CustomStatusBar } from '../components/CustomStatusBar'
+import { i18n } from '../locales/i18n'
+import { View } from 'react-native'
 
-/*
-function useInterval(callback: (() => Promise<void>) | undefined, delay: number) {
-  const savedCallback = useRef()
-
-  useEffect(() => {
-    savedCallback.current = callback
-  })
-
-  useEffect(() => {
-    function tick() {
-      savedCallback.current()
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay)
-      return () => clearInterval(id)
-    }
-  }, [delay])
-}
-*/
-
-class GetPostsRes {
-  posts: string
+interface LiveAjaxResponse {
+  created: any[]
+  updated: any[]
+  deleted: any[]
+  article: any | null
+  isOpen: boolean
+  isLocked: boolean
+  lastPost: {
+    date: string
+    timezone_type: number
+    timezone: string
+  } | null
+  lastArticleModification: {
+    date: string
+    timezone_type: number
+    timezone: string
+  } | null
 }
 
 /**
@@ -54,20 +52,23 @@ class GetPostsRes {
  * @since 2020-03
  * @version 2.0
  */
-export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => void }*/) {
+export function LiveScreen() {
   const route = useRoute()
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
   const window = useWindowDimensions()
   const navigation = useNavigation<MainStackNavigation>()
+  const isFocused = useIsFocused()
+  const queryClient = useQueryClient()
+  console.log('Live > isFocused', isFocused)
 
   const [loading, setLoading] = useState(true)
   const [fetchFailed, setFetchFailed] = useState<boolean>(false)
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
   const [sections, setSections] = useState<SectionContent[]>([])
 
-  //const [latestPostId, setLatestPostId] = useState(null)
-  //const [newCommentsReceived, setNewCommentsReceived] = useState(false)
+  const [lastPost, setLastPost] = useState<string | null>(null)
+  const [lastArticleModification, setLastArticleModification] = useState<string | null>(null)
 
   const styles = StyleSheet.create({
     imageHeader: {
@@ -97,22 +98,68 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
     }
   })
 
-  /*
-  useInterval(async () => {
-    if (latestPostId && articleId) {
-      const response = await ky.get(`https://www.lemonde.fr/ajax/live/${articleId}/after/${latestPostId}`)
-      if (response.ok) {
-        const res = await response.json()
-        if (res.elements.length > 0) {
-          setNewCommentsReceived(true)
-        }
+  const { data } = useQuery<LiveAjaxResponse | null>({
+    queryKey: ['newPosts', article?.id, lastPost, lastArticleModification],
+    queryFn: async (): Promise<LiveAjaxResponse | null> => {
+      if (!article?.id) {
+        //console.warn('no article id')
+        return null
       }
+
+      const baseUrl = `https://www.lemonde.fr/ajax/live/article/${article.id}`
+      const params = new URLSearchParams()
+      if (lastPost) {
+        params.append('lastPost', lastPost)
+      }
+      if (lastArticleModification) {
+        params.append('lastArticleModification', lastArticleModification)
+      }
+
+      console.debug('about to fetch new comments')
+
+      const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl
+      const response = await ky.get(url)
+      if (!response.ok) {
+        // Failed to fetch new posts
+        console.warn('Failed to fetch new posts')
+        return null
+      }
+      return response.json() as Promise<LiveAjaxResponse>
+    },
+    enabled: isFocused && !!article?.id,
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true
+  })
+
+  useEffect(() => {
+    if (data) {
+      //console.log('useEffect > data', data)
+      const newLastPost = data.lastPost?.date?.replace('.000000', '') || null
+      const newLastArticleModification = data.lastArticleModification?.date?.replace('.000000', '') || null
+      //console.log('useEffect > newLastPost=' + newLastPost + ', lastPost=' + lastPost)
+      //console.log(
+      //  'useEffect > newLastArticleModification=' + newLastArticleModification + ', lastArticleModification=' + lastArticleModification
+      //)
+      if (newLastPost) {
+        setLastPost(newLastPost)
+      }
+      if (newLastArticleModification) {
+        setLastArticleModification(newLastArticleModification)
+      }
+    } else {
+      //console.log('useEffect > no data')
     }
-  }, 5000)
-  */
+  }, [data])
 
   useEffect(() => {
     init()
+    return () => {
+      console.log('useEffect > return > cancelling queries')
+      queryClient.cancelQueries({
+        queryKey: ['newPosts'],
+        exact: false
+      })
+    }
   }, [])
 
   useEffect(() => {
@@ -129,95 +176,92 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
       console.warn('no params!')
       return
     }
+
     setFetchFailed(false)
+
     try {
       const l = route.params as ParsedLink
       const response = await Api.get(`${l.category}/live/${l.yyyy}/${l.mm}/${l.dd}/${l.title}`)
       const doc = parse(await response.text())
       const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
-      const parser = new ArticleHeaderParser()
-      const a = parser.parse(metas)
 
-      let s: SectionContent[] = []
+      const parser = new ArticleHeaderParser()
+      const a: ArticleHeader = parser.parse(metas)
+
+      const uniqueSectionKeys = new Set<string>()
+      const s: SectionContent[] = []
+
+      const addUniqueSection = (section: SectionContent, key: string) => {
+        if (!uniqueSectionKeys.has(key)) {
+          uniqueSectionKeys.add(key)
+          s.push(section)
+        }
+      }
+
+      // Process hero section
       const hero: HTMLElement | null = doc.querySelector('section.hero__live-content')
       if (hero !== null) {
-        let section: SectionContent = {
+        const section: SectionContent = {
           id: '',
           hero: false,
           hasBorder: false,
           contents: []
         }
-        //const banner: HTMLElement | null = hero.querySelector('img')
-        //if (banner && banner.hasAttribute('src')) {
-        //  section.hero = true
-        //}
+
+        const meta: HTMLElement | null = doc.querySelector('div.hero__live-meta')
+        if (meta) {
+          const label = meta.querySelector('span.flag-live-cartridge__label')
+          const metaDate = meta.querySelector('span.meta__date')
+          if (label && metaDate) {
+            section.contents.push({ type: 'chip', data: label.textContent, lastUpdated: metaDate.textContent })
+          }
+        }
+
         const title: HTMLElement | null = hero.querySelector('section.title')
         if (title) {
           const h1: HTMLElement | null = title.querySelector('h1')
-          if (h1) {
+          if (h1 && a.title.trim() !== h1.textContent.trim()) {
             section.contents.push({ type: 'h1', data: h1.textContent })
           }
+
           const p: HTMLElement | null = title.querySelector('p')
           if (p) {
             section.contents.push({ type: 'h2', data: p.textContent })
           }
         }
-        s.push(section)
+
+        if (section.contents.length > 0) {
+          addUniqueSection(section, 'hero')
+        }
       }
+
+      // Process post sections
       const posts: HTMLElement | null = doc.querySelector('#post-container')
-      // list of
-      // <section ?border="color">
-      //  <header>time + title</header>
-      //  <content>
-      //    <h2></h2> (once, usually)
-      //    <ul><li></li></ul> (multiple)
-      //    <div></div> (multiple)
-      //  </content>
-      // </section>
       if (posts !== null) {
-        for (let i = 0; i < posts.childNodes.length; i++) {
-          const node = posts.childNodes[i]
-          if (node.nodeType === NodeType.ELEMENT_NODE && node.rawTagName.toLowerCase() === 'section') {
-            const section = await exctractSection(node)
-            if (section && section.contents.length > 0) {
-              s.push(section)
-            }
+        const sections = Array.from(posts.children).filter((node) => node.rawTagName.toLowerCase() === 'section')
+
+        // console.log('sections found: ', posts.children.length)
+        for (const node of sections) {
+          //if (!(node instanceof HTMLElement)) continue
+          const dataPostId = node.getAttribute('data-post-id')
+          // console.debug('dataPostId', dataPostId)
+
+          if (!dataPostId) continue // skip if neither id nor data-post-id
+          const section = await exctractSection(node)
+          // console.debug(section)
+
+          if (section && section.contents.length > 0) {
+            addUniqueSection(section, dataPostId)
           }
         }
       }
-      //setLatestPostId(id)
+
       setSections(s)
       setArticle(a)
       setLoading(false)
     } catch (error) {
       setFetchFailed(true)
       setLoading(false)
-    }
-  }
-
-  /**
-   *
-   */
-  const fetchLastPosts = async () => {
-    if (article && article.id && sections.length > 10) {
-      const lastSection = sections[sections.length - 1]
-      console.log('about to fetch last posts', lastSection)
-      const response = await ky
-        .get(`https://www.lemonde.fr/ajax/live/article/${article.id}/scroll?lastPost=${lastSection.id}`)
-        .json<GetPostsRes>()
-      if (!response || !response.posts || response.posts.length === 0) {
-        console.log('no new posts, exiting...')
-        return
-      }
-      let s = [...sections]
-      for (const post of response.posts) {
-        const node = parse(post)
-        const newSection = await exctractSection(node)
-        if (newSection) {
-          s.push(newSection)
-        }
-      }
-      setSections(s)
     }
   }
 
@@ -235,7 +279,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
       contents: []
     }
     const htmlElement: HTMLElement = node as HTMLElement
-    const border = htmlElement.querySelector('.flag-live__border')
+    const border = htmlElement.querySelector('.flag-live__border, .flag-live__border__label')
     if (border && border.hasAttribute('style')) {
       // Assume that inline style is always 'background-color'
       section.hasBorder = true
@@ -256,6 +300,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
       contents = htmlElement.querySelectorAll('.meta__social--new-live-post > *')
     }
     for (const content of contents) {
+      console.log(content.id)
       switch (content.rawTagName) {
         case 'h2':
           section.contents.push({ type: content.rawTagName, data: content.textContent })
@@ -336,6 +381,15 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
 
   const renderContent = (content: LiveContentType, index: number) => {
     switch (content.type) {
+      case 'chip':
+        return (
+          <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+            <Chip icon="information" compact style={{ marginEnd: 12 }}>
+              {content.data}
+            </Chip>
+            <Text style={{ flex: 1 }}>{content.lastUpdated}</Text>
+          </View>
+        )
       case 'h1':
         return (
           <Text key={index} variant="titleLarge" style={styles.sm}>
@@ -455,35 +509,30 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
         <ActivityIndicator style={{ flexGrow: 1, justifyContent: 'center' }} color={colors.primary} size={40} />
       ) : (
         <>
-          {/*
           <Banner
             style={{ marginTop: 32 }}
             icon="update"
-            visible={newCommentsReceived}
+            visible={Array.isArray(data?.created) && data.created.length > 0}
             actions={[
               {
                 label: i18n.t('live.view'),
-                onPress: () => {
-                  setNewCommentsReceived(false)
-                  //onRefresh()
-                }
+                onPress: () => {}
               }
             ]}>
             {i18n.t('live.newComments')}
           </Banner>
-          */}
-          <CustomStatusBar translucent backgroundColor={'transparent'} />
+          <CustomStatusBar translucent />
           <FlatListWithHeaders
             disableAutoFixScroll
             headerFadeInThreshold={0.8}
             disableLargeHeaderFadeAnim={false}
             data={sections}
             extraData={sections}
-            keyExtractor={(item: any, index: number) => index.toString()}
+            keyExtractor={(_: any, index: number) => index.toString()}
             renderItem={renderSection}
             HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}
             LargeHeaderComponent={(props) => <LargeHeaderComponent {...props} article={article} />}
-            onEndReached={fetchLastPosts}
+            // onEndReached={fetchLastPosts}
           />
         </>
       )}

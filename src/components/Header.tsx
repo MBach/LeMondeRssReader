@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { FC, useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, Image, Share, View } from 'react-native'
 import { useTheme, IconButton, Portal, Snackbar, Text } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
@@ -31,7 +31,8 @@ const useFavoriteStatus = (article: ArticleHeader) => {
   return [isFavorite, toggleFavorite]
 }
 
-const ShareButton = ({ article }) => {
+type ShareButtonProps = { article: ArticleHeader }
+const ShareButton: FC<ShareButtonProps> = ({ article }) => {
   const shareContent = async () => {
     if (!article) return
     try {
@@ -42,7 +43,12 @@ const ShareButton = ({ article }) => {
   return article && <IconButton icon="share-variant" size={20} onPress={shareContent} />
 }
 
-const FavoriteButton = ({ isFavorite, toggleFavorite, setSnackbarVisible }) => {
+type FavoriteButtonProps = {
+  isFavorite: boolean
+  toggleFavorite: () => Promise<boolean>
+  setSnackbarVisible: (value: boolean) => void
+}
+const FavoriteButton: FC<FavoriteButtonProps> = ({ isFavorite, toggleFavorite, setSnackbarVisible }) => {
   const { colors } = useTheme()
 
   const handlePress = async () => {
@@ -61,7 +67,8 @@ const FavoriteButton = ({ isFavorite, toggleFavorite, setSnackbarVisible }) => {
   )
 }
 
-const BannerImage = ({ article, scrollY }: { article: ArticleHeader; scrollY: SharedValue<number> }) => {
+type BannerImageProps = { article: ArticleHeader; scrollY: SharedValue<number> }
+const BannerImage: FC<BannerImageProps> = ({ article, scrollY }) => {
   const { width } = useWindowDimensions()
   const bannerTranslationStyle = useAnimatedStyle(() => {
     const bannerTranslation = interpolate(
@@ -114,6 +121,7 @@ export const HeaderComponent = ({
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const navigation = useNavigation<NavigationProp>()
   const opacity = useDerivedValue(() => 1 - showNavBar.value)
+  const settingsContext = useContext(SettingsContext)
 
   return (
     <View style={{ position: 'relative' }}>
@@ -137,7 +145,7 @@ export const HeaderComponent = ({
         headerRightStyle={{ flex: 1, flexGrow: 1, minWidth: 60 }}
         headerRight={
           <>
-            <ShareButton article={article} />
+            {settingsContext.share && <ShareButton article={article} />}
             <FavoriteButton isFavorite={isFavorite} toggleFavorite={toggleFavorite} setSnackbarVisible={setSnackbarVisible} />
           </>
         }
@@ -152,7 +160,7 @@ export const HeaderComponent = ({
   )
 }
 
-export const LargeHeaderComponent = ({ scrollY, article }) => (
+export const LargeHeaderComponent: FC<BannerImageProps> = ({ article, scrollY }) => (
   <LargeHeader headerStyle={{ paddingHorizontal: 0, marginTop: 140 }}>
     <ScalingView scrollY={scrollY}>
       <Text variant="headlineSmall" style={{ paddingHorizontal: 8 }}>

@@ -154,7 +154,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
         const title: HTMLElement | null = hero.querySelector('section.title')
         if (title) {
           const h1: HTMLElement | null = title.querySelector('h1')
-          if (h1) {
+          if (h1 && article?.title !== h1.textContent) {
             section.contents.push({ type: 'h1', data: h1.textContent })
           }
           const p: HTMLElement | null = title.querySelector('p')
@@ -235,7 +235,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
       contents: []
     }
     const htmlElement: HTMLElement = node as HTMLElement
-    const border = htmlElement.querySelector('.flag-live__border')
+    const border = htmlElement.querySelector('.flag-live__border, .flag-live__border__label')
     if (border && border.hasAttribute('style')) {
       // Assume that inline style is always 'background-color'
       section.hasBorder = true
@@ -479,7 +479,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
             disableLargeHeaderFadeAnim={false}
             data={sections}
             extraData={sections}
-            keyExtractor={(item: any, index: number) => index.toString()}
+            keyExtractor={(_: any, index: number) => index.toString()}
             renderItem={renderSection}
             HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}
             LargeHeaderComponent={(props) => <LargeHeaderComponent {...props} article={article} />}

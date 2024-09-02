@@ -319,7 +319,7 @@ export default function ArticleScreen() {
     }
   }
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: { item: ContentType }) => {
     switch (item.type) {
       case 'h2':
         return (

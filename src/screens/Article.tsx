@@ -1,31 +1,34 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useWindowDimensions, Image, Linking, StyleSheet, View, ActivityIndicator, SafeAreaView } from 'react-native'
-import { useTheme, Button, Card, Text } from 'react-native-paper'
+import { useContext, useEffect, useState } from 'react'
+import { useWindowDimensions, Image, Linking, StyleSheet, View, ActivityIndicator } from 'react-native'
+import { useTheme, Button, Card, Text, Surface, Chip } from 'react-native-paper'
 import { useRoute } from '@react-navigation/core'
 import { useNavigation } from '@react-navigation/native'
 import parse, { HTMLElement, Node } from 'node-html-parser'
 import { FlatListWithHeaders } from '@codeherence/react-native-header'
 import WebView from 'react-native-webview'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import stringify from 'json-stable-stringify'
 
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
 import {
   ArticleHeader,
   ArticleHeaderParser,
   ContentType,
   ImgContent,
+  InlineText,
   MainStackNavigation,
   ParsedLink,
   SeeAlsoButtonContent,
   parseAndGuessURL
 } from '../types'
 import DynamicNavbar from '../DynamicNavbar'
-import Api from '../api'
+import { Api } from '../api'
 import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
 import { IconPremium } from '../assets'
-import FetchError from '../components/FetchError'
-import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { CustomStatusBar } from '../components/CustomStatusBar'
 
 const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.*/
 
@@ -34,7 +37,7 @@ const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.
  * @since 2020-03
  * @version 2.0
  */
-export default function ArticleScreen() {
+export function ArticleScreen() {
   const route = useRoute()
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
@@ -140,7 +143,39 @@ export default function ArticleScreen() {
    * @param node
    * @returns
    */
-  const extractContent = (node: Node): ContentType | null => {
+  const extractParagraphContent = (node: HTMLElement): InlineText[] => {
+    const content: InlineText[] = []
+
+    node.childNodes.forEach((child) => {
+      if (child.nodeType === 3) {
+        content.push({ type: 'text', text: child.textContent ?? '' })
+      } else if (child.nodeType === 1) {
+        const el = child as HTMLElement
+        if (el.rawTagName === 'span' && el.classNames?.includes('article__kicker')) {
+          content.push({ type: 'kicker', text: el.textContent ?? '' })
+          return
+        }
+        switch (el.rawTagName) {
+          case 'em':
+            content.push({ type: 'em', text: el.textContent ?? '' })
+            break
+          case 'strong':
+            content.push({ type: 'strong', text: el.textContent ?? '' })
+            break
+          default:
+            content.push({ type: 'text', text: el.textContent ?? '' })
+        }
+      }
+    })
+    return content
+  }
+
+  /**
+   *
+   * @param node
+   * @returns
+   */
+  const extractContent = (node: Node): ContentType[] | null => {
     if (!node.rawTagName) {
       return null
     }
@@ -155,7 +190,7 @@ export default function ArticleScreen() {
               let child: HTMLElement = htmlElement.childNodes[i] as HTMLElement
               if (child && child.rawTagName === 'figure') {
                 const figureContent = extractFigureContent(child)
-                if (figureContent) return figureContent
+                if (figureContent) return [figureContent]
               }
             }
           } else if (htmlElement.classNames.includes('twitter-tweet')) {
@@ -167,21 +202,20 @@ export default function ArticleScreen() {
               const provider = videoContainer.getAttribute('data-provider')
               const id = videoContainer.getAttribute('data-id')
               if (provider && id) {
-                return { type: 'webview-video', provider, data: id }
+                return [{ type: 'webview-video', provider, data: id }]
               }
             }
           }
         }
         break
       case 'h2':
-        return { type: 'h2', data: node.text }
+        return [{ type: 'h2', data: node.text }]
       case 'h3':
-        return { type: 'h3', data: node.text }
+        return [{ type: 'h3', data: node.text }]
       case 'p':
-        if (htmlElement.classNames && htmlElement.classNames.length > 0) {
-          if (htmlElement.classNames.includes('article__paragraph')) {
-            return { type: 'paragraph', data: node.text }
-          }
+        if (htmlElement.classNames?.includes('article__paragraph') || htmlElement.classNames?.includes('article__desc')) {
+          const inlineContent = extractParagraphContent(htmlElement)
+          return [{ type: 'paragraph', data: inlineContent }]
         }
         break
       case 'section':
@@ -197,13 +231,25 @@ export default function ArticleScreen() {
                 url: readAlso.attrs['href'],
                 isRestricted: readAlso.getAttribute('data-premium') === '1'
               }
-              return seeAlso
+              return [seeAlso]
             }
           }
         }
         break
+      case 'ul':
+        const listItems: ContentType[] = []
+        for (let i = 0; i < htmlElement.childNodes.length; i++) {
+          const child = htmlElement.childNodes[i] as HTMLElement
+          if (child && child.rawTagName === 'li') {
+            listItems.push({ type: 'list', data: child.textContent ?? '' })
+          }
+        }
+        return listItems
       case 'figure':
-        return extractFigureContent(htmlElement)
+        const f = extractFigureContent(htmlElement)
+        if (f) {
+          return [f]
+        }
     }
 
     return null
@@ -265,7 +311,22 @@ export default function ArticleScreen() {
         a.readingTime = s
       }
 
-      // Paragraphes and images
+      const parMap = new Map<string, any>()
+
+      function appendContentFrom(nodeList: Node[]) {
+        for (const node of nodeList) {
+          const content = extractContent(node)
+          if (content) {
+            for (const item of content) {
+              const key = stringify(item)
+              if (key && !parMap.has(key)) {
+                parMap.set(key, item)
+              }
+            }
+          }
+        }
+      }
+
       let par: ContentType[] = []
       par.push({ type: 'description', data: a.description })
       a.authors && par.push({ type: 'authors', data: a.authors })
@@ -280,38 +341,30 @@ export default function ArticleScreen() {
 
       if (longform) {
         for (const child of longform.childNodes) {
-          let c = child as HTMLElement
-          if (c.classNames?.includes('article__content')) {
-            for (let j = 0; j < c.childNodes.length; j++) {
-              let p = extractContent(c.childNodes[j])
-              if (p) {
-                par.push(p)
-              }
-            }
+          const element = child as HTMLElement
+          if (element.classNames?.includes('article__heading')) {
+            const nodes = doc.querySelectorAll('p.article__desc')
+            appendContentFrom(nodes)
+          }
+          if (element.classNames?.includes('article__content')) {
+            appendContentFrom(element.childNodes)
           }
         }
       }
+
       const articles = main.getElementsByTagName('article')
       if (articles.length > 0) {
-        for (const a of articles) {
-          for (let j = 0; j < a.childNodes.length; j++) {
-            let p = extractContent(a.childNodes[j])
-            if (p) {
-              par.push(p)
-            }
-          }
+        for (const article of articles) {
+          appendContentFrom(article.childNodes)
         }
       }
-      if (par.length === 1) {
-        for (let i = 0; i < main.childNodes.length; i++) {
-          let p = extractContent(main.childNodes[i])
-          if (p) {
-            par.push(p)
-          }
-        }
+
+      if (parMap.size === 1) {
+        appendContentFrom(main.childNodes)
       }
+
       setArticle(a)
-      setParagraphes(par)
+      setParagraphes(Array.from(parMap.values()))
       setLoading(false)
     } catch (error) {
       setFetchFailed(true)
@@ -319,7 +372,7 @@ export default function ArticleScreen() {
     }
   }
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: { item: ContentType }) => {
     switch (item.type) {
       case 'h2':
         return (
@@ -377,10 +430,41 @@ export default function ArticleScreen() {
             )}
           </View>
         )
-      case 'paragraph':
+      case 'list':
         return (
           <Text variant="bodyMedium" style={styles.paragraph}>
-            {item.data}
+            • {item.data}
+          </Text>
+        )
+      case 'paragraph':
+        return (
+          <Text variant="bodyMedium" style={styles.paragraph} numberOfLines={10}>
+            {item.data.map((chunk, index) => {
+              switch (chunk.type) {
+                case 'kicker':
+                  return (
+                    <View key={index} style={{ paddingRight: 12 }}>
+                      <Chip compact>{chunk.text}</Chip>
+                    </View>
+                  )
+                case 'text':
+                  return <Text key={index}>{chunk.text}</Text>
+                case 'strong':
+                  return (
+                    <Text key={index} style={{ fontWeight: 'bold' }}>
+                      {chunk.text}
+                    </Text>
+                  )
+                case 'em':
+                  return (
+                    <Text key={index} style={{ fontStyle: 'italic' }}>
+                      {chunk.text}
+                    </Text>
+                  )
+                default:
+                  return null
+              }
+            })}
           </Text>
         )
       case 'seeAlsoButton':
@@ -426,11 +510,6 @@ export default function ArticleScreen() {
     }
   }
 
-  const renderCustomStatusBar = (article: ArticleHeader) => {
-    const dynamicColor = settingsContext.hasDynamicStatusBarColor && article.isRestricted
-    return <CustomStatusBar backgroundColor={dynamicColor ? colors.primaryContainer : 'transparent'} translucent={!dynamicColor} />
-  }
-
   const renderFooter = (article: ArticleHeader) => (
     <>
       {article.isRestricted && (
@@ -449,15 +528,17 @@ export default function ArticleScreen() {
     </>
   )
 
+  const dynamicColor = settingsContext.hasDynamicStatusBarColor && article?.isRestricted
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: dynamicColor ? colors.primaryContainer : 'transparent', marginBottom: -48 }}>
       {fetchFailed ? (
         <FetchError onRetry={init} />
       ) : loading || !article ? (
         <ActivityIndicator style={styles.activityIndicator} color={colors.primary} size={40} />
       ) : (
-        <>
-          {renderCustomStatusBar(article)}
+        <Surface style={{ flex: 1 }}>
+          <CustomStatusBar translucent={!dynamicColor} />
           <FlatListWithHeaders
             disableAutoFixScroll
             headerFadeInThreshold={0.8}
@@ -469,7 +550,7 @@ export default function ArticleScreen() {
             LargeHeaderComponent={(props) => <LargeHeaderComponent {...props} article={article} />}
             ListFooterComponent={renderFooter(article)}
           />
-        </>
+        </Surface>
       )}
     </SafeAreaView>
   )

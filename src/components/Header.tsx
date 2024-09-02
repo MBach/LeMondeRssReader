@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { type FC, useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, Image, Share, View } from 'react-native'
 import { useTheme, IconButton, Portal, Snackbar, Text } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
@@ -7,7 +7,7 @@ import Animated, { Extrapolation, SharedValue, interpolate, useAnimatedStyle, us
 import { FadingView, Header, LargeHeader, ScalingView } from '@codeherence/react-native-header'
 
 import { SettingsContext } from '../context/SettingsContext'
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
 import { ArticleHeader, RootStackParamList } from '../types'
 
 const useFavoriteStatus = (article: ArticleHeader) => {
@@ -31,7 +31,8 @@ const useFavoriteStatus = (article: ArticleHeader) => {
   return [isFavorite, toggleFavorite]
 }
 
-const ShareButton = ({ article }) => {
+type ShareButtonProps = { article: ArticleHeader }
+const ShareButton: FC<ShareButtonProps> = ({ article }) => {
   const shareContent = async () => {
     if (!article) return
     try {
@@ -42,7 +43,12 @@ const ShareButton = ({ article }) => {
   return article && <IconButton icon="share-variant" size={20} onPress={shareContent} />
 }
 
-const FavoriteButton = ({ isFavorite, toggleFavorite, setSnackbarVisible }) => {
+type FavoriteButtonProps = {
+  isFavorite: boolean
+  toggleFavorite: () => Promise<boolean>
+  setSnackbarVisible: (value: boolean) => void
+}
+const FavoriteButton: FC<FavoriteButtonProps> = ({ isFavorite, toggleFavorite, setSnackbarVisible }) => {
   const { colors } = useTheme()
 
   const handlePress = async () => {
@@ -61,7 +67,8 @@ const FavoriteButton = ({ isFavorite, toggleFavorite, setSnackbarVisible }) => {
   )
 }
 
-const BannerImage = ({ article, scrollY }: { article: ArticleHeader; scrollY: SharedValue<number> }) => {
+type BannerImageProps = { article: ArticleHeader; scrollY: SharedValue<number> }
+const BannerImage: FC<BannerImageProps> = ({ article, scrollY }) => {
   const { width } = useWindowDimensions()
   const bannerTranslationStyle = useAnimatedStyle(() => {
     const bannerTranslation = interpolate(
@@ -114,14 +121,15 @@ export const HeaderComponent = ({
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const navigation = useNavigation<NavigationProp>()
   const opacity = useDerivedValue(() => 1 - showNavBar.value)
+  const settingsContext = useContext(SettingsContext)
 
   return (
-    <View style={{ position: 'relative' }}>
+    <View>
       <FadingView opacity={opacity}>
         <BannerImage article={article} scrollY={scrollY} />
       </FadingView>
       <Header
-        //ignoreTopSafeArea
+        ignoreTopSafeArea
         noBottomBorder
         showNavBar={showNavBar}
         headerLeft={
@@ -137,7 +145,7 @@ export const HeaderComponent = ({
         headerRightStyle={{ flex: 1, flexGrow: 1, minWidth: 60 }}
         headerRight={
           <>
-            <ShareButton article={article} />
+            {settingsContext.share && <ShareButton article={article} />}
             <FavoriteButton isFavorite={isFavorite} toggleFavorite={toggleFavorite} setSnackbarVisible={setSnackbarVisible} />
           </>
         }
@@ -152,8 +160,8 @@ export const HeaderComponent = ({
   )
 }
 
-export const LargeHeaderComponent = ({ scrollY, article }) => (
-  <LargeHeader headerStyle={{ paddingHorizontal: 0, marginTop: 140 }}>
+export const LargeHeaderComponent: FC<BannerImageProps> = ({ article, scrollY }) => (
+  <LargeHeader headerStyle={{ paddingHorizontal: 0, marginTop: 172 }}>
     <ScalingView scrollY={scrollY}>
       <Text variant="headlineSmall" style={{ paddingHorizontal: 8 }}>
         {article.title}

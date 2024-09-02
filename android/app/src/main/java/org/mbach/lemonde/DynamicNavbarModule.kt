@@ -2,6 +2,8 @@ package org.mbach.lemonde
 
 import android.graphics.Color
 import android.os.Build
+import android.view.Window
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
 import android.view.WindowManager
 import androidx.core.view.WindowInsetsControllerCompat
 import com.facebook.react.bridge.ReactApplicationContext
@@ -20,18 +22,33 @@ class DynamicNavbarModule internal constructor(reactContext: ReactApplicationCon
         return "DynamicNavbarModule"
     }
 
+    private fun withCurrentWindow(action: (Window) -> Unit) {
+        UiThreadUtil.runOnUiThread {
+            currentActivity?.window?.let { window ->
+                action(window)
+            }
+        }
+    }
+
     @ReactMethod
     fun setLightNavigationBar(isLight: Boolean) {
         try {
-            UiThreadUtil.runOnUiThread {
-                currentActivity?.let { activity ->
-                    val window = activity.window
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        val controller = WindowInsetsControllerCompat(window, window.decorView)
-                        controller.isAppearanceLightNavigationBars = isLight
-                    }
-                    val color = if (isLight) Color.WHITE else Color.BLACK
-                    window.navigationBarColor = color
+            withCurrentWindow { window ->
+                val decorView = window.decorView
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val controller = decorView.windowInsetsController
+                    controller?.setSystemBarsAppearance(
+                        if (isLight) APPEARANCE_LIGHT_NAVIGATION_BARS else 0,
+                        APPEARANCE_LIGHT_NAVIGATION_BARS
+                    )
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val controller = WindowInsetsControllerCompat(window, decorView)
+                    controller.isAppearanceLightNavigationBars = isLight
+                }
+
+                // Optional: only set color below API 29 or as fallback
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    window.navigationBarColor = if (isLight) Color.WHITE else Color.BLACK
                 }
             }
         } catch (e: Exception) {
@@ -39,19 +56,15 @@ class DynamicNavbarModule internal constructor(reactContext: ReactApplicationCon
         }
     }
 
+
     @ReactMethod
     fun setKeepScreenOn(isOn: Boolean) {
         try {
-            UiThreadUtil.runOnUiThread {
-                if (currentActivity == null) {
-                    return@runOnUiThread
-                }
-                if (currentActivity!!.window != null) {
-                    if (isOn) {
-                        currentActivity!!.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    } else {
-                        currentActivity!!.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    }
+            withCurrentWindow { window ->
+                if (isOn) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 }
             }
         } catch (e: Exception) {

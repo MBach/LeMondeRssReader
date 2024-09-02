@@ -1,14 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { ColorValue, StatusBar, StatusBarStyle, useColorScheme } from 'react-native'
+import { useContext, useEffect, useState } from 'react'
+import { StatusBar, StatusBarStyle, useColorScheme } from 'react-native'
 import { SettingsContext } from '../context/SettingsContext'
 import { Theme } from '../types'
 
 interface CustomStatusBarProps {
   translucent?: boolean
-  backgroundColor?: ColorValue
 }
 
-const CustomStatusBar = ({ translucent = false, backgroundColor = undefined }: CustomStatusBarProps) => {
+export const CustomStatusBar = ({ translucent = false }: CustomStatusBarProps) => {
   const colorScheme = useColorScheme()
   const settingsContext = useContext(SettingsContext)
   const [barStyle, setBarStyle] = useState<StatusBarStyle>('dark-content')
@@ -21,7 +20,5 @@ const CustomStatusBar = ({ translucent = false, backgroundColor = undefined }: C
     }
   }, [settingsContext.theme])
 
-  return <StatusBar translucent={translucent} barStyle={barStyle} backgroundColor={backgroundColor} />
+  return <StatusBar translucent={translucent} barStyle={barStyle} />
 }
-
-export default CustomStatusBar

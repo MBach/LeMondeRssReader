@@ -1,33 +1,32 @@
-import React, { FC } from 'react'
+import { type FC } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { useTheme, Text, IconButton, Button } from 'react-native-paper'
 
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center'
+  },
+  text: {
+    textAlign: 'center'
+  },
+  button: {
+    marginTop: 24,
+    padding: 8
+  }
+})
 
 interface FetchErrorProps {
   onRetry: () => void
 }
 
-const FetchError: FC<FetchErrorProps> = ({ onRetry }) => {
+export const FetchError: FC<FetchErrorProps> = ({ onRetry }) => {
   const { colors } = useTheme()
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingHorizontal: 12,
-      justifyContent: 'center',
-      alignContent: 'center',
-      alignItems: 'center'
-    },
-    text: {
-      textAlign: 'center'
-    },
-    button: {
-      marginTop: 24,
-      padding: 8
-    }
-  })
-
   return (
     <View style={styles.container}>
       <Text variant="headlineSmall" numberOfLines={2} style={styles.text}>
@@ -40,5 +39,3 @@ const FetchError: FC<FetchErrorProps> = ({ onRetry }) => {
     </View>
   )
 }
-
-export default FetchError

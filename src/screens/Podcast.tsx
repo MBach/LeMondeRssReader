@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { SafeAreaView, StatusBar, StyleSheet, View } from 'react-native'
+import { useContext, useEffect, useState } from 'react'
+import { StatusBar, StyleSheet, View } from 'react-native'
 import { ActivityIndicator, Text, useTheme } from 'react-native-paper'
 import { useRoute } from '@react-navigation/core'
 import { RouteProp } from '@react-navigation/native'
@@ -9,11 +9,12 @@ import VideoPlayer from 'react-native-media-console'
 import { decode } from 'html-entities'
 
 import { SettingsContext } from '../context/SettingsContext'
-import Api from '../api'
+import { Api } from '../api'
 import DynamicNavbar from '../DynamicNavbar'
 import { ArticleHeader, ArticleHeaderParser, MainStackParamList, ParsedLink } from '../types'
 import { HeaderComponent } from '../components/Header'
-import FetchError from '../components/FetchError'
+import { FetchError } from '../components/FetchError'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 type PodcastScreenRouteProp = RouteProp<MainStackParamList, 'Podcast'>
 
@@ -109,7 +110,7 @@ interface PodcastData {
  * @since 2024-05
  * @version 1.0
  */
-export default function PodcastScreen() {
+export function PodcastScreen() {
   const route = useRoute<PodcastScreenRouteProp>()
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()

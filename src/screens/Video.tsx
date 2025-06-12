@@ -1,22 +1,22 @@
-import { useRoute } from '@react-navigation/core'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useWindowDimensions, StatusBar, StyleSheet, View, SafeAreaView } from 'react-native'
+import { useRoute } from '@react-navigation/core'
 import { ActivityIndicator, Text, useTheme } from 'react-native-paper'
 import WebView from 'react-native-webview'
 import parse, { HTMLElement } from 'node-html-parser'
 import { ScrollViewWithHeaders } from '@codeherence/react-native-header'
 
 import { ArticleHeader, ArticleHeaderParser, ParsedLink } from '../types'
-import Api from '../api'
+import { Api } from '../api'
 import { HeaderComponent } from '../components/Header'
-import FetchError from '../components/FetchError'
+import { FetchError } from '../components/FetchError'
 
 /**
  * @author Matthieu BACHELIER
  * @since 2020-04
  * @version 2.0
  */
-export default function VideoScreen() {
+export function VideoScreen() {
   type VideoData = {
     id: string
     provider: string

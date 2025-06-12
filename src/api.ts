@@ -1,4 +1,4 @@
-import ky, { KyInstance, Options, ResponsePromise } from 'ky'
+import ky, { Options, type KyInstance, type ResponsePromise } from 'ky'
 
 const k = ky.create({
   prefixUrl: 'https://www.lemonde.fr',
@@ -17,6 +17,4 @@ class ApiKy {
   post = (path: string, data: object, options?: Options): ResponsePromise => this.api.post(path, { json: data, ...options })
 }
 
-const Api = new ApiKy()
-
-export default Api
+export const Api = new ApiKy()

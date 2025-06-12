@@ -1,13 +1,13 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import { Appearance, SafeAreaView } from 'react-native'
-import { DefaultTheme, LinkingOptions, NavigationContainer } from '@react-navigation/native'
+import { DefaultTheme, type LinkingOptions, NavigationContainer } from '@react-navigation/native'
 import { adaptNavigationTheme, Provider } from 'react-native-paper'
 import { useMaterial3Theme } from '@pchmn/expo-material3-theme'
 
 import { SettingsContext } from '../context/SettingsContext'
 import { BottomSheetProvider } from '../context/useBottomSheet'
 import { darkTheme, lightTheme } from '../constants'
-import RootStack from './RootStack'
+import { RootStack } from './RootStack'
 import { RootStackParamList, Theme } from '../types'
 
 const linking: LinkingOptions<RootStackParamList> = {
@@ -29,7 +29,7 @@ const linking: LinkingOptions<RootStackParamList> = {
   }
 }
 
-export default function AppContainer() {
+export function AppContainer() {
   const { LightTheme, DarkTheme } = adaptNavigationTheme({ reactNavigationLight: DefaultTheme, reactNavigationDark: DefaultTheme })
   const settingsContext = useContext(SettingsContext)
   const { theme } = useMaterial3Theme({ fallbackSourceColor: '#FABD00' })

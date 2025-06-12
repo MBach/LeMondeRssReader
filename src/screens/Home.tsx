@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, FlatList, Image, RefreshControl, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/core'
@@ -10,10 +10,10 @@ import { KyResponse } from 'ky'
 
 import { DefaultImageFeed, IconMic, IconVideo, IconPremium } from '../assets'
 import { SettingsContext } from '../context/SettingsContext'
-import Api from '../api'
+import { Api } from '../api'
 import { ArticleType, MainStackNavigation, ParsedRssItem, parseAndGuessURL } from '../types'
-import FetchError from '../components/FetchError'
-import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { CustomStatusBar } from '../components/CustomStatusBar'
 import { useBottomSheet } from '../context/useBottomSheet'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
@@ -23,7 +23,7 @@ const regex = /<!\[CDATA\[(.*)+\]\]>/
  * @since 2020-03
  * @version 2.0
  */
-export default function HomeScreen() {
+export function HomeScreen() {
   const [loading, setLoading] = useState<boolean>(false)
   const [loadingPremium, setLoadingPremium] = useState<boolean>(false)
   const [refreshing, setRefreshing] = useState<boolean>(false)

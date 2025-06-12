@@ -1,14 +1,14 @@
-import React, { FC } from 'react'
+import { type FC } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { useTheme, Text, IconButton, Button } from 'react-native-paper'
 
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
 
 interface FetchErrorProps {
   onRetry: () => void
 }
 
-const FetchError: FC<FetchErrorProps> = ({ onRetry }) => {
+export const FetchError: FC<FetchErrorProps> = ({ onRetry }) => {
   const { colors } = useTheme()
 
   const styles = StyleSheet.create({
@@ -40,5 +40,3 @@ const FetchError: FC<FetchErrorProps> = ({ onRetry }) => {
     </View>
   )
 }
-
-export default FetchError

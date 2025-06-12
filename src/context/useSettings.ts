@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Appearance } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import DeviceInfo from 'react-native-device-info'
@@ -51,7 +51,7 @@ const defaultMenuEntry: MenuEntry = {
   uri: 'rss/une.xml'
 }
 
-const useSettings = (): UseSettingsType => {
+export const useSettings = (): UseSettingsType => {
   const [hydrated, setHydrated] = useState<boolean>(false)
   const [fontScale, setFontScale] = useState<number>(1)
   const [theme, _setTheme] = useState<Theme>(Theme.SYSTEM)
@@ -289,5 +289,3 @@ const useSettings = (): UseSettingsType => {
     toggleFavorite
   }
 }
-
-export default useSettings

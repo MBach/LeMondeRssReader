@@ -1,16 +1,16 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { BottomNavigation } from 'react-native-paper'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { SettingsContext } from '../context/SettingsContext'
-import i18n from '../locales/i18n'
-import MainStack from './MainStack'
-import FavScreen from '../screens/Favorites'
-import SettingsScreen from '../screens/Settings'
+import { i18n } from '../locales/i18n'
+import { MainStack } from './MainStack'
+import { FavScreen } from '../screens/Favorites'
+import { SettingsScreen } from '../screens/Settings'
 import { RootStackParamList } from '../types'
 
-export default function RootStack() {
+export function RootStack() {
   const settingsContext = useContext(SettingsContext)
   const Tab = createBottomTabNavigator<RootStackParamList>()
 
@@ -29,9 +29,19 @@ export default function RootStack() {
           navigationState={state}
           safeAreaInsets={insets}
           onTabPress={({ route }) => {
-            console.log(route)
-            if (route.name === 'MainStack' && route.state?.index! > 0) {
-              navigation.navigate('Home')
+            const currentRouteName = state.routes[state.index].name
+            const isAlreadyOnMainStack = currentRouteName === 'MainStack'
+
+            if (route.name === 'MainStack') {
+              if (isAlreadyOnMainStack) {
+                const stackState = route.state as { index: number; routes: any[] } | undefined
+                const currentNestedRoute = stackState?.routes?.[stackState.index]?.name
+                if (currentNestedRoute !== 'Home') {
+                  navigation.navigate('MainStack', { screen: 'Home' })
+                }
+              } else {
+                navigation.navigate('MainStack')
+              }
             } else {
               navigation.navigate(route.name, route.params)
             }

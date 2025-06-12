@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import { ScrollView, StyleSheet, StatusBar, View } from 'react-native'
 import {
   useTheme,
@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { KEYS } from '../constants'
 import { SettingsContext } from '../context/SettingsContext'
 import { UseSettingsType } from '../context/useSettings'
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
 import { Category, Theme } from '../types'
 
 /**
@@ -27,7 +27,7 @@ import { Category, Theme } from '../types'
  * @since 2020-03
  * @version 2.0
  */
-export default function SettingsScreen() {
+export function SettingsScreen() {
   const settingsContext = useContext(SettingsContext)
 
   const [data, setData] = useState<Category[]>(settingsContext.feed)

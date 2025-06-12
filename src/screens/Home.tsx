@@ -1,34 +1,48 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState, type FC } from 'react'
 import { useWindowDimensions, FlatList, Image, RefreshControl, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useNavigation } from '@react-navigation/core'
+import { useFocusEffect, useNavigation } from '@react-navigation/core'
+import { QueryClient, useQuery } from '@tanstack/react-query'
 import { useTheme, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { parse, HTMLElement } from 'node-html-parser'
-import { useFocusEffect } from '@react-navigation/native'
-import { KyResponse } from 'ky'
 
 import { DefaultImageFeed, IconMic, IconVideo, IconPremium } from '../assets'
 import { SettingsContext } from '../context/SettingsContext'
-import Api from '../api'
+import { Api } from '../api'
 import { ArticleType, MainStackNavigation, ParsedRssItem, parseAndGuessURL } from '../types'
-import FetchError from '../components/FetchError'
-import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { CustomStatusBar } from '../components/CustomStatusBar'
 import { useBottomSheet } from '../context/useBottomSheet'
+import { KyResponse } from 'ky'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
+
+const fetchFeed = async (uri: string): Promise<HTMLElement> => {
+  const response = await Api.get(uri)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch feed: ${response.status}`)
+  }
+  const text = await response.text()
+  return parse(text)
+}
+
+const useFeed = (uri: string | undefined) =>
+  useQuery({
+    queryKey: ['feed', uri],
+    queryFn: () => fetchFeed(uri!),
+    enabled: !!uri,
+    staleTime: 1000 * 60
+  })
 
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
  * @version 2.0
  */
-export default function HomeScreen() {
-  const [loading, setLoading] = useState<boolean>(false)
-  const [loadingPremium, setLoadingPremium] = useState<boolean>(false)
-  const [refreshing, setRefreshing] = useState<boolean>(false)
-  const [fetchFailed, setFetchFailed] = useState<boolean>(false)
+export function HomeScreen() {
   const [items, setItems] = useState<ParsedRssItem[]>([])
+  const [loadingPremium, setLoadingPremium] = useState<boolean>(false)
   const [checkPremiumIcons, setCheckPremiumIcons] = useState<boolean>(false)
   const sheetRef = useBottomSheet()
 
@@ -75,61 +89,12 @@ export default function HomeScreen() {
     }, [sheetRef?.current])
   )
 
-  /*
-  useEffect(() => {
-    const backAction = () => {
-      console.log('back', navigation.getState())
-      sheetRef?.current?.snapToIndex(0)
-      return false
-    }
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction)
-    return () => backHandler.remove()
-  }, [sheetRef?.current])
-  */
+  const { data, error, isLoading, isRefetching, refetch } = useFeed(settingsContext.currentCategory?.uri)
 
   useEffect(() => {
-    if (loading) {
-      console.log('useEffect > already loading...')
-      return
-    }
-    if (settingsContext.currentCategory) {
-      fetchAndCollapse()
-    }
-  }, [settingsContext.currentCategory])
-
-  const fetchAndCollapse = async () => {
-    await fetchFeed(false)
-    sheetRef?.current?.collapse()
-    setCheckPremiumIcons(false)
-  }
-
-  const refreshFeed = async () => {
-    setRefreshing(true)
-    setCheckPremiumIcons(false)
-    await fetchFeed(true)
-    setRefreshing(false)
-  }
-
-  const fetchFeed = async (isRefreshing: boolean) => {
-    setFetchFailed(false)
-    if (loading) {
-      console.log('fetchFeed, alreading loading...')
-      return
-    }
-    if (!isRefreshing) {
-      setLoading(true)
-    }
-
-    const url = `${settingsContext.currentCategory?.uri}`
-    try {
-      const response = await Api.get(url)
-      if (!response.ok) {
-        setFetchFailed(true)
-        return
-      }
-      const text = await response.text()
-      const doc = parse(text)
-      const items: HTMLElement[] = doc.querySelectorAll('item')
+    if (data) {
+      setCheckPremiumIcons(false)
+      const items: HTMLElement[] = data.querySelectorAll('item')
       let rssItems: ParsedRssItem[] = []
       for (const item of items) {
         let rssItem: ParsedRssItem = { title: '', description: '', isRestricted: false, link: '', uri: '' }
@@ -161,14 +126,8 @@ export default function HomeScreen() {
         rssItems.push(rssItem)
       }
       setItems(rssItems)
-      if (!isRefreshing) {
-        setLoading(false)
-      }
-    } catch (error) {
-      setLoading(false)
-      setFetchFailed(true)
     }
-  }
+  }, [data])
 
   useEffect(() => {
     if (items.length > 0 && !checkPremiumIcons && !loadingPremium) {
@@ -201,6 +160,12 @@ export default function HomeScreen() {
         })
     }
   }, [items, checkPremiumIcons])
+
+  useEffect(() => {
+    if (data) {
+      sheetRef?.current?.collapse()
+    }
+  }, [data, sheetRef])
 
   const navigateTo = async (item: ParsedRssItem, type: ArticleType) => {
     const parsed = parseAndGuessURL(item.link)
@@ -281,20 +246,19 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView>
       <CustomStatusBar translucent={true} backgroundColor={colors.surface} />
-      {loading ? (
-        <View style={{ flex: 1 }}>{renderContentLoader()}</View>
-      ) : fetchFailed ? (
-        <FetchError onRetry={fetchFeed.bind(null, false)} />
+      {isLoading ? (
+        <View>{renderContentLoader()}</View>
+      ) : error ? (
+        <FetchError onRetry={refetch} />
       ) : (
         <FlatList
-          contentContainerStyle={{ paddingBottom: 32 }}
           data={items}
           extraData={items}
           renderItem={renderItem}
-          keyExtractor={(item: any, index: number) => index.toString()}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshFeed} />}
+          keyExtractor={(item: ParsedRssItem) => item.link}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
         />
       )}
     </SafeAreaView>

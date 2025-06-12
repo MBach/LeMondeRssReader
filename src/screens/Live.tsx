@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Image, StatusBar, StyleSheet, useWindowDimensions } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { ActivityIndicator, Card, List, Surface, Text, useTheme } from 'react-native-paper'
@@ -19,11 +19,11 @@ import {
   MainStackNavigation
 } from '../types'
 import DynamicNavbar from '../DynamicNavbar'
-import Api from '../api'
+import { Api } from '../api'
 import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
 import { IconPremium } from '../assets'
-import FetchError from '../components/FetchError'
-import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { CustomStatusBar } from '../components/CustomStatusBar'
 
 /*
 function useInterval(callback: (() => Promise<void>) | undefined, delay: number) {
@@ -54,7 +54,7 @@ class GetPostsRes {
  * @since 2020-03
  * @version 2.0
  */
-export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => void }*/) {
+export function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => void }*/) {
   const route = useRoute()
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()

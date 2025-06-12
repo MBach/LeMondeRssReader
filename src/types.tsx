@@ -1,3 +1,4 @@
+import { NavigatorScreenParams } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HTMLElement } from 'node-html-parser'
 
@@ -48,7 +49,7 @@ export enum ArticleType {
 export type MainScreenNames = 'Home' | 'Article' | 'Live' | 'Podcast' | 'Video'
 export type MainStackParamList = Record<MainScreenNames, ParsedLink>
 export type RootStackParamList = {
-  MainStack: undefined
+  MainStack: NavigatorScreenParams<MainStackParamList>
   Favorites: undefined
   Settings: undefined
   Root: undefined
@@ -82,23 +83,30 @@ export const parseAndGuessURL = (url: string): ParsedLink | null => {
 }
 
 // Article
-
-export interface ArticleHeader {
+export type ArticleHeader = {
   id?: string
+  title: string
+  description: string
   url: string
   imgUrl?: string
   imgRatio?: number
   category?: string
-  title: string
-  description: string
   authors?: string
-  date: string
+  date?: string
   readingTime?: string
   isRestricted: boolean
 }
 
+type OgPropertyKey = keyof ArticleHeader
+
+type OgPropertyMap = {
+  property: string
+  key: OgPropertyKey
+  transform?: (value: string) => any
+}
+
 export class ArticleHeaderParser {
-  private ogProperties = [
+  private ogProperties: OgPropertyMap[] = [
     { property: 'ad:article_id', key: 'id' },
     { property: 'og:title', key: 'title' },
     { property: 'og:description', key: 'description' },
@@ -106,7 +114,11 @@ export class ArticleHeaderParser {
     { property: 'og:image', key: 'imgUrl' },
     { property: 'og:article:section', key: 'category' },
     { property: 'og:article:author', key: 'authors' },
-    { property: 'og:article:content_tier', key: 'isRestricted', transform: (value: string) => value === 'locked' }
+    {
+      property: 'og:article:content_tier',
+      key: 'isRestricted',
+      transform: (value: string) => value === 'locked'
+    }
   ]
 
   parse(metas: HTMLElement[]): ArticleHeader {
@@ -119,30 +131,23 @@ export class ArticleHeaderParser {
       if (!property || !content) continue
 
       const ogProp = this.ogProperties.find((p) => p.property === property)
+      if (!ogProp) continue
 
-      if (ogProp) {
-        if (ogProp.transform) {
-          articleHeader[ogProp.key] = ogProp.transform(content)
-        } else {
-          articleHeader[ogProp.key] = content
-        }
-      }
+      const { key, transform } = ogProp
+      // Use type assertion to let TS know we're assigning to a known key
+      articleHeader[key] = transform ? transform(content) : content
     }
 
-    // Second pass for image ratio
+    // Calculate image ratio if width/height available
     if (articleHeader.imgUrl) {
-      const widthItem = metas.find((meta) => meta.getAttribute('property') === 'og:image:width')
-      const heightItem = metas.find((meta) => meta.getAttribute('property') === 'og:image:height')
-      if (widthItem && heightItem) {
-        const width = widthItem.getAttribute('content')
-        const height = heightItem.getAttribute('content')
-        if (width && height) {
-          articleHeader.imgRatio = parseInt(height) / parseInt(width)
-        }
+      const width = metas.find((m) => m.getAttribute('property') === 'og:image:width')?.getAttribute('content')
+      const height = metas.find((m) => m.getAttribute('property') === 'og:image:height')?.getAttribute('content')
+      if (width && height) {
+        articleHeader.imgRatio = parseInt(height, 10) / parseInt(width, 10)
       }
     }
 
-    // Assuming default values for mandatory fields if not found in the meta tags
+    // Return finalized ArticleHeader with fallbacks
     return {
       id: articleHeader.id,
       url: articleHeader.url || '',
@@ -154,7 +159,7 @@ export class ArticleHeaderParser {
       authors: articleHeader.authors,
       date: articleHeader.date || '',
       readingTime: articleHeader.readingTime,
-      isRestricted: articleHeader.isRestricted || false
+      isRestricted: articleHeader.isRestricted ?? false
     }
   }
 }
@@ -237,9 +242,11 @@ export interface IframeContent {
   data: string
 }
 
-export interface ParagraphContent {
+export type InlineText = { type: 'text'; text: string } | { type: 'strong'; text: string } | { type: 'em'; text: string }
+
+type ParagraphContent = {
   type: 'paragraph'
-  data: string
+  data: InlineText[]
 }
 
 export interface SeeAlsoButtonContent {

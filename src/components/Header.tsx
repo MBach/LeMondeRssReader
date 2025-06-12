@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect, useState } from 'react'
+import { type FC, useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, Image, Share, View } from 'react-native'
 import { useTheme, IconButton, Portal, Snackbar, Text } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
@@ -7,7 +7,7 @@ import Animated, { Extrapolation, SharedValue, interpolate, useAnimatedStyle, us
 import { FadingView, Header, LargeHeader, ScalingView } from '@codeherence/react-native-header'
 
 import { SettingsContext } from '../context/SettingsContext'
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
 import { ArticleHeader, RootStackParamList } from '../types'
 
 const useFavoriteStatus = (article: ArticleHeader) => {

@@ -1,7 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Image, StatusBar, StyleSheet, useWindowDimensions } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
-import { ActivityIndicator, Card, List, Surface, Text, useTheme } from 'react-native-paper'
+import { useQuery } from '@tanstack/react-query'
+import { ActivityIndicator, Banner, Card, List, Surface, Text, useTheme } from 'react-native-paper'
 import parse, { HTMLElement, Node, NodeType } from 'node-html-parser'
 import ky from 'ky'
 import WebView from 'react-native-webview'
@@ -19,34 +20,30 @@ import {
   MainStackNavigation
 } from '../types'
 import DynamicNavbar from '../DynamicNavbar'
-import Api from '../api'
+import { Api } from '../api'
 import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
 import { IconPremium } from '../assets'
-import FetchError from '../components/FetchError'
-import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { CustomStatusBar } from '../components/CustomStatusBar'
+import { i18n } from '../locales/i18n'
 
-/*
-function useInterval(callback: (() => Promise<void>) | undefined, delay: number) {
-  const savedCallback = useRef()
-
-  useEffect(() => {
-    savedCallback.current = callback
-  })
-
-  useEffect(() => {
-    function tick() {
-      savedCallback.current()
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay)
-      return () => clearInterval(id)
-    }
-  }, [delay])
-}
-*/
-
-class GetPostsRes {
-  posts: string
+interface LiveAjaxResponse {
+  created: any[]
+  updated: any[]
+  deleted: any[]
+  article: any | null
+  isOpen: boolean
+  isLocked: boolean
+  lastPost: {
+    date: string
+    timezone_type: number
+    timezone: string
+  } | null
+  lastArticleModification: {
+    date: string
+    timezone_type: number
+    timezone: string
+  } | null
 }
 
 /**
@@ -54,7 +51,7 @@ class GetPostsRes {
  * @since 2020-03
  * @version 2.0
  */
-export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => void }*/) {
+export function LiveScreen() {
   const route = useRoute()
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
@@ -66,8 +63,8 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
   const [sections, setSections] = useState<SectionContent[]>([])
 
-  //const [latestPostId, setLatestPostId] = useState(null)
-  //const [newCommentsReceived, setNewCommentsReceived] = useState(false)
+  const [lastPost, setLastPost] = useState<string | null>(null)
+  const [lastArticleModification, setLastArticleModification] = useState<string | null>(null)
 
   const styles = StyleSheet.create({
     imageHeader: {
@@ -97,19 +94,58 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
     }
   })
 
-  /*
-  useInterval(async () => {
-    if (latestPostId && articleId) {
-      const response = await ky.get(`https://www.lemonde.fr/ajax/live/${articleId}/after/${latestPostId}`)
-      if (response.ok) {
-        const res = await response.json()
-        if (res.elements.length > 0) {
-          setNewCommentsReceived(true)
-        }
+  const { data } = useQuery<LiveAjaxResponse | null>({
+    queryKey: ['newPosts', article?.id, lastPost, lastArticleModification],
+    queryFn: async (): Promise<LiveAjaxResponse | null> => {
+      console.log('hello!')
+      console.log('lastPost', lastPost)
+      console.log('lastArticleModification', lastArticleModification)
+      if (!article?.id) {
+        console.log('no article id')
+        return null
+      }
+
+      const baseUrl = `https://www.lemonde.fr/ajax/live/article/${article.id}`
+      const params = new URLSearchParams()
+
+      if (lastPost) {
+        params.append('lastPost', lastPost)
+      }
+      if (lastArticleModification) {
+        params.append('lastArticleModification', lastArticleModification)
+      }
+
+      console.log('fetch new posts!')
+
+      const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl
+      const response = await ky.get(url)
+      if (!response.ok) {
+        // Failed to fetch new posts
+        return null
+      }
+      return response.json() as Promise<LiveAjaxResponse>
+    },
+    enabled: !!article?.id,
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true
+  })
+
+  useEffect(() => {
+    if (data) {
+      console.log('useEffect > data', data)
+      const newLastPost = data.lastPost?.date?.replace('.000000', '') || null
+      const newLastArticleModification = data.lastArticleModification?.date?.replace('.000000', '') || null
+      console.log('useEffect > newLastPost', newLastPost)
+      console.log('useEffect > newLastArticleModification', newLastArticleModification)
+
+      if (newLastPost) {
+        setLastPost(newLastPost)
+      }
+      if (newLastArticleModification) {
+        setLastArticleModification(newLastArticleModification)
       }
     }
-  }, 5000)
-  */
+  }, [data])
 
   useEffect(() => {
     init()
@@ -136,7 +172,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
       const doc = parse(await response.text())
       const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
       const parser = new ArticleHeaderParser()
-      const a = parser.parse(metas)
+      const a: ArticleHeader = parser.parse(metas)
 
       let s: SectionContent[] = []
       const hero: HTMLElement | null = doc.querySelector('section.hero__live-content')
@@ -154,7 +190,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
         const title: HTMLElement | null = hero.querySelector('section.title')
         if (title) {
           const h1: HTMLElement | null = title.querySelector('h1')
-          if (h1 && article?.title !== h1.textContent) {
+          if (h1 && a.title.trim() !== h1.textContent.trim()) {
             section.contents.push({ type: 'h1', data: h1.textContent })
           }
           const p: HTMLElement | null = title.querySelector('p')
@@ -192,32 +228,6 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
     } catch (error) {
       setFetchFailed(true)
       setLoading(false)
-    }
-  }
-
-  /**
-   *
-   */
-  const fetchLastPosts = async () => {
-    if (article && article.id && sections.length > 10) {
-      const lastSection = sections[sections.length - 1]
-      console.log('about to fetch last posts', lastSection)
-      const response = await ky
-        .get(`https://www.lemonde.fr/ajax/live/article/${article.id}/scroll?lastPost=${lastSection.id}`)
-        .json<GetPostsRes>()
-      if (!response || !response.posts || response.posts.length === 0) {
-        console.log('no new posts, exiting...')
-        return
-      }
-      let s = [...sections]
-      for (const post of response.posts) {
-        const node = parse(post)
-        const newSection = await exctractSection(node)
-        if (newSection) {
-          s.push(newSection)
-        }
-      }
-      setSections(s)
     }
   }
 
@@ -455,23 +465,18 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
         <ActivityIndicator style={{ flexGrow: 1, justifyContent: 'center' }} color={colors.primary} size={40} />
       ) : (
         <>
-          {/*
           <Banner
             style={{ marginTop: 32 }}
             icon="update"
-            visible={newCommentsReceived}
+            visible={true}
             actions={[
               {
                 label: i18n.t('live.view'),
-                onPress: () => {
-                  setNewCommentsReceived(false)
-                  //onRefresh()
-                }
+                onPress: () => {}
               }
             ]}>
             {i18n.t('live.newComments')}
           </Banner>
-          */}
           <CustomStatusBar translucent backgroundColor={'transparent'} />
           <FlatListWithHeaders
             disableAutoFixScroll
@@ -483,7 +488,7 @@ export default function LiveScreen(/*FIXME { onRefresh }: { onRefresh: () => voi
             renderItem={renderSection}
             HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}
             LargeHeaderComponent={(props) => <LargeHeaderComponent {...props} article={article} />}
-            onEndReached={fetchLastPosts}
+            // onEndReached={fetchLastPosts}
           />
         </>
       )}

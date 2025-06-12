@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, Image, Linking, StyleSheet, View, ActivityIndicator, SafeAreaView } from 'react-native'
 import { useTheme, Button, Card, Text } from 'react-native-paper'
 import { useRoute } from '@react-navigation/core'
@@ -8,24 +8,25 @@ import { FlatListWithHeaders } from '@codeherence/react-native-header'
 import WebView from 'react-native-webview'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
 import {
   ArticleHeader,
   ArticleHeaderParser,
   ContentType,
   ImgContent,
+  InlineText,
   MainStackNavigation,
   ParsedLink,
   SeeAlsoButtonContent,
   parseAndGuessURL
 } from '../types'
 import DynamicNavbar from '../DynamicNavbar'
-import Api from '../api'
+import { Api } from '../api'
 import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
 import { IconPremium } from '../assets'
-import FetchError from '../components/FetchError'
-import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { CustomStatusBar } from '../components/CustomStatusBar'
 
 const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.*/
 
@@ -34,7 +35,7 @@ const regex = /https:\/\/img\.lemde.fr\/\d+\/\d+\/\d+\/\d+\/\d+\/(\d+)\/(\d+)\/.
  * @since 2020-03
  * @version 2.0
  */
-export default function ArticleScreen() {
+export function ArticleScreen() {
   const route = useRoute()
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
@@ -140,7 +141,35 @@ export default function ArticleScreen() {
    * @param node
    * @returns
    */
-  const extractContent = (node: Node): ContentType | null => {
+  const extractParagraphContent = (node: HTMLElement): InlineText[] => {
+    const content: InlineText[] = []
+    node.childNodes.forEach((child) => {
+      if (child.nodeType === 3) {
+        content.push({ type: 'text', text: child.textContent ?? '' })
+      } else if (child.nodeType === 1) {
+        const el = child as HTMLElement
+        switch (el.rawTagName) {
+          case 'em':
+            content.push({ type: 'em', text: el.textContent ?? '' })
+            break
+          case 'strong':
+            content.push({ type: 'strong', text: el.textContent ?? '' })
+            break
+          default:
+            content.push({ type: 'text', text: el.textContent ?? '' })
+        }
+      }
+    })
+
+    return content
+  }
+
+  /**
+   *
+   * @param node
+   * @returns
+   */
+  const extractContent = (node: Node): ContentType[] | null => {
     if (!node.rawTagName) {
       return null
     }
@@ -155,7 +184,7 @@ export default function ArticleScreen() {
               let child: HTMLElement = htmlElement.childNodes[i] as HTMLElement
               if (child && child.rawTagName === 'figure') {
                 const figureContent = extractFigureContent(child)
-                if (figureContent) return figureContent
+                if (figureContent) return [figureContent]
               }
             }
           } else if (htmlElement.classNames.includes('twitter-tweet')) {
@@ -167,21 +196,20 @@ export default function ArticleScreen() {
               const provider = videoContainer.getAttribute('data-provider')
               const id = videoContainer.getAttribute('data-id')
               if (provider && id) {
-                return { type: 'webview-video', provider, data: id }
+                return [{ type: 'webview-video', provider, data: id }]
               }
             }
           }
         }
         break
       case 'h2':
-        return { type: 'h2', data: node.text }
+        return [{ type: 'h2', data: node.text }]
       case 'h3':
-        return { type: 'h3', data: node.text }
+        return [{ type: 'h3', data: node.text }]
       case 'p':
-        if (htmlElement.classNames && htmlElement.classNames.length > 0) {
-          if (htmlElement.classNames.includes('article__paragraph')) {
-            return { type: 'paragraph', data: node.text }
-          }
+        if (htmlElement.classNames?.includes('article__paragraph')) {
+          const inlineContent = extractParagraphContent(htmlElement)
+          return [{ type: 'paragraph', data: inlineContent }]
         }
         break
       case 'section':
@@ -197,13 +225,25 @@ export default function ArticleScreen() {
                 url: readAlso.attrs['href'],
                 isRestricted: readAlso.getAttribute('data-premium') === '1'
               }
-              return seeAlso
+              return [seeAlso]
             }
           }
         }
         break
+      case 'ul':
+        const listItems: ContentType[] = []
+        for (let i = 0; i < htmlElement.childNodes.length; i++) {
+          const child = htmlElement.childNodes[i] as HTMLElement
+          if (child && child.rawTagName === 'li') {
+            listItems.push({ type: 'list', data: child.textContent ?? '' })
+          }
+        }
+        return listItems
       case 'figure':
-        return extractFigureContent(htmlElement)
+        const f = extractFigureContent(htmlElement)
+        if (f) {
+          return [f]
+        }
     }
 
     return null
@@ -285,7 +325,7 @@ export default function ArticleScreen() {
             for (let j = 0; j < c.childNodes.length; j++) {
               let p = extractContent(c.childNodes[j])
               if (p) {
-                par.push(p)
+                par.push(...p)
               }
             }
           }
@@ -297,7 +337,7 @@ export default function ArticleScreen() {
           for (let j = 0; j < a.childNodes.length; j++) {
             let p = extractContent(a.childNodes[j])
             if (p) {
-              par.push(p)
+              par.push(...p)
             }
           }
         }
@@ -306,7 +346,7 @@ export default function ArticleScreen() {
         for (let i = 0; i < main.childNodes.length; i++) {
           let p = extractContent(main.childNodes[i])
           if (p) {
-            par.push(p)
+            par.push(...p)
           }
         }
       }
@@ -377,10 +417,35 @@ export default function ArticleScreen() {
             )}
           </View>
         )
+      case 'list':
+        return (
+          <Text variant="bodyMedium" style={styles.paragraph}>
+            • {item.data}
+          </Text>
+        )
       case 'paragraph':
         return (
           <Text variant="bodyMedium" style={styles.paragraph}>
-            {item.data}
+            {item.data.map((chunk, index) => {
+              switch (chunk.type) {
+                case 'text':
+                  return <Text key={index}>{chunk.text}</Text>
+                case 'strong':
+                  return (
+                    <Text key={index} style={{ fontWeight: 'bold' }}>
+                      {chunk.text}
+                    </Text>
+                  )
+                case 'em':
+                  return (
+                    <Text key={index} style={{ fontStyle: 'italic' }}>
+                      {chunk.text}
+                    </Text>
+                  )
+                default:
+                  return null
+              }
+            })}
           </Text>
         )
       case 'seeAlsoButton':

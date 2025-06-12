@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useTheme, Surface, Text, Chip, Divider } from 'react-native-paper'
@@ -6,11 +6,11 @@ import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 
 import { SettingsContext } from '../context/SettingsContext'
 import { useBottomSheet } from '../context/useBottomSheet'
-import i18n from '../locales/i18n'
+import { i18n } from '../locales/i18n'
 import { KEYS } from '../constants'
 import { MenuEntry } from '../types'
 
-export default function CustomBottomSheet() {
+export function CustomBottomSheet() {
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
   const sheetRef = useBottomSheet()
@@ -112,9 +112,7 @@ export default function CustomBottomSheet() {
                     mode={isSelected ? 'flat' : 'outlined'}
                     elevated
                     selected={isSelected}
-                    onPress={() => {
-                      settingsContext.setCurrentCategory(d)
-                    }}>
+                    onPress={() => settingsContext.setCurrentCategory(d)}>
                     {i18n.t(`feeds.${d.name}`)}
                   </Chip>
                 )

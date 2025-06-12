@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Appearance } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import DeviceInfo from 'react-native-device-info'
@@ -9,7 +9,7 @@ import defaultFeeds from '../feeds.json'
 import { KEYS } from '../constants'
 
 export interface UseSettingsType {
-  currentCategory: MenuEntry | null
+  currentCategory: MenuEntry
   feed: Category[]
   fontScale: number
   hasDynamicStatusBarColor: boolean
@@ -33,9 +33,15 @@ export interface UseSettingsType {
   toggleFavorite: (article: ArticleHeader) => Promise<void>
 }
 
+const defaultMenuEntry: MenuEntry = {
+  cat: 'news',
+  name: 'latestNews',
+  uri: 'rss/une.xml'
+}
+
 // Default values
 export const initialSettingsContext = {
-  currentCategory: null,
+  currentCategory: defaultMenuEntry,
   hydrated: false,
   fontScale: 1,
   feed: defaultFeeds,
@@ -45,13 +51,7 @@ export const initialSettingsContext = {
   hasDynamicStatusBarColor: true
 } as UseSettingsType
 
-const defaultMenuEntry: MenuEntry = {
-  cat: 'news',
-  name: 'latestNews',
-  uri: 'rss/une.xml'
-}
-
-const useSettings = (): UseSettingsType => {
+export const useSettings = (): UseSettingsType => {
   const [hydrated, setHydrated] = useState<boolean>(false)
   const [fontScale, setFontScale] = useState<number>(1)
   const [theme, _setTheme] = useState<Theme>(Theme.SYSTEM)
@@ -61,7 +61,7 @@ const useSettings = (): UseSettingsType => {
   const [hasReadAlso, _setReadAlso] = useState<boolean>(true)
   const [hasDynamicStatusBarColor, _setDynamicStatusBarColor] = useState<boolean>(true)
   const [share, _setShare] = useState<boolean>(true)
-  const [currentCategory, _setCurrentCategory] = useState<MenuEntry | null>(null)
+  const [currentCategory, _setCurrentCategory] = useState<MenuEntry>(defaultMenuEntry)
   const [lastFiveCategories, setLastFiveCategories] = useState<MenuEntry[]>([])
 
   useEffect(() => {
@@ -289,5 +289,3 @@ const useSettings = (): UseSettingsType => {
     toggleFavorite
   }
 }
-
-export default useSettings

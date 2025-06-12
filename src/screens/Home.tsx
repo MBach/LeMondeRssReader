@@ -1,35 +1,100 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { useWindowDimensions, FlatList, Image, RefreshControl, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useNavigation } from '@react-navigation/core'
+import { useFocusEffect, useNavigation } from '@react-navigation/core'
+import { useQuery } from '@tanstack/react-query'
 import { useTheme, Surface, Text, TouchableRipple } from 'react-native-paper'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { parse, HTMLElement } from 'node-html-parser'
-import { useFocusEffect } from '@react-navigation/native'
-import { KyResponse } from 'ky'
 
 import { DefaultImageFeed, IconMic, IconVideo, IconPremium } from '../assets'
 import { SettingsContext } from '../context/SettingsContext'
-import Api from '../api'
+import { Api } from '../api'
 import { ArticleType, MainStackNavigation, ParsedRssItem, parseAndGuessURL } from '../types'
-import FetchError from '../components/FetchError'
-import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { CustomStatusBar } from '../components/CustomStatusBar'
 import { useBottomSheet } from '../context/useBottomSheet'
 
 const regex = /<!\[CDATA\[(.*)+\]\]>/
+
+const fetchFeed = async (uri: string): Promise<HTMLElement> => {
+  console.log(`about to fetchFeed on uri="${uri}"`)
+  const response = await Api.get(uri)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch feed: ${response.status}`)
+  }
+  const text = await response.text()
+  return parse(text)
+}
+
+const useFeed = (uri: string) =>
+  useQuery({
+    queryKey: ['feed', uri],
+    queryFn: () => fetchFeed(uri!),
+    enabled: !!uri,
+    staleTime: 1000 * 60
+  })
+
+const fetchPremiumPage = async (subPath: string): Promise<Set<string>> => {
+  console.log(`about to fetchPremiumPage on subPath="${subPath}"`)
+  const res = await Api.get(subPath)
+  const page = await res.text()
+  const doc = parse(page)
+  const premiumIcons = doc.querySelectorAll('span.icon__premium')
+  const premiumHrefs = new Set<string>()
+  premiumIcons.forEach((icon) => {
+    const anchor = icon.parentNode
+    if (anchor?.tagName === 'A') {
+      const href = anchor.getAttribute('href')
+      if (href) premiumHrefs.add(href)
+    }
+  })
+
+  return premiumHrefs
+}
+
+function parseRssItems(data: HTMLElement): ParsedRssItem[] {
+  const items: HTMLElement[] = data.querySelectorAll('item')
+  let rssItems: ParsedRssItem[] = []
+  for (const item of items) {
+    let rssItem: ParsedRssItem = { title: '', description: '', isRestricted: false, link: '', uri: '' }
+    for (let i = 0; i < item.childNodes.length; i++) {
+      const htmlElement = item.childNodes[i] as HTMLElement
+      if (!(htmlElement && htmlElement.rawTagName)) {
+        continue
+      }
+      switch (htmlElement.rawTagName.toLowerCase()) {
+        case 'guid':
+          rssItem.link = htmlElement.text
+          break
+        case 'title':
+          const title = regex.exec(htmlElement.text)
+          rssItem.title = title && title.length === 2 ? title[1] : ''
+          break
+        case 'description':
+          const description = regex.exec(htmlElement.text)
+          rssItem.description = description?.length === 2 ? description[1] : ''
+          break
+        case 'media:content':
+          let url = htmlElement.getAttribute('url')
+          if (url) {
+            rssItem.uri = url
+          }
+          break
+      }
+    }
+    rssItems.push(rssItem)
+  }
+  return rssItems
+}
 
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
  * @version 2.0
  */
-export default function HomeScreen() {
-  const [loading, setLoading] = useState<boolean>(false)
-  const [loadingPremium, setLoadingPremium] = useState<boolean>(false)
-  const [refreshing, setRefreshing] = useState<boolean>(false)
-  const [fetchFailed, setFetchFailed] = useState<boolean>(false)
+export function HomeScreen() {
   const [items, setItems] = useState<ParsedRssItem[]>([])
-  const [checkPremiumIcons, setCheckPremiumIcons] = useState<boolean>(false)
   const sheetRef = useBottomSheet()
 
   const navigation = useNavigation<MainStackNavigation>()
@@ -37,6 +102,49 @@ export default function HomeScreen() {
   const { colors } = useTheme()
   const window = useWindowDimensions()
   const settingsContext = useContext(SettingsContext)
+
+  const { data, error, isFetched, isLoading, isRefetching, refetch } = useFeed(settingsContext.currentCategory?.uri)
+
+  const { data: premiumHrefs } = useQuery({
+    queryKey: ['premiumIcons', settingsContext.currentCategory?.subPath || ''],
+    queryFn: () => fetchPremiumPage(settingsContext.currentCategory?.subPath || ''),
+    enabled: isFetched && items.length > 0,
+    staleTime: 1000 * 60
+  })
+
+  useEffect(() => {
+    if (data) {
+      setItems(parseRssItems(data))
+    }
+  }, [data])
+
+  useEffect(() => {
+    console.log('useEffect > ', settingsContext.currentCategory?.subPath)
+  }, [settingsContext.currentCategory])
+
+  useEffect(() => {
+    if (premiumHrefs) {
+      const updatedItems = items.map((item) => ({
+        ...item,
+        isRestricted: premiumHrefs.has(item.link)
+      }))
+      setItems(updatedItems)
+    }
+  }, [premiumHrefs])
+
+  useEffect(() => {
+    if (data && sheetRef && sheetRef.current) {
+      sheetRef.current.collapse()
+    }
+  }, [data, sheetRef])
+
+  const navigateTo = async (item: ParsedRssItem, type: ArticleType) => {
+    const parsed = parseAndGuessURL(item.link)
+    if (parsed) {
+      sheetRef?.current?.close()
+      navigation.navigate(type, parsed)
+    }
+  }
 
   const styles = StyleSheet.create({
     itemContainer: {
@@ -75,140 +183,13 @@ export default function HomeScreen() {
     }, [sheetRef?.current])
   )
 
-  /*
-  useEffect(() => {
-    const backAction = () => {
-      console.log('back', navigation.getState())
-      sheetRef?.current?.snapToIndex(0)
-      return false
-    }
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction)
-    return () => backHandler.remove()
-  }, [sheetRef?.current])
-  */
-
-  useEffect(() => {
-    if (loading) {
-      console.log('useEffect > already loading...')
-      return
-    }
-    if (settingsContext.currentCategory) {
-      fetchAndCollapse()
-    }
-  }, [settingsContext.currentCategory])
-
-  const fetchAndCollapse = async () => {
-    await fetchFeed(false)
-    sheetRef?.current?.collapse()
-    setCheckPremiumIcons(false)
-  }
-
-  const refreshFeed = async () => {
-    setRefreshing(true)
-    setCheckPremiumIcons(false)
-    await fetchFeed(true)
-    setRefreshing(false)
-  }
-
-  const fetchFeed = async (isRefreshing: boolean) => {
-    setFetchFailed(false)
-    if (loading) {
-      console.log('fetchFeed, alreading loading...')
-      return
-    }
-    if (!isRefreshing) {
-      setLoading(true)
-    }
-
-    const url = `${settingsContext.currentCategory?.uri}`
-    try {
-      const response = await Api.get(url)
-      if (!response.ok) {
-        setFetchFailed(true)
-        return
+  useFocusEffect(
+    useCallback(() => {
+      if (isFetched) {
+        refetch()
       }
-      const text = await response.text()
-      const doc = parse(text)
-      const items: HTMLElement[] = doc.querySelectorAll('item')
-      let rssItems: ParsedRssItem[] = []
-      for (const item of items) {
-        let rssItem: ParsedRssItem = { title: '', description: '', isRestricted: false, link: '', uri: '' }
-        for (let i = 0; i < item.childNodes.length; i++) {
-          const htmlElement = item.childNodes[i] as HTMLElement
-          if (!(htmlElement && htmlElement.rawTagName)) {
-            continue
-          }
-          switch (htmlElement.rawTagName.toLowerCase()) {
-            case 'guid':
-              rssItem.link = htmlElement.text
-              break
-            case 'title':
-              const title = regex.exec(htmlElement.text)
-              rssItem.title = title && title.length === 2 ? title[1] : ''
-              break
-            case 'description':
-              const description = regex.exec(htmlElement.text)
-              rssItem.description = description?.length === 2 ? description[1] : ''
-              break
-            case 'media:content':
-              let url = htmlElement.getAttribute('url')
-              if (url) {
-                rssItem.uri = url
-              }
-              break
-          }
-        }
-        rssItems.push(rssItem)
-      }
-      setItems(rssItems)
-      if (!isRefreshing) {
-        setLoading(false)
-      }
-    } catch (error) {
-      setLoading(false)
-      setFetchFailed(true)
-    }
-  }
-
-  useEffect(() => {
-    if (items.length > 0 && !checkPremiumIcons && !loadingPremium) {
-      setLoadingPremium(true)
-      Api.get(settingsContext.currentCategory?.subPath || '')
-        .then((res: KyResponse) => res.text())
-        .then((page: string) => {
-          const doc = parse(page)
-          const premiumIcons = doc.querySelectorAll('span.icon__premium')
-          const rssItemListWithIcon: ParsedRssItem[] = [...items]
-          premiumIcons.forEach((premiumIcon) => {
-            const parentAnchor = premiumIcon.parentNode
-            if (parentAnchor && parentAnchor.tagName === 'A') {
-              const href = parentAnchor.getAttribute('href')
-              if (href) {
-                const rssItem = rssItemListWithIcon.find((item) => item.link === href)
-                if (rssItem) {
-                  rssItem.isRestricted = true
-                }
-              }
-            }
-          })
-          setItems(rssItemListWithIcon)
-        })
-        .catch((error) => {
-          console.warn('Error fetching premium icons:', error)
-        })
-        .finally(() => {
-          setLoadingPremium(false)
-        })
-    }
-  }, [items, checkPremiumIcons])
-
-  const navigateTo = async (item: ParsedRssItem, type: ArticleType) => {
-    const parsed = parseAndGuessURL(item.link)
-    if (parsed) {
-      sheetRef?.current?.close()
-      navigation.navigate(type, parsed)
-    }
-  }
+    }, [refetch, isFetched])
+  )
 
   const renderItem = ({ item }: { item: ParsedRssItem }) => {
     // Check if 2nd capture group is live/video/other
@@ -281,20 +262,19 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView>
       <CustomStatusBar translucent={true} backgroundColor={colors.surface} />
-      {loading ? (
-        <View style={{ flex: 1 }}>{renderContentLoader()}</View>
-      ) : fetchFailed ? (
-        <FetchError onRetry={fetchFeed.bind(null, false)} />
+      {isLoading ? (
+        <View>{renderContentLoader()}</View>
+      ) : error ? (
+        <FetchError onRetry={refetch} />
       ) : (
         <FlatList
-          contentContainerStyle={{ paddingBottom: 32 }}
           data={items}
           extraData={items}
           renderItem={renderItem}
-          keyExtractor={(item: any, index: number) => index.toString()}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshFeed} />}
+          keyExtractor={(item: ParsedRssItem) => item.link}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
         />
       )}
     </SafeAreaView>

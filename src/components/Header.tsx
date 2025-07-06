@@ -3,7 +3,14 @@ import { useWindowDimensions, Image, Share, View } from 'react-native'
 import { useTheme, IconButton, Portal, Snackbar, Text } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import Animated, { Extrapolation, SharedValue, interpolate, useAnimatedStyle, useDerivedValue } from 'react-native-reanimated'
+import Animated, {
+  Extrapolation,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue
+} from 'react-native-reanimated'
 import { FadingView, Header, LargeHeader, ScalingView } from '@codeherence/react-native-header'
 
 import { SettingsContext } from '../context/SettingsContext'
@@ -107,31 +114,35 @@ const BannerImage: FC<BannerImageProps> = ({ article, scrollY }) => {
 }
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>
-
-export const HeaderComponent = ({
-  showNavBar,
-  scrollY,
-  article
-}: {
-  showNavBar: SharedValue<number>
-  scrollY: SharedValue<number>
+interface HeaderComponentProps {
   article: ArticleHeader
-}) => {
+  showNavBar?: SharedValue<number>
+  scrollY?: SharedValue<number>
+  children?: React.ReactNode
+}
+
+export const HeaderComponent = ({ article, showNavBar, scrollY, children }: HeaderComponentProps) => {
+  const fallbackShowNavBar = useSharedValue(1)
+  const fallbackScrollY = useSharedValue(1)
+
   const [isFavorite, toggleFavorite] = useFavoriteStatus(article)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const navigation = useNavigation<NavigationProp>()
-  const opacity = useDerivedValue(() => 1 - showNavBar.value)
   const settingsContext = useContext(SettingsContext)
 
+  const _showNavBar = showNavBar ?? fallbackShowNavBar
+  const _scrollY = scrollY ?? fallbackScrollY
+  const opacity = useDerivedValue(() => 1 - _showNavBar.value)
+
   return (
-    <View>
+    <View style={{ flex: children ? 1 : 0 }}>
       <FadingView opacity={opacity}>
-        <BannerImage article={article} scrollY={scrollY} />
+        <BannerImage article={article} scrollY={_scrollY} />
       </FadingView>
       <Header
         ignoreTopSafeArea
         noBottomBorder
-        showNavBar={showNavBar}
+        showNavBar={_showNavBar}
         headerLeft={
           <IconButton
             icon="arrow-left"
@@ -156,6 +167,7 @@ export const HeaderComponent = ({
           {isFavorite ? i18n.t('article.favAdded') : i18n.t('article.favRemoved')}
         </Snackbar>
       </Portal>
+      {children}
     </View>
   )
 }

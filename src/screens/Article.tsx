@@ -102,6 +102,24 @@ export function ArticleScreen() {
     }
   }, [settingsContext.keepScreenOn])
 
+  const getBestResolutionFromSrcset = (srcset: string): string | undefined => {
+    const candidates = srcset
+      .split(',')
+      .map((part) => part.trim())
+      .map((part) => {
+        const [url, widthStr] = part.split(/\s+/)
+        const width = parseInt(widthStr, 10)
+        return { url, width: isNaN(width) ? 0 : width }
+      })
+      .filter(({ url, width }) => url.startsWith('http') && width > 0)
+      .sort((a, b) => a.width - b.width)
+
+    if (candidates.length === 0) return undefined
+
+    const best = candidates.find((c) => c.width >= window.width)
+    return (best ?? candidates[candidates.length - 1]).url
+  }
+
   /**
    *
    * @param figure
@@ -109,33 +127,41 @@ export function ArticleScreen() {
    */
   const extractFigureContent = (figure: HTMLElement): ImgContent | null => {
     const img = figure.querySelector('img')
-    if (img) {
-      let imgSrc = img.getAttribute('src')
-      if (!imgSrc) {
-        imgSrc = img.getAttribute('data-src')
-      }
-      let caption: string | null = null
-      if (imgSrc) {
-        const figcaption = figure.querySelector('figcaption')
-        if (figcaption && figcaption.text) {
-          caption = figcaption.text
-        }
-      } else {
-        return null
-      }
+    if (!img) return null
 
-      const b: RegExpExecArray | null = regex.exec(imgSrc)
-      let ratio: number | undefined
-      if (b && b.length === 3) {
-        const num1 = parseFloat(b[1])
-        const num2 = parseFloat(b[2])
-        if (!isNaN(num1) && !isNaN(num2)) {
-          ratio = num1 / num2
-        }
+    let imgSrc = img.getAttribute('src')
+
+    // Detect placeholder SVG
+    if (imgSrc?.startsWith('data:image/svg+xml')) {
+      // Fallback to srcset (prioritize this over data-src)
+      const srcset = img.getAttribute('srcset') || img.getAttribute('data-srcset')
+      if (srcset) {
+        imgSrc = getBestResolutionFromSrcset(srcset)
+      } else {
+        imgSrc = undefined
       }
-      return { type: 'img', uri: imgSrc, ratio, caption }
     }
-    return null
+
+    if (!imgSrc) return null
+
+    // Extract caption if present
+    let caption: string | null = null
+    const figcaption = figure.querySelector('figcaption')
+    if (figcaption) {
+      caption = figcaption.textContent?.trim() || null
+    }
+
+    // Extract ratio from URL if regex matches
+    const b: RegExpExecArray | null = regex.exec(imgSrc)
+    let ratio: number | undefined
+    if (b && b.length === 3) {
+      const num1 = parseFloat(b[1])
+      const num2 = parseFloat(b[2])
+      if (!isNaN(num1) && !isNaN(num2)) {
+        ratio = num1 / num2
+      }
+    }
+    return { type: 'img', uri: imgSrc, ratio, caption }
   }
 
   /**
@@ -418,7 +444,7 @@ export function ArticleScreen() {
         )
       case 'img':
         return (
-          <View style={{ marginHorizontal: 8 }}>
+          <View style={{ marginHorizontal: 8, marginBottom: 12 }}>
             <Image
               source={{ uri: item.uri }}
               style={{ width: window.width - 16, height: item.ratio ? (window.width - 16) / item.ratio : window.width / 2 }}
@@ -438,7 +464,7 @@ export function ArticleScreen() {
         )
       case 'paragraph':
         return (
-          <Text variant="bodyMedium" style={styles.paragraph} numberOfLines={10}>
+          <Text variant="bodyMedium" style={styles.paragraph}>
             {item.data.map((chunk, index) => {
               switch (chunk.type) {
                 case 'kicker':

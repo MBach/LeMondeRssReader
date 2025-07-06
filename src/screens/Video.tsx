@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useWindowDimensions, StatusBar, StyleSheet, View } from 'react-native'
+import { useWindowDimensions, StatusBar, StyleSheet, View, useAnimatedValue } from 'react-native'
 import { useRoute } from '@react-navigation/core'
 import { ActivityIndicator, Text, useTheme } from 'react-native-paper'
 import WebView from 'react-native-webview'
@@ -106,7 +106,7 @@ export function VideoScreen() {
       ) : loading || !article ? (
         <ActivityIndicator style={{ flexGrow: 1, justifyContent: 'center' }} color={colors.primary} size={40} />
       ) : (
-        <ScrollViewWithHeaders HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}>
+        <HeaderComponent article={article}>
           <Text variant="headlineSmall" style={styles.paddingH}>
             {article.title}
           </Text>
@@ -120,7 +120,7 @@ export function VideoScreen() {
             {article.date}
           </Text>
           {renderVideoContainer()}
-        </ScrollViewWithHeaders>
+        </HeaderComponent>
       )}
       <View style={{ paddingBottom: 40 }} />
     </SafeAreaView>

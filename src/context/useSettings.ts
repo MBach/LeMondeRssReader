@@ -22,6 +22,7 @@ export interface UseSettingsType {
   theme: Theme
   getFavorites: () => Promise<ArticleHeader[]>
   hasFavorite: (link: string) => Promise<boolean>
+  removeCategory: (c: MenuEntry) => Promise<void>
   setCurrentCategory: (c: MenuEntry) => Promise<void>
   setDynamicStatusBarColor: (b: boolean) => Promise<void>
   setFeed: (feed: Category[]) => Promise<void>
@@ -36,7 +37,8 @@ export interface UseSettingsType {
 const defaultMenuEntry: MenuEntry = {
   cat: 'news',
   name: 'latestNews',
-  uri: 'rss/une.xml'
+  uri: 'rss/une.xml',
+  isTranslatable: true
 }
 
 // Default values
@@ -175,6 +177,18 @@ export const useSettings = (): UseSettingsType => {
     setLastFiveCategories(lastCategories)
   }
 
+  const removeCategory = async (m: MenuEntry): Promise<void> => {
+    const lastCategoriesStr = await AsyncStorage.getItem(KEYS.LAST_FIVE_CATEGORIES)
+    let lastCategories: MenuEntry[] = lastCategoriesStr ? JSON.parse(lastCategoriesStr) : []
+    lastCategories = lastCategories.filter((category: MenuEntry) => category.uri !== m.uri)
+    if (lastCategories.length > 0) {
+      await AsyncStorage.setItem(KEYS.LAST_SECTION_ENTRY, JSON.stringify(lastCategories[0]))
+    }
+    const newestLastCategoriesStr = JSON.stringify(lastCategories)
+    await AsyncStorage.setItem(KEYS.LAST_FIVE_CATEGORIES, newestLastCategoriesStr)
+    setLastFiveCategories(lastCategories)
+  }
+
   /**
    *
    * @param b
@@ -278,6 +292,7 @@ export const useSettings = (): UseSettingsType => {
     theme,
     getFavorites,
     hasFavorite,
+    removeCategory,
     setCurrentCategory,
     setDynamicStatusBarColor,
     setFeed,

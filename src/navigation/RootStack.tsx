@@ -63,7 +63,11 @@ export function RootStack() {
         name="MainStack"
         children={() => <MainStack ref={mainStackRef} />}
         options={{
-          tabBarLabel: settingsContext.currentCategory ? i18n.t(`feeds.${settingsContext.currentCategory.name}`) : 'Home',
+          tabBarLabel: settingsContext.currentCategory
+            ? settingsContext.currentCategory.isTranslatable
+              ? i18n.t(`feeds.${settingsContext.currentCategory.name}`)
+              : settingsContext.currentCategory.name
+            : 'Home',
           tabBarIcon: renderTabIcon('home')
         }}
       />

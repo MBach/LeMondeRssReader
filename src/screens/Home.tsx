@@ -27,11 +27,16 @@ const fetchFeed = async (uri: string): Promise<HTMLElement> => {
   return parse(text)
 }
 
-const useFeed = (uri: string) => {
-  console.log('useFeed > uri', uri)
+const useFeed = (uri: string | null) => {
   return useQuery({
-    queryKey: ['feed', uri],
-    queryFn: () => fetchFeed(uri!),
+    queryKey: uri ? ['feed', uri] : ['feed', 'disabled'],
+    queryFn: async () => {
+      if (!uri) {
+        return null
+      }
+      console.log('useFeed > uri', uri)
+      return fetchFeed(uri)
+    },
     enabled: !!uri,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -107,7 +112,9 @@ export function HomeScreen() {
   const window = useWindowDimensions()
   const settingsContext = useContext(SettingsContext)
 
-  const { data, error, isFetched, isLoading, isRefetching, refetch } = useFeed(settingsContext.currentCategory.uri)
+  const feedUri = settingsContext.hydrated ? settingsContext.currentCategory.uri : null
+
+  const { data, error, isFetched, isLoading, isRefetching, refetch } = useFeed(feedUri)
   const { data: premiumHrefs } = useQuery({
     queryKey: ['premiumIcons', settingsContext.currentCategory.subPath],
     queryFn: () => fetchPremiumPage(settingsContext.currentCategory.subPath || ''),
@@ -119,19 +126,21 @@ export function HomeScreen() {
     if (data) {
       const items: HTMLElement[] = data.querySelectorAll('item')
       if (items && items.length > 0) {
-        console.log('useEffect > data changed, calling parseRssItems')
+        //console.log('useEffect > data changed, calling parseRssItems')
         setItems(parseRssItems(items))
       }
     }
   }, [data])
 
+  /*
   useEffect(() => {
     console.log('useEffect > items.length', items.length)
   }, [items])
 
   useEffect(() => {
-    console.log('useEffect > settingsContext.currentCategory.uri', settingsContext.currentCategory.uri)
-  }, [settingsContext.currentCategory.uri])
+    console.log('useEffect > feedUri', feedUri)
+  }, [feedUri])
+  */
 
   useEffect(() => {
     if (premiumHrefs) {

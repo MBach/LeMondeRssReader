@@ -1,7 +1,7 @@
-import { useContext, useState, useEffect } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { useContext, useState, useEffect, useRef, useMemo } from 'react'
+import { StyleSheet, useWindowDimensions, View } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useTheme, Surface, Text, Chip, Divider } from 'react-native-paper'
+import { useTheme, Surface, Text, Chip, Divider, Portal, Dialog, Button } from 'react-native-paper'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 
 import { SettingsContext } from '../context/SettingsContext'
@@ -14,8 +14,11 @@ export function CustomBottomSheet() {
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
   const sheetRef = useBottomSheet()
-  const [sections, setSections] = useState<{ title: string; data: MenuEntry[] }[]>([])
-
+  const [sections, setSections] = useState<{ title: string; data: MenuEntry[]; deletable: boolean }[]>([])
+  const [showRemoveRecentDialog, setShowRemoveRecentDialog] = useState<MenuEntry | null>(null)
+  const { width } = useWindowDimensions()
+  const [chipContainerHeight, setChipContainerHeight] = useState(0)
+  const chipStyle = useMemo(() => ({ maxWidth: width / 2.3 }), [width])
   const styles = StyleSheet.create({
     hPadding: {
       paddingHorizontal: 4
@@ -33,10 +36,13 @@ export function CustomBottomSheet() {
     },
     divider: {
       marginBottom: 12
+    },
+    flexCenter: {
+      justifyContent: 'center'
     }
   })
 
-  const createSections = async () => {
+  const createSections = async (): Promise<{ title: string; data: MenuEntry[]; deletable: boolean }[]> => {
     let allEntries = new Map<string, MenuEntry[]>()
 
     const lastCategoriesJSON = await AsyncStorage.getItem(KEYS.LAST_FIVE_CATEGORIES)
@@ -53,12 +59,10 @@ export function CustomBottomSheet() {
             cat: category.cat,
             name: subCat.name,
             uri: subCat.uri,
-            subPath: subCat.subPath
+            subPath: subCat.subPath,
+            isTranslatable: subCat.isTranslatable
           }
-          let entries = allEntries.get(category.cat)
-          if (!entries) {
-            entries = []
-          }
+          const entries = allEntries.get(category.cat) ?? []
           entries.push(newMenuEntry)
           allEntries.set(category.cat, entries)
         }
@@ -66,10 +70,20 @@ export function CustomBottomSheet() {
     }
 
     return [...allEntries.keys()].map((catName: string) => {
-      const data = allEntries.get(catName)
-      return {
-        title: catName === 'recent' ? i18n.t('categories.recent', { count: lastCategories.length }) : i18n.t(`categories.${catName}`),
-        data: data || []
+      const data = allEntries.get(catName) || []
+      const first = data[0]
+      if (catName === 'recent') {
+        return {
+          title: i18n.t('categories.recent', { count: lastCategories.length }),
+          data,
+          deletable: true
+        }
+      } else {
+        return {
+          title: first.isTranslatable ? i18n.t(`categories.${catName}`) : catName,
+          data,
+          deletable: false
+        }
       }
     })
   }
@@ -93,34 +107,71 @@ export function CustomBottomSheet() {
       handleIndicatorStyle={{ backgroundColor: colors.outline }}
       style={{ backgroundColor: 'transparent', paddingHorizontal: 8 }}
       index={0}
-      snapPoints={[24, settingsContext.lastFiveCategories.length > 3 ? 150 : 110, '90%']}
+      snapPoints={[24, chipContainerHeight > 60 ? 150 : 110, '90%']}
       animateOnMount={false}
       enableOverDrag={false}
       enablePanDownToClose={false}>
       <BottomSheetScrollView>
-        {sections.map((section, index: number) => (
-          <Surface key={`section-${index}`} style={styles.hPadding}>
+        {sections.map((section, i: number) => (
+          <Surface key={`section-${i}`} style={styles.hPadding}>
             <Text variant="titleMedium" style={styles.title}>
               {section.title}
             </Text>
-            <View style={styles.section}>
-              {section.data.map((d, idx) => {
+            <View
+              style={styles.section}
+              onLayout={(event) => {
+                if (i === 0) {
+                  const { height } = event.nativeEvent.layout
+                  setChipContainerHeight(height)
+                }
+              }}>
+              {section.data.map((d: MenuEntry, j: number) => {
                 const isSelected = settingsContext.currentCategory?.uri === d.uri
-                return (
-                  <Chip
-                    key={`subcat-${idx}`}
-                    mode={isSelected ? 'flat' : 'outlined'}
-                    elevated
-                    selected={isSelected}
-                    onPress={() => settingsContext.setCurrentCategory(d)}>
-                    {i18n.t(`feeds.${d.name}`)}
-                  </Chip>
-                )
+                if (section.deletable) {
+                  return (
+                    <Chip
+                      compact
+                      key={`section-${i}-subcat-${j}`}
+                      mode={isSelected ? 'flat' : 'outlined'}
+                      style={chipStyle}
+                      elevated
+                      selected={isSelected}
+                      onPress={() => settingsContext.setCurrentCategory(d)}
+                      onLongPress={() => setShowRemoveRecentDialog(d)}>
+                      {d.isTranslatable ? i18n.t(`feeds.${d.name}`) : d.name}
+                    </Chip>
+                  )
+                } else {
+                  return (
+                    <Chip
+                      key={`section-${i}-subcat-${j}`}
+                      mode={isSelected ? 'flat' : 'outlined'}
+                      elevated
+                      selected={isSelected}
+                      onPress={() => settingsContext.setCurrentCategory(d)}>
+                      {d.isTranslatable ? i18n.t(`feeds.${d.name}`) : d.name}
+                    </Chip>
+                  )
+                }
               })}
             </View>
             <Divider style={styles.divider} />
           </Surface>
         ))}
+        <Portal>
+          <Dialog visible={showRemoveRecentDialog !== null} onDismiss={() => setShowRemoveRecentDialog(null)}>
+            <Dialog.Actions style={styles.flexCenter}>
+              <Button
+                mode="text"
+                onPress={async () => {
+                  await settingsContext.removeCategory(showRemoveRecentDialog!)
+                  setShowRemoveRecentDialog(null)
+                }}>
+                {i18n.t('sheet.removeRecent')}
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       </BottomSheetScrollView>
     </BottomSheet>
   )

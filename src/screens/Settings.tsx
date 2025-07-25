@@ -251,7 +251,7 @@ export function SettingsScreen() {
             </RadioButton.Group>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setShowThemeDialog(false)}>Annuler</Button>
+            <Button onPress={() => setShowThemeDialog(false)}>{i18n.t('settings.cancel')}</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>

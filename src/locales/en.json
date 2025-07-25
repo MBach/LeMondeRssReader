@@ -152,7 +152,8 @@
         "light": "Apply light theme to the App",
         "system": "Let the system define the theme of the App"
       }
-    }
+    },
+    "cancel": "Cancel"
   },
   "tabs": {
     "article": "Article",
@@ -160,5 +161,8 @@
     "facts": "The Facts",
     "live": "Follow the live",
     "video": "Video"
+  },
+  "sheet": {
+    "removeRecent": "Remove from recent categories"
   }
 }

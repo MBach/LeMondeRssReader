@@ -152,7 +152,8 @@
         "light": "Appliquer le thème clair à l’App",
         "system": "Laisser le système choisir le thème de l’App"
       }
-    }
+    },
+    "cancel": "Annuler"
   },
   "tabs": {
     "article": "Article",
@@ -160,5 +161,8 @@
     "facts": "Les faits",
     "live": "Suivez le live",
     "video": "Vidéo"
+  },
+  "sheet": {
+    "removeRecent": "Retirer des éléments récents"
   }
 }

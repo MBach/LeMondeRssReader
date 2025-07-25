@@ -14,6 +14,7 @@ export interface SubCategory {
   active: boolean
   uri: string
   subPath?: string
+  isTranslatable: boolean
 }
 
 export interface Category {
@@ -30,6 +31,7 @@ export interface MenuEntry {
   name: string
   uri: string
   subPath?: string
+  isTranslatable: boolean
 }
 
 export enum Theme {
@@ -190,6 +192,21 @@ interface CaptionContent extends BaseContent {
   type: 'caption'
 }
 
+export interface CarouselCard extends BaseContent {
+  type: 'carousel-card'
+  episode: string
+  link: string
+  premium: boolean
+  img?: string
+}
+
+export interface CarouselContent extends BaseContent {
+  type: 'carousel'
+  category?: string
+  button: string
+  cards: CarouselCard[]
+}
+
 interface H1Content extends BaseContent {
   type: 'h1'
 }
@@ -263,6 +280,7 @@ interface WebviewVideoContent extends BaseContent {
 export type ContentType =
   | AuthorsContent
   | CaptionContent
+  | CarouselContent
   | DateReadingTime
   | DescContent
   | DivContent

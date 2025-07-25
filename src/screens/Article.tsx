@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
-import { useWindowDimensions, Image, Linking, StyleSheet, View, ActivityIndicator } from 'react-native'
-import { useTheme, Button, Card, Text, Surface, Chip } from 'react-native-paper'
+import { useWindowDimensions, Image, Linking, StyleSheet, View, ActivityIndicator, Pressable } from 'react-native'
+import { useTheme, Button, Card, Text, Surface, Chip, IconButton } from 'react-native-paper'
 import { useRoute } from '@react-navigation/core'
 import { useNavigation } from '@react-navigation/native'
 import parse, { HTMLElement, Node } from 'node-html-parser'
@@ -9,16 +9,21 @@ import WebView from 'react-native-webview'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import stringify from 'json-stable-stringify'
+import Carousel from 'react-native-reanimated-carousel'
 
 import { i18n } from '../locales/i18n'
 import { SettingsContext } from '../context/SettingsContext'
 import {
   ArticleHeader,
   ArticleHeaderParser,
+  ArticleType,
+  CarouselCard,
+  CarouselContent,
   ContentType,
   ImgContent,
   InlineText,
   MainStackNavigation,
+  MenuEntry,
   ParsedLink,
   SeeAlsoButtonContent,
   parseAndGuessURL
@@ -48,6 +53,7 @@ export function ArticleScreen() {
   const [fetchFailed, setFetchFailed] = useState<boolean>(false)
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
   const [paragraphes, setParagraphes] = useState<ContentType[]>([])
+  const [openCarousel, setOpenCarousel] = useState<boolean>(false)
 
   const styles = StyleSheet.create({
     subtitle: {
@@ -86,12 +92,38 @@ export function ArticleScreen() {
       marginTop: 20,
       width: window.width,
       height: (window.width * 9) / 16
+    },
+    carouselContainer: {
+      marginHorizontal: 8,
+      backgroundColor: colors.elevation.level2,
+      maxWidth: window.width - 16
+    },
+    carouselContent: {
+      display: 'flex',
+      flexDirection: 'row'
+    },
+    carouselIconPremium: {
+      marginRight: 8,
+      width: 18,
+      height: 18,
+      backgroundColor: colors.primaryContainer,
+      tintColor: colors.onPrimaryContainer
+    },
+    carouselData: {
+      paddingTop: 8,
+      maxWidth: window.width / 1.9,
+      paddingEnd: 4
+    },
+    carouselImg: {
+      resizeMode: 'cover',
+      width: 120,
+      height: 108
     }
   })
 
   useEffect(() => {
     init()
-  }, [])
+  }, [route.params])
 
   useEffect(() => {
     if (settingsContext.keepScreenOn) {
@@ -281,12 +313,50 @@ export function ArticleScreen() {
     return null
   }
 
+  const extractCarousel = (nav: HTMLElement, carousel: HTMLElement): CarouselContent | null => {
+    const title = nav.querySelector('a.serie__title')
+    const button = nav.querySelector('button > span.text-open')
+    if (title && button) {
+      const serieCards = carousel.querySelectorAll('div.serie__card')
+      const cards: CarouselCard[] = serieCards.map((card) => {
+        const span = card.querySelector('span[id^="article-title-"]')
+        const img = card.querySelector('div.serie__card-article--img > img')
+        let imgSrc
+        if (img) {
+          const srcset = img.getAttribute('srcset') || img.getAttribute('data-srcset')
+          if (srcset) {
+            imgSrc = getBestResolutionFromSrcset(srcset)
+          }
+        }
+        return {
+          type: 'carousel-card',
+          episode: card.querySelector('h3')?.rawText ?? '',
+          link: card.querySelector('a.js-serie-card-link')?.getAttribute('href') ?? '',
+          premium: card.querySelector('span.icon__premium') !== null,
+          img: imgSrc,
+          data: span?.textContent ?? ''
+        }
+      })
+      let c: CarouselContent = {
+        type: 'carousel',
+        data: title.textContent,
+        category: title.getAttribute('href')?.replace('https://www.lemonde.fr/', ''),
+        button: button.textContent,
+        cards
+      }
+      return c
+    }
+    return null
+  }
+
   const init = async () => {
     if (!route.params) {
       console.warn('no params!')
       return
     }
-    setFetchFailed(false)
+    if (fetchFailed) {
+      setFetchFailed(false)
+    }
     try {
       const l: ParsedLink = route.params as ParsedLink
       const response = await Api.get(`${l.category}/article/${l.yyyy}/${l.mm}/${l.dd}/${l.title}`)
@@ -337,7 +407,7 @@ export function ArticleScreen() {
         a.readingTime = s
       }
 
-      const parMap = new Map<string, any>()
+      const parMap = new Map<string, ContentType>()
 
       function appendContentFrom(nodeList: Node[]) {
         for (const node of nodeList) {
@@ -363,6 +433,15 @@ export function ArticleScreen() {
       const footers = main.getElementsByTagName('footer')
       if (footers && footers.length > 0) {
         footers[0].remove()
+      }
+
+      const nav: HTMLElement | null = doc.querySelector('div.serie__nav')
+      const serieCarousel: HTMLElement | null = doc.querySelector('div.serie__carousel')
+      if (nav && serieCarousel) {
+        const carousel = extractCarousel(nav, serieCarousel)
+        if (carousel) {
+          parMap.set('carousel', carousel)
+        }
       }
 
       if (longform) {
@@ -396,6 +475,32 @@ export function ArticleScreen() {
       setFetchFailed(true)
       setLoading(false)
     }
+  }
+
+  const renderCarouselCard = (info: CarouselCard) => {
+    return (
+      <Card
+        style={styles.carouselContainer}
+        onPress={() => {
+          const parsed = parseAndGuessURL(info.link)
+          if (parsed) {
+            navigation.push(parsed.type, parsed)
+          }
+        }}>
+        <Card.Content style={styles.carouselContent}>
+          <View style={{ flex: 1 }}>
+            <View style={styles.carouselContent}>
+              {info.premium && <Image source={IconPremium} style={styles.carouselIconPremium} />}
+              <Text variant="labelLarge">{info.episode}</Text>
+            </View>
+            <Text variant="bodyMedium" numberOfLines={5} style={styles.carouselData}>
+              {info.data}
+            </Text>
+          </View>
+          <Image source={{ uri: info.img }} style={styles.carouselImg} />
+        </Card.Content>
+      </Card>
+    )
   }
 
   const renderItem = ({ item }: { item: ContentType }) => {
@@ -436,6 +541,73 @@ export function ArticleScreen() {
             )}
           </View>
         )
+      case 'carousel':
+        return (
+          <View style={{ margin: 8 }}>
+            <View
+              style={{
+                display: 'flex',
+                marginBottom: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+              <View
+                style={{
+                  flex: 1,
+                  flexWrap: 'wrap',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center'
+                }}>
+                <IconButton
+                  mode="contained"
+                  icon="newspaper-variant"
+                  size={20}
+                  onPress={async () => {
+                    if (item.category) {
+                      const c: MenuEntry = {
+                        cat: item.category,
+                        name: item.data,
+                        uri: item.category.replaceAll('/', '') + '/rss_full.xml',
+                        isTranslatable: false
+                      }
+                      await settingsContext.setCurrentCategory(c)
+                      navigation.navigate('Home', {
+                        ///FIXME remove this
+                        type: ArticleType.ARTICLE,
+                        category: item.category!,
+                        dd: '00',
+                        mm: '00',
+                        yyyy: '00',
+                        title: ''
+                      })
+                    }
+                  }}
+                />
+                <Text variant="bodyMedium" numberOfLines={2} style={{ flex: 1, flexWrap: 'wrap' }}>
+                  {item.data}
+                </Text>
+              </View>
+              <Button
+                style={{ flexWrap: 'nowrap' }}
+                mode="contained-tonal"
+                icon={openCarousel ? 'chevron-up' : 'chevron-down'}
+                onPress={() => setOpenCarousel(!openCarousel)}>
+                <Text>{item.button}</Text>
+              </Button>
+            </View>
+            {openCarousel && (
+              <Carousel
+                autoPlayInterval={2000}
+                data={item.cards}
+                height={180}
+                width={window.width - 16}
+                renderItem={(i) => renderCarouselCard(i.item)}
+              />
+            )}
+          </View>
+        )
       case 'h3':
         return (
           <Text variant="titleMedium" style={styles.subtitle}>
@@ -469,9 +641,10 @@ export function ArticleScreen() {
               switch (chunk.type) {
                 case 'kicker':
                   return (
-                    <View key={index} style={{ paddingRight: 12 }}>
-                      <Chip compact>{chunk.text}</Chip>
-                    </View>
+                    <Text variant="titleMedium" key={index} style={{ margin: 8 }}>
+                      {chunk.text}
+                      {`  `}
+                    </Text>
                   )
                 case 'text':
                   return <Text key={index}>{chunk.text}</Text>

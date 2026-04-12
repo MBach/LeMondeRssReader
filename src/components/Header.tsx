@@ -1,8 +1,9 @@
-import { type FC, useContext, useEffect, useState } from 'react'
-import { useWindowDimensions, Image, Share, View } from 'react-native'
-import { useTheme, IconButton, Portal, Snackbar, Text } from 'react-native-paper'
+import { FadingView, Header, LargeHeader, ScalingView } from '@codeherence/react-native-header'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { type FC, useContext, useEffect, useState } from 'react'
+import { Image, Share, View, useWindowDimensions } from 'react-native'
+import { IconButton, Portal, Snackbar, Text, useTheme } from 'react-native-paper'
 import Animated, {
   Extrapolation,
   SharedValue,
@@ -11,13 +12,12 @@ import Animated, {
   useDerivedValue,
   useSharedValue
 } from 'react-native-reanimated'
-import { FadingView, Header, LargeHeader, ScalingView } from '@codeherence/react-native-header'
 
+import { i18n } from '../../src/locales/i18n'
+import { ArticleHeader, RootStackParamList } from '../../src/types'
 import { SettingsContext } from '../context/SettingsContext'
-import { i18n } from '../locales/i18n'
-import { ArticleHeader, RootStackParamList } from '../types'
 
-const useFavoriteStatus = (article: ArticleHeader) => {
+const useFavoriteStatus = (article: ArticleHeader): [boolean, () => Promise<boolean>] => {
   const settingsContext = useContext(SettingsContext)
   const [isFavorite, setIsFavorite] = useState(false)
 
@@ -27,8 +27,7 @@ const useFavoriteStatus = (article: ArticleHeader) => {
     }
   }, [article])
 
-  const toggleFavorite = async () => {
-    if (!article) return
+  const toggleFavorite = async (): Promise<boolean> => {
     const newStatus = !isFavorite
     setIsFavorite(newStatus)
     await settingsContext.toggleFavorite(article)
@@ -54,12 +53,14 @@ type FavoriteButtonProps = {
   isFavorite: boolean
   toggleFavorite: () => Promise<boolean>
   setSnackbarVisible: (value: boolean) => void
+  setLastAction: (added: boolean) => void
 }
-const FavoriteButton: FC<FavoriteButtonProps> = ({ isFavorite, toggleFavorite, setSnackbarVisible }) => {
+const FavoriteButton: FC<FavoriteButtonProps> = ({ isFavorite, toggleFavorite, setSnackbarVisible, setLastAction }) => {
   const { colors } = useTheme()
 
   const handlePress = async () => {
-    await toggleFavorite()
+    const nowFavorite = await toggleFavorite()
+    setLastAction(nowFavorite)
     setSnackbarVisible(true)
   }
 
@@ -122,11 +123,12 @@ interface HeaderComponentProps {
 }
 
 export const HeaderComponent = ({ article, showNavBar, scrollY, children }: HeaderComponentProps) => {
-  const fallbackShowNavBar = useSharedValue(1)
-  const fallbackScrollY = useSharedValue(1)
+  const fallbackShowNavBar = useSharedValue(0)
+  const fallbackScrollY = useSharedValue(0)
 
   const [isFavorite, toggleFavorite] = useFavoriteStatus(article)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
+  const [lastAction, setLastAction] = useState(false)
   const navigation = useNavigation<NavigationProp>()
   const settingsContext = useContext(SettingsContext)
 
@@ -157,14 +159,19 @@ export const HeaderComponent = ({ article, showNavBar, scrollY, children }: Head
         headerRight={
           <>
             {settingsContext.share && <ShareButton article={article} />}
-            <FavoriteButton isFavorite={isFavorite} toggleFavorite={toggleFavorite} setSnackbarVisible={setSnackbarVisible} />
+            <FavoriteButton
+              isFavorite={isFavorite}
+              toggleFavorite={toggleFavorite}
+              setSnackbarVisible={setSnackbarVisible}
+              setLastAction={setLastAction}
+            />
           </>
         }
         headerRightFadesIn
       />
       <Portal>
         <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={Snackbar.DURATION_SHORT}>
-          {isFavorite ? i18n.t('article.favAdded') : i18n.t('article.favRemoved')}
+          {lastAction ? i18n.t('article.favAdded') : i18n.t('article.favRemoved')}
         </Snackbar>
       </Portal>
       {children}

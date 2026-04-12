@@ -1,32 +1,31 @@
-import { useContext, useEffect, useState } from 'react'
-import { Image, StatusBar, StyleSheet, useWindowDimensions } from 'react-native'
-import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ActivityIndicator, Banner, Card, Chip, List, Surface, Text, useTheme } from 'react-native-paper'
-import parse, { HTMLElement, Node } from 'node-html-parser'
-import ky from 'ky'
-import WebView from 'react-native-webview'
 import { FlatListWithHeaders } from '@codeherence/react-native-header'
+import { useNavigation } from '@react-navigation/native'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
+import { useLocalSearchParams } from 'expo-router'
+import parse, { HTMLElement, Node } from 'node-html-parser'
+import { useContext, useEffect, useState } from 'react'
+import { Image, StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native'
+import { ActivityIndicator, Banner, Card, Chip, List, Surface, Text, useTheme } from 'react-native-paper'
+import WebView from 'react-native-webview'
 
+import { IconPremium } from '../../assets'
+import { Api } from '../api'
+import CustomStatusBar from '../components/CustomStatusBar'
+import { FetchError } from '../components/FetchError'
+import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
 import { SettingsContext } from '../context/SettingsContext'
+import { useWebViewFetch } from '../hooks/useWebViewFetch'
+import { i18n } from '../locales/i18n'
 import {
   ArticleHeader,
   ArticleHeaderParser,
   LiveContentType,
-  SectionContent,
-  ParsedLink,
+  MainStackNavigation,
   parseAndGuessURL,
-  SeeAlsoButtonContent,
-  MainStackNavigation
+  SectionContent,
+  SeeAlsoButtonContent
 } from '../types'
-import DynamicNavbar from '../DynamicNavbar'
-import { Api } from '../api'
-import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
-import { IconPremium } from '../assets'
-import { FetchError } from '../components/FetchError'
-import { CustomStatusBar } from '../components/CustomStatusBar'
-import { i18n } from '../locales/i18n'
-import { View } from 'react-native'
 
 interface LiveAjaxResponse {
   created: any[]
@@ -50,23 +49,24 @@ interface LiveAjaxResponse {
 /**
  * @author Matthieu BACHELIER
  * @since 2020-03
- * @version 2.0
+ * @version 3.0
  */
-export function LiveScreen() {
-  const route = useRoute()
+export default function LiveScreen() {
+  const allParams = useLocalSearchParams()
+  const { category, slug } = allParams as { category?: string; slug?: string | string[] }
+  const slugArr = Array.isArray(slug) ? slug : slug ? [slug] : []
+  const [yyyy, mm, dd, title] = slugArr
+
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
   const window = useWindowDimensions()
   const navigation = useNavigation<MainStackNavigation>()
-  const isFocused = useIsFocused()
   const queryClient = useQueryClient()
-  console.log('Live > isFocused', isFocused)
 
-  const [loading, setLoading] = useState(true)
-  const [fetchFailed, setFetchFailed] = useState<boolean>(false)
+  const { fetch, reset, html, status, webViewProps } = useWebViewFetch()
+
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
   const [sections, setSections] = useState<SectionContent[]>([])
-
   const [lastPost, setLastPost] = useState<string | null>(null)
   const [lastArticleModification, setLastArticleModification] = useState<string | null>(null)
 
@@ -101,226 +101,169 @@ export function LiveScreen() {
   const { data } = useQuery<LiveAjaxResponse | null>({
     queryKey: ['newPosts', article?.id, lastPost, lastArticleModification],
     queryFn: async (): Promise<LiveAjaxResponse | null> => {
-      if (!article?.id) {
-        //console.warn('no article id')
-        return null
-      }
+      if (!article?.id) return null
 
-      const baseUrl = `https://www.lemonde.fr/ajax/live/article/${article.id}`
-      const params = new URLSearchParams()
-      if (lastPost) {
-        params.append('lastPost', lastPost)
-      }
-      if (lastArticleModification) {
-        params.append('lastArticleModification', lastArticleModification)
-      }
+      const params: Record<string, string> = {}
+      if (lastPost) params['lastPost'] = lastPost
+      if (lastArticleModification) params['lastArticleModification'] = lastArticleModification
 
-      console.debug('about to fetch new comments')
-
-      const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl
-      const response = await ky.get(url)
+      const response = await Api.get(`ajax/live/article/${article.id}`, { searchParams: params })
       if (!response.ok) {
-        // Failed to fetch new posts
-        console.warn('Failed to fetch new posts')
+        console.warn('[LiveScreen] Failed to fetch new posts')
         return null
       }
       return response.json() as Promise<LiveAjaxResponse>
     },
-    enabled: isFocused && !!article?.id,
+    enabled: !!article?.id,
     refetchInterval: 5000,
     refetchOnWindowFocus: true
   })
 
+  // Kick off WebView fetch when params change
   useEffect(() => {
-    if (data) {
-      //console.log('useEffect > data', data)
-      const newLastPost = data.lastPost?.date?.replace('.000000', '') || null
-      const newLastArticleModification = data.lastArticleModification?.date?.replace('.000000', '') || null
-      //console.log('useEffect > newLastPost=' + newLastPost + ', lastPost=' + lastPost)
-      //console.log(
-      //  'useEffect > newLastArticleModification=' + newLastArticleModification + ', lastArticleModification=' + lastArticleModification
-      //)
-      if (newLastPost) {
-        setLastPost(newLastPost)
-      }
-      if (newLastArticleModification) {
-        setLastArticleModification(newLastArticleModification)
-      }
-    } else {
-      //console.log('useEffect > no data')
+    if (!category || !yyyy || !mm || !dd || !title) {
+      console.warn('[LiveScreen] missing params, skipping fetch')
+      return
     }
-  }, [data])
-
-  useEffect(() => {
-    init()
+    reset()
+    fetch(`https://www.lemonde.fr/${category}/live/${yyyy}/${mm}/${dd}/${title}`)
     return () => {
-      console.log('useEffect > return > cancelling queries')
-      queryClient.cancelQueries({
-        queryKey: ['newPosts'],
-        exact: false
-      })
+      queryClient.cancelQueries({ queryKey: ['newPosts'], exact: false })
     }
-  }, [])
+  }, [slugArr.join('/')])
+
+  // Parse HTML once WebView delivers it
+  useEffect(() => {
+    if (status !== 'done' || !html) return
+    try {
+      parseHtml(html)
+    } catch (e) {
+      console.warn('[LiveScreen] parse error', e)
+    }
+  }, [status, html])
 
   useEffect(() => {
     if (settingsContext.keepScreenOn) {
-      DynamicNavbar.setKeepScreenOn(true)
-      return () => {
-        DynamicNavbar.setKeepScreenOn(false)
-      }
+      activateKeepAwakeAsync()
+    } else {
+      deactivateKeepAwake()
     }
   }, [settingsContext.keepScreenOn])
 
-  const init = async () => {
-    if (!route.params) {
-      console.warn('no params!')
-      return
+  useEffect(() => {
+    if (!data) return
+    const newLastPost = data.lastPost?.date?.replace('.000000', '') || null
+    const newLastArticleModification = data.lastArticleModification?.date?.replace('.000000', '') || null
+    if (newLastPost) setLastPost(newLastPost)
+    if (newLastArticleModification) setLastArticleModification(newLastArticleModification)
+  }, [data])
+
+  const parseHtml = async (rawHtml: string) => {
+    const doc = parse(rawHtml)
+    const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
+
+    const parser = new ArticleHeaderParser()
+    const a: ArticleHeader = parser.parse(metas)
+
+    const uniqueSectionKeys = new Set<string>()
+    const s: SectionContent[] = []
+
+    const addUniqueSection = (section: SectionContent, key: string) => {
+      if (!uniqueSectionKeys.has(key)) {
+        uniqueSectionKeys.add(key)
+        s.push(section)
+      }
     }
 
-    setFetchFailed(false)
+    // Process hero section
+    const hero: HTMLElement | null = doc.querySelector('section.hero__live-content')
+    if (hero !== null) {
+      const section: SectionContent = { id: '', hero: false, hasBorder: false, contents: [] }
 
-    try {
-      const l = route.params as ParsedLink
-      const response = await Api.get(`${l.category}/live/${l.yyyy}/${l.mm}/${l.dd}/${l.title}`)
-      const doc = parse(await response.text())
-      const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
-
-      const parser = new ArticleHeaderParser()
-      const a: ArticleHeader = parser.parse(metas)
-
-      const uniqueSectionKeys = new Set<string>()
-      const s: SectionContent[] = []
-
-      const addUniqueSection = (section: SectionContent, key: string) => {
-        if (!uniqueSectionKeys.has(key)) {
-          uniqueSectionKeys.add(key)
-          s.push(section)
+      const meta: HTMLElement | null = doc.querySelector('div.hero__live-meta')
+      if (meta) {
+        const label = meta.querySelector('span.flag-live-cartridge__label')
+        const metaDate = meta.querySelector('span.meta__date')
+        if (label && metaDate) {
+          section.contents.push({ type: 'chip', data: label.textContent, lastUpdated: metaDate.textContent })
         }
       }
 
-      // Process hero section
-      const hero: HTMLElement | null = doc.querySelector('section.hero__live-content')
-      if (hero !== null) {
-        const section: SectionContent = {
-          id: '',
-          hero: false,
-          hasBorder: false,
-          contents: []
+      const titleEl: HTMLElement | null = hero.querySelector('section.title')
+      if (titleEl) {
+        const h1: HTMLElement | null = titleEl.querySelector('h1')
+        if (h1 && a.title.trim() !== h1.textContent.trim()) {
+          section.contents.push({ type: 'h1', data: h1.textContent })
         }
-
-        const meta: HTMLElement | null = doc.querySelector('div.hero__live-meta')
-        if (meta) {
-          const label = meta.querySelector('span.flag-live-cartridge__label')
-          const metaDate = meta.querySelector('span.meta__date')
-          if (label && metaDate) {
-            section.contents.push({ type: 'chip', data: label.textContent, lastUpdated: metaDate.textContent })
-          }
-        }
-
-        const title: HTMLElement | null = hero.querySelector('section.title')
-        if (title) {
-          const h1: HTMLElement | null = title.querySelector('h1')
-          if (h1 && a.title.trim() !== h1.textContent.trim()) {
-            section.contents.push({ type: 'h1', data: h1.textContent })
-          }
-
-          const p: HTMLElement | null = title.querySelector('p')
-          if (p) {
-            section.contents.push({ type: 'h2', data: p.textContent })
-          }
-        }
-
-        if (section.contents.length > 0) {
-          addUniqueSection(section, 'hero')
+        const p: HTMLElement | null = titleEl.querySelector('p')
+        if (p) {
+          section.contents.push({ type: 'h2', data: p.textContent })
         }
       }
 
-      // Process post sections
-      const posts: HTMLElement | null = doc.querySelector('#post-container')
-      if (posts !== null) {
-        const sections = Array.from(posts.children).filter((node) => node.rawTagName.toLowerCase() === 'section')
-
-        // console.log('sections found: ', posts.children.length)
-        for (const node of sections) {
-          //if (!(node instanceof HTMLElement)) continue
-          const dataPostId = node.getAttribute('data-post-id')
-          // console.debug('dataPostId', dataPostId)
-
-          if (!dataPostId) continue // skip if neither id nor data-post-id
-          const section = await exctractSection(node)
-          // console.debug(section)
-
-          if (section && section.contents.length > 0) {
-            addUniqueSection(section, dataPostId)
-          }
-        }
+      if (section.contents.length > 0) {
+        addUniqueSection(section, 'hero')
       }
-
-      setSections(s)
-      setArticle(a)
-      setLoading(false)
-    } catch (error) {
-      setFetchFailed(true)
-      setLoading(false)
     }
+
+    // Process post sections
+    const posts: HTMLElement | null = doc.querySelector('#post-container')
+    if (posts !== null) {
+      const postSections = Array.from(posts.children).filter((node) => node.rawTagName.toLowerCase() === 'section')
+      for (const node of postSections) {
+        const dataPostId = node.getAttribute('data-post-id')
+        if (!dataPostId) continue
+        const section = await extractSection(node)
+        if (section && section.contents.length > 0) {
+          addUniqueSection(section, dataPostId)
+        }
+      }
+    }
+
+    setSections(s)
+    setArticle(a)
   }
 
   /**
    * Transforms a Node into a JSON-like structure in order to be displayed.
-   *
-   * @param node
-   * @returns a new section ready to be added to a FlatList
    */
-  const exctractSection = async (node: Node): Promise<SectionContent | undefined> => {
-    let section: SectionContent = {
-      id: '',
-      hero: false,
-      hasBorder: false,
-      contents: []
-    }
+  const extractSection = async (node: Node): Promise<SectionContent | undefined> => {
+    const section: SectionContent = { id: '', hero: false, hasBorder: false, contents: [] }
     const htmlElement: HTMLElement = node as HTMLElement
+
     const border = htmlElement.querySelector('.flag-live__border, .flag-live__border__label')
     if (border && border.hasAttribute('style')) {
-      // Assume that inline style is always 'background-color'
       section.hasBorder = true
     }
-    // Header is a single element
+
     const header = htmlElement.querySelector('.header-content__live > .info-content')
     if (header) {
       section.header = header.textContent.trim()
     }
+
     const postId = htmlElement.getAttribute('id')
     if (postId) {
       section.id = postId
     }
-    // Content is a list of HTML tags: <h2>, <div>, <iframe> (e.g. tweets), etc.
+
     let contents = htmlElement.querySelectorAll('.content--live > *')
     if (contents.length === 0) {
-      console.log('no contents, trying again')
       contents = htmlElement.querySelectorAll('.meta__social--new-live-post > *')
     }
+
     for (const content of contents) {
-      console.log(content.id)
       switch (content.rawTagName) {
         case 'h2':
           section.contents.push({ type: content.rawTagName, data: content.textContent })
           break
         case 'div':
-          // post__live-container--answer => classic text
-          // post__live-container--comment-content => text displayed as speech bubble
-          // article__video-container article__video-container--ratio => iframe for embedding a video
-          // post__live-container--link-content => probably 'see also' button
           if (content.classNames === 'post__live-container--answer') {
             section.contents.push({ type: content.rawTagName, data: content.textContent })
           } else if (content.classNames === 'post__live-container--comment-content') {
-            let data = content.querySelector('blockquote.post__live-container--comment-blockquote')
-            let aut = content.querySelector('span.post__live-container--comment-author')
-            if (data && aut) {
-              section.contents.push({
-                type: 'quote',
-                data: data.textContent,
-                author: aut.textContent
-              })
+            const blockquote = content.querySelector('blockquote.post__live-container--comment-blockquote')
+            const author = content.querySelector('span.post__live-container--comment-author')
+            if (blockquote && author) {
+              section.contents.push({ type: 'quote', data: blockquote.textContent, author: author.textContent })
             }
           } else if (
             content.classNames.includes('post__live-container--link-content') ||
@@ -348,32 +291,35 @@ export function LiveScreen() {
             section.contents.push({ type: content.rawTagName, data: content.textContent })
           }
           break
-        case 'figure':
+        case 'figure': {
           const img = content.querySelector('img')
-          const data = img?.getAttribute('data-src')
-          if (img && data) {
-            section.contents.push({ type: 'img', uri: data })
+          const imgSrc = img?.getAttribute('data-src')
+          if (img && imgSrc) {
+            section.contents.push({ type: 'img', uri: imgSrc })
           }
-          const caption = content.querySelector('figcaption')
-          if (caption) {
-            section.contents.push({ type: 'caption', data: caption.textContent })
+          const figcaption = content.querySelector('figcaption')
+          if (figcaption) {
+            section.contents.push({ type: 'caption', data: figcaption.textContent })
           }
           break
+        }
         case 'ul':
           for (const li of content.childNodes) {
             section.contents.push({ type: 'list', data: li.textContent })
           }
           break
-        case 'iframe':
+        case 'iframe': {
           const dataSrc = content.getAttribute('data-src')
           if (dataSrc) {
             section.contents.push({ type: 'iframe', data: dataSrc })
           }
           break
+        }
         default:
           break
       }
     }
+
     if (section.contents.length > 0) {
       return section
     }
@@ -431,8 +377,8 @@ export function LiveScreen() {
             {content.data}
           </Text>
         )
-      case 'seeAlsoButton':
-        let see: SeeAlsoButtonContent = content as SeeAlsoButtonContent
+      case 'seeAlsoButton': {
+        const see = content as SeeAlsoButtonContent
         return (
           <Card
             key={index}
@@ -440,9 +386,7 @@ export function LiveScreen() {
             style={{ marginStart: 24, marginEnd: 8, marginVertical: 8 }}
             onPress={() => {
               const parsed = parseAndGuessURL(content.url)
-              if (parsed) {
-                navigation.push(parsed.type, parsed)
-              }
+              if (parsed) navigation.push(parsed.type, parsed)
             }}>
             <Card.Content style={{ flexDirection: 'row', marginEnd: 8 }}>
               {see.isRestricted && (
@@ -463,6 +407,7 @@ export function LiveScreen() {
             </Card.Content>
           </Card>
         )
+      }
       case 'webview-video':
         switch (content.provider) {
           case 'dailymotion':
@@ -476,49 +421,53 @@ export function LiveScreen() {
           case 'youtube':
             return <WebView key={index} source={{ uri: `https://www.youtube.com/embed/${content.data}` }} style={styles.videoContainer} />
         }
+        return null
       default:
         return null
     }
   }
 
   const renderSection = ({ item, index }: { item: SectionContent; index: number }) => {
-    let sectionStyle = {}
-    if (item.hasBorder) {
-      sectionStyle = { borderLeftColor: '#be1514', borderLeftWidth: 2, paddingHorizontal: 4 }
-    } else {
-      sectionStyle = { paddingHorizontal: 4 }
-    }
-    let subHeader: React.JSX.Element | null = null
-    if (item.header) {
-      subHeader = <List.Subheader style={{ color: item.hasBorder ? '#be1514' : colors.onSurface }}>{item.header}</List.Subheader>
-    }
+    const sectionStyle = item.hasBorder
+      ? { borderLeftColor: '#be1514', borderLeftWidth: 2, paddingHorizontal: 4 }
+      : { paddingHorizontal: 4 }
+
     return (
-      <List.Section key={item.id ?? `section-${index}`} style={{ ...sectionStyle }}>
-        {subHeader}
+      <List.Section key={item.id ?? `section-${index}`} style={sectionStyle}>
+        {item.header && <List.Subheader style={{ color: item.hasBorder ? '#be1514' : colors.onSurface }}>{item.header}</List.Subheader>}
         {item.contents.map(renderContent)}
       </List.Section>
     )
   }
 
+  const isLoading = status === 'idle' || status === 'loading' || !article
+  const fetchFailed = status === 'error'
+
   return (
     <Surface elevation={0} style={{ flex: 1 }}>
+      {/* Hidden WebView — zero size, delivers HTML then unmounts */}
+      {webViewProps && <WebView {...webViewProps} />}
       <StatusBar translucent />
       {fetchFailed ? (
-        <FetchError onRetry={init} />
-      ) : loading || !article ? (
-        <ActivityIndicator style={{ flexGrow: 1, justifyContent: 'center' }} color={colors.primary} size={40} />
+        <FetchError
+          onRetry={() => {
+            reset()
+            fetch(`https://www.lemonde.fr/${category}/live/${yyyy}/${mm}/${dd}/${title}`)
+          }}
+        />
+      ) : isLoading ? (
+        <ActivityIndicator
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 }}
+          color={colors.primary}
+          size={40}
+        />
       ) : (
         <>
           <Banner
             style={{ marginTop: 32 }}
             icon="update"
             visible={Array.isArray(data?.created) && data.created.length > 0}
-            actions={[
-              {
-                label: i18n.t('live.view'),
-                onPress: () => {}
-              }
-            ]}>
+            actions={[{ label: i18n.t('live.view'), onPress: () => {} }]}>
             {i18n.t('live.newComments')}
           </Banner>
           <CustomStatusBar translucent />
@@ -530,9 +479,8 @@ export function LiveScreen() {
             extraData={sections}
             keyExtractor={(_: any, index: number) => index.toString()}
             renderItem={renderSection}
-            HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}
-            LargeHeaderComponent={(props) => <LargeHeaderComponent {...props} article={article} />}
-            // onEndReached={fetchLastPosts}
+            HeaderComponent={(props: any) => <HeaderComponent {...props} article={article} />}
+            LargeHeaderComponent={(props: any) => <LargeHeaderComponent {...props} article={article} />}
           />
         </>
       )}

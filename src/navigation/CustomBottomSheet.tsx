@@ -1,14 +1,14 @@
-import { useContext, useState, useEffect, useRef, useMemo } from 'react'
-import { StyleSheet, useWindowDimensions, View } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useTheme, Surface, Text, Chip, Divider, Portal, Dialog, Button } from 'react-native-paper'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useContext, useEffect, useMemo, useState } from 'react'
+import { StyleSheet, useWindowDimensions, View } from 'react-native'
+import { Button, Chip, Dialog, Divider, Portal, Surface, Text, useTheme } from 'react-native-paper'
 
+import { i18n } from '../../src/locales/i18n'
+import { MenuEntry } from '../../src/types'
+import { KEYS } from '../constants'
 import { SettingsContext } from '../context/SettingsContext'
 import { useBottomSheet } from '../context/useBottomSheet'
-import { i18n } from '../locales/i18n'
-import { KEYS } from '../constants'
-import { MenuEntry } from '../types'
 
 export function CustomBottomSheet() {
   const settingsContext = useContext(SettingsContext)

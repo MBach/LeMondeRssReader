@@ -1,28 +1,14 @@
 ## Introduction
 
-This App for Android 6.0 Marshmallow and later (Android 15) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping).
+This App for Android 7.0 and later (Android 16) features how to read RSS stream from one website, and does some complex [Web scraping](https://en.wikipedia.org/wiki/Web_scraping).
 
 ## Requirements
 
-A smartphone at least on Android 6.0
+A smartphone at least on Android 7.0
 
 ## Download
 
 <a href="https://f-droid.org/packages/org.mbach.lemonde/"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a>
-
-## Screenshots
-
-![Main page](https://mbach.github.io/LeMondeRssReader/screenshots/main.jpg)
-
-![Article](https://mbach.github.io/LeMondeRssReader/screenshots/article.jpg)
-
-![Live](https://mbach.github.io/LeMondeRssReader/screenshots/live.jpg)
-
-![Bottom Sheet opened](https://mbach.github.io/LeMondeRssReader/screenshots/bottomsheet_1.jpg)
-
-![Bottom Sheet fully opened](https://mbach.github.io/LeMondeRssReader/screenshots/bottomsheet_2.jpg)
-
-![Dynamic theming](https://mbach.github.io/LeMondeRssReader/screenshots/themes.jpg)
 
 ## Support or Contact
 

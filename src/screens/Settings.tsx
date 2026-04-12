@@ -1,7 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useContext, useState } from 'react'
-import { ScrollView, StyleSheet, StatusBar, View } from 'react-native'
+import { ScrollView, StatusBar, StyleSheet, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
-  useTheme,
   ActivityIndicator,
   Button,
   Chip,
@@ -9,12 +10,12 @@ import {
   Divider,
   Portal,
   RadioButton,
+  Surface,
   Switch,
   Text,
   TouchableRipple,
-  Surface
+  useTheme
 } from 'react-native-paper'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { KEYS } from '../constants'
 import { SettingsContext } from '../context/SettingsContext'
@@ -35,6 +36,7 @@ export function SettingsScreen() {
   const [radioValue, setRadioValue] = useState<Theme>(settingsContext.theme)
 
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
 
   const styles = StyleSheet.create({
     flex: {
@@ -108,7 +110,7 @@ export function SettingsScreen() {
       <StatusBar translucent />
       <SettingsContext.Consumer>
         {(settingsContext: UseSettingsType) => (
-          <ScrollView style={{ paddingTop: StatusBar.currentHeight }}>
+          <ScrollView style={{ paddingTop: StatusBar.currentHeight }} contentContainerStyle={{ paddingBottom: insets.bottom }}>
             <View style={styles.surfaceContainer}>
               <Text variant="bodyMedium" style={{ color: colors.primary }}>
                 {i18n.t('settings.general.title')}
@@ -143,15 +145,6 @@ export function SettingsScreen() {
               <Text variant="bodyMedium" style={{ color: colors.primary }}>
                 {i18n.t('settings.layout.title')}
               </Text>
-              <TouchableRipple rippleColor={colors.primary} style={styles.rippleMarginTop}>
-                <View style={styles.flexRow}>
-                  <View style={styles.flex}>
-                    <Text variant="titleMedium">{i18n.t('settings.layout.content1')}</Text>
-                    <Text variant="bodyMedium">{i18n.t('settings.layout.desc1')}</Text>
-                  </View>
-                  <Switch value={true} disabled />
-                </View>
-              </TouchableRipple>
               <TouchableRipple
                 rippleColor={colors.primary}
                 style={styles.rippleMarginTop}

@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Appearance } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import DeviceInfo from 'react-native-device-info'
+import { useEffect, useState } from 'react'
 
-import DynamicNavbar from '../DynamicNavbar'
-import { ArticleHeader, Category, MenuEntry, Theme } from '../types'
-import defaultFeeds from '../feeds.json'
+import * as NavigationBar from 'expo-navigation-bar'
+import { Appearance, PixelRatio, Platform } from 'react-native'
+import { ArticleHeader, Category, MenuEntry, Theme } from '../../src/types'
+
 import { KEYS } from '../constants'
+import defaultFeeds from '../feeds.json'
 
 export interface UseSettingsType {
   currentCategory: MenuEntry
@@ -71,7 +71,7 @@ export const useSettings = (): UseSettingsType => {
   }, [])
 
   const _init = async (): Promise<void> => {
-    setFontScale(await DeviceInfo.getFontScale())
+    setFontScale(PixelRatio.getFontScale())
     const f = await AsyncStorage.getItem(KEYS.FEED)
     _setFeed(f ? JSON.parse(f) : defaultFeeds)
     ///
@@ -84,16 +84,13 @@ export const useSettings = (): UseSettingsType => {
     let themeStr: string | null = await AsyncStorage.getItem(KEYS.THEME)
     switch (themeStr) {
       case 'light':
-        DynamicNavbar.setLightNavigationBar(true)
         _setTheme(Theme.LIGHT)
         break
       case 'dark':
-        DynamicNavbar.setLightNavigationBar(false)
         _setTheme(Theme.DARK)
         break
       default:
       case 'system':
-        DynamicNavbar.setLightNavigationBar(Appearance.getColorScheme() === 'light')
         _setTheme(Theme.SYSTEM)
         break
     }
@@ -243,21 +240,26 @@ export const useSettings = (): UseSettingsType => {
     _setShare(b)
   }
 
+  const setNavbarStyle = async (isLight: boolean) => {
+    if (Platform.OS !== 'android') return
+    await NavigationBar.setButtonStyleAsync(isLight ? 'dark' : 'light')
+  }
+
   /**
    *
    * @param theme
    */
   const setTheme = async (theme: Theme): Promise<void> => {
     switch (theme) {
-      default:
       case Theme.DARK:
-        DynamicNavbar.setLightNavigationBar(false)
+        await setNavbarStyle(false)
         break
       case Theme.LIGHT:
-        DynamicNavbar.setLightNavigationBar(true)
+        await setNavbarStyle(true)
         break
+      default:
       case Theme.SYSTEM:
-        DynamicNavbar.setLightNavigationBar(Appearance.getColorScheme() === 'light')
+        await setNavbarStyle(Appearance.getColorScheme() === 'light')
         break
     }
     _setTheme(theme)

@@ -1,215 +1,198 @@
+import { ScrollViewWithHeaders } from '@codeherence/react-native-header'
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
+import { useLocalSearchParams } from 'expo-router'
+import { decode } from 'html-entities'
+import parse, { HTMLElement } from 'node-html-parser'
 import { useContext, useEffect, useState } from 'react'
 import { StatusBar, StyleSheet, View } from 'react-native'
-import { ActivityIndicator, Text, useTheme } from 'react-native-paper'
-import { useRoute } from '@react-navigation/core'
-import { RouteProp } from '@react-navigation/native'
-import parse, { HTMLElement } from 'node-html-parser'
-import { ScrollViewWithHeaders } from '@codeherence/react-native-header'
-import VideoPlayer from 'react-native-media-console'
-import { decode } from 'html-entities'
-
-import { SettingsContext } from '../context/SettingsContext'
-import { Api } from '../api'
-import DynamicNavbar from '../DynamicNavbar'
-import { ArticleHeader, ArticleHeaderParser, MainStackParamList, ParsedLink } from '../types'
-import { HeaderComponent } from '../components/Header'
-import { FetchError } from '../components/FetchError'
+import { ActivityIndicator, IconButton, ProgressBar, Text, useTheme } from 'react-native-paper'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import WebView from 'react-native-webview'
 
-type PodcastScreenRouteProp = RouteProp<MainStackParamList, 'Podcast'>
-
-interface ImageObject {
-  '@type': string
-  '@id': string
-  url: string
-  contentUrl: string
-  caption: string
-}
-
-interface Publisher {
-  '@id': string
-}
-
-interface PrimaryImageOfPage {
-  '@id': string
-}
-
-interface BreadcrumbListItem {
-  '@type': string
-  position: number
-  name: string
-  item: string
-}
-
-interface BreadcrumbList {
-  '@type': string
-  '@id': string
-  itemListElement: BreadcrumbListItem[]
-}
-
-interface Organization {
-  '@type': string
-  '@id': string
-  name: string
-  url: string
-  sameAs: string[]
-  logo: ImageObject
-  image: ImageObject
-}
-
-interface WebSite {
-  '@type': string
-  '@id': string
-  url: string
-  name: string
-  description: string
-  inLanguage: string
-  publisher: Publisher
-}
+import { FetchError } from '../components/FetchError'
+import { HeaderComponent } from '../components/Header'
+import { SettingsContext } from '../context/SettingsContext'
+import { useWebViewFetch } from '../hooks/useWebViewFetch'
+import { ArticleHeader, ArticleHeaderParser } from '../types'
 
 interface WebPage {
   '@type': string
-  '@id': string
-  url: string
-  name: string
   description: string
-  inLanguage: string
-  publisher: Publisher
-  isPartOf: {
-    '@id': string
-  }
-  primaryImageOfPage: PrimaryImageOfPage
-  breadcrumb: {
-    '@id': string
-  }
-}
-
-interface PodcastEpisode {
-  url: string
-  name: string
-  datePublished: string
-  description: string
-  associatedMedia: {
-    '@type': string
-    contentUrl: string
-  }
-  partOfSeries: {
-    '@type': string
-    name: string
-    url: string
-  }
+  [key: string]: any
 }
 
 interface PodcastData {
   '@context': string
-  '@graph': (Organization | WebSite | ImageObject | WebPage | BreadcrumbList | PodcastEpisode)[]
+  '@graph': any[]
 }
 
 /**
  * @author Matthieu BACHELIER
  * @since 2024-05
- * @version 1.0
+ * @version 2.0
  */
-export function PodcastScreen() {
-  const route = useRoute<PodcastScreenRouteProp>()
+export default function PodcastScreen() {
+  const { category, slug } = useLocalSearchParams<{ category: string; slug: string[] }>()
+  const [yyyy, mm, dd, title] = Array.isArray(slug) ? slug : []
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
 
-  const [loading, setLoading] = useState(true)
-  const [fetchFailed, setFetchFailed] = useState<boolean>(false)
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
   const [paragraphes, setParagraphes] = useState<string[]>([])
   const [podcastURI, setPodcastURI] = useState<string | null>(null)
 
-  const styles = StyleSheet.create({
-    containerStyle: {
-      width: '100%',
-      height: 128
-    }
-  })
+  const { fetch, reset, html, status, webViewProps } = useWebViewFetch()
 
+  // expo-audio: player is re-created whenever podcastURI changes
+  const player = useAudioPlayer(podcastURI ? { uri: podcastURI } : null, { updateInterval: 500 })
+  const playerStatus = useAudioPlayerStatus(player)
+
+  const podcastUrl =
+    category && yyyy && mm && dd && title ? `https://www.lemonde.fr/${category}/podcast/${yyyy}/${mm}/${dd}/${title}` : null
+
+  // Configure audio session once
   useEffect(() => {
-    init()
+    setAudioModeAsync({ playsInSilentMode: true })
   }, [])
 
+  // Kick off WebView fetch when params change
+  useEffect(() => {
+    if (!podcastUrl) return
+    reset()
+    fetch(podcastUrl)
+  }, [podcastUrl])
+
+  // Parse HTML once received from WebView
+  useEffect(() => {
+    if (status !== 'done' || !html) return
+    try {
+      const doc = parse(html)
+      const metas = Array.from(doc.querySelectorAll('meta')).filter((m): m is HTMLElement => m instanceof HTMLElement)
+      const a = new ArticleHeaderParser().parse(metas)
+      setArticle(a)
+
+      const metaOgAudio = metas.find((m) => m.getAttribute('property') === 'og:audio')
+      const audioUrl = metaOgAudio?.getAttribute('content')
+      if (audioUrl) {
+        for (const script of doc.getElementsByTagName('script')) {
+          if (script.getAttribute('type') === 'application/ld+json') {
+            try {
+              const jsonData: PodcastData = JSON.parse(script.innerHTML)
+              const webPage = jsonData['@graph']?.find((item: any) => item['@type'] === 'WebPage') as WebPage | undefined
+              if (webPage?.description) {
+                setParagraphes(decode(webPage.description).split('  '))
+              }
+            } catch {}
+            break
+          }
+        }
+        setPodcastURI(audioUrl)
+      }
+    } catch (e) {
+      console.warn('[PodcastScreen] parse error', e)
+    }
+  }, [status, html])
+
+  // Keep screen on
   useEffect(() => {
     if (settingsContext.keepScreenOn) {
-      DynamicNavbar.setKeepScreenOn(true)
-      return () => {
-        DynamicNavbar.setKeepScreenOn(false)
-      }
+      activateKeepAwakeAsync()
+    } else {
+      deactivateKeepAwake()
     }
   }, [settingsContext.keepScreenOn])
 
-  const init = async () => {
-    if (!route.params) {
-      console.warn('no params!')
-      return
-    }
-    setFetchFailed(false)
-    try {
-      const l: ParsedLink = route.params as ParsedLink
-      const response = await Api.get(`podcasts/article/${l.yyyy}/${l.mm}/${l.dd}/${l.title}`)
-      const doc = parse(await response.text())
-
-      // Category and other infos in the header
-      const metas = Array.from(doc.querySelectorAll('meta')).filter((meta): meta is HTMLElement => meta instanceof HTMLElement)
-      const parser = new ArticleHeaderParser()
-      const a = parser.parse(metas)
-
-      if (metas) {
-        const metaOgAudio = metas.find((meta: HTMLElement) => meta.getAttribute('property') === 'og:audio')
-        if (metaOgAudio) {
-          let content = metaOgAudio.getAttribute('content')
-          if (content) {
-            const scripts: HTMLElement[] = doc.getElementsByTagName('script')
-            for (const script of scripts) {
-              if (script.getAttribute('type') === 'application/ld+json') {
-                const jsonString: PodcastData = JSON.parse(script.innerHTML)
-                const graph = jsonString['@graph']
-                const webPage: WebPage | undefined = graph.find((item: any) => item['@type'] === 'WebPage') as WebPage | undefined
-                if (webPage?.description) {
-                  const paragraphs = decode(webPage.description).split('  ')
-                  setParagraphes(paragraphs)
-                }
-                break
-              }
-            }
-            setPodcastURI(content)
-          }
-        }
-      }
-      setArticle(a)
-      setLoading(false)
-    } catch (error) {
-      setFetchFailed(true)
-      setLoading(false)
-    }
+  const formatTime = (ms: number) => {
+    const totalSec = Math.floor(ms / 1000)
+    const m = Math.floor(totalSec / 60)
+    const s = totalSec % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
   }
+
+  const seekBy = (deltaMs: number) => {
+    const next = Math.max(0, Math.min(playerStatus.currentTime * 1000 + deltaMs, (playerStatus.duration ?? 0) * 1000))
+    player.seekTo(next / 1000)
+  }
+
+  const styles = StyleSheet.create({
+    player: {
+      marginHorizontal: 8,
+      marginVertical: 12,
+      padding: 12,
+      borderRadius: 12,
+      backgroundColor: colors.elevation.level2
+    },
+    playerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    timeRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 4
+    },
+    progress: {
+      marginTop: 8,
+      borderRadius: 4
+    }
+  })
+
+  const isLoading = status === 'idle' || status === 'loading' || !article || !podcastURI
+  const fetchFailed = status === 'error'
+  const duration = playerStatus.duration ?? 0
+  const progress = duration > 0 ? playerStatus.currentTime / duration : 0
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar backgroundColor={'rgba(0,0,0,0.33)'} translucent barStyle="light-content" />
+
+      {/* Hidden WebView for fetching HTML */}
+      {webViewProps && <WebView {...webViewProps} />}
+
       {fetchFailed ? (
-        <FetchError onRetry={init} />
-      ) : loading || !article || !podcastURI ? (
+        <FetchError
+          onRetry={() => {
+            reset()
+            if (podcastUrl) fetch(podcastUrl)
+          }}
+        />
+      ) : isLoading ? (
         <ActivityIndicator style={{ flexGrow: 1, justifyContent: 'center' }} color={colors.primary} size={40} />
       ) : (
-        <ScrollViewWithHeaders HeaderComponent={(props) => <HeaderComponent {...props} article={article} />}>
-          <Text variant="titleMedium">{article.title}</Text>
-          <VideoPlayer
-            source={{ uri: podcastURI }}
-            containerStyle={styles.containerStyle}
-            alwaysShowControls
-            disableBack
-            disableFullscreen
-            disableVolume
-            showDuration
-            showOnStart
-            seekColor={colors.primary}
-          />
-          {paragraphes.map((p: string, index: number) => (
-            <Text key={`p-${index}`} variant="bodyMedium" style={{ paddingBottom: 4 }}>
+        <ScrollViewWithHeaders HeaderComponent={(props: any) => <HeaderComponent {...props} article={article} />}>
+          <Text variant="titleMedium" style={{ paddingHorizontal: 8, paddingTop: 8 }}>
+            {article!.title}
+          </Text>
+
+          {/* Audio player */}
+          <View style={styles.player}>
+            {!playerStatus.isLoaded ? (
+              <ActivityIndicator color={colors.primary} />
+            ) : (
+              <>
+                <View style={styles.playerRow}>
+                  <IconButton icon="rewind-10" size={28} onPress={() => seekBy(-10_000)} />
+                  <IconButton
+                    icon={playerStatus.playing ? 'pause-circle' : 'play-circle'}
+                    size={52}
+                    iconColor={colors.primary}
+                    onPress={() => (playerStatus.playing ? player.pause() : player.play())}
+                  />
+                  <IconButton icon="fast-forward-10" size={28} onPress={() => seekBy(10_000)} />
+                </View>
+                <ProgressBar progress={progress} color={colors.primary} style={styles.progress} />
+                <View style={styles.timeRow}>
+                  <Text variant="labelSmall">{formatTime(playerStatus.currentTime * 1000)}</Text>
+                  <Text variant="labelSmall">{formatTime(duration * 1000)}</Text>
+                </View>
+              </>
+            )}
+          </View>
+
+          {paragraphes.map((p, index) => (
+            <Text key={`p-${index}`} variant="bodyMedium" style={{ paddingHorizontal: 8, paddingBottom: 4 }}>
               {p}
             </Text>
           ))}

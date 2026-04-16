@@ -1,5 +1,3 @@
-import { NavigatorScreenParams } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { HTMLElement } from 'node-html-parser'
 
 export interface ParsedRssItem {
@@ -46,17 +44,6 @@ export enum ArticleType {
   PODCAST = 'Podcast',
   VIDEO = 'Video'
 }
-
-export type MainScreenNames = 'Home' | 'Article' | 'Live' | 'Podcast' | 'Video'
-export type MainStackParamList = Record<MainScreenNames, ParsedLink>
-export type RootStackParamList = {
-  MainStack: NavigatorScreenParams<MainStackParamList>
-  Favorites: undefined
-  Settings: undefined
-  Root: undefined
-  Home: undefined
-}
-export type MainStackNavigation = NativeStackNavigationProp<MainStackParamList>
 
 // Deep linking
 

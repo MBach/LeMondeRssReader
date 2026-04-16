@@ -1,5 +1,5 @@
-import { useFocusEffect } from '@react-navigation/core'
 import { useQuery } from '@tanstack/react-query'
+import { useFocusEffect } from 'expo-router'
 import { HTMLElement, parse } from 'node-html-parser'
 import { JSX, useCallback, useContext, useEffect, useState } from 'react'
 import ContentLoader, { Rect } from 'react-content-loader/native'

@@ -146,16 +146,10 @@ export const useSettings = (): UseSettingsType => {
   const hasFavorite = async (link: string): Promise<boolean> => {
     const favorites: string | null = await AsyncStorage.getItem(KEYS.FAVORITES)
     if (favorites) {
-      const fav: string[] = JSON.parse(favorites)
-      for (const f of fav) {
-        if (f === link) {
-          return true
-        }
-      }
-      return false
-    } else {
-      return false
+      const fav: ArticleHeader[] = JSON.parse(favorites)
+      return fav.some((f) => f.url === link)
     }
+    return false
   }
 
   const setCurrentCategory = async (m: MenuEntry): Promise<void> => {

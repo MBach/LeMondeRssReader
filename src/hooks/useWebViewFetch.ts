@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 const TIMEOUT_MS = 10_000
@@ -20,7 +20,6 @@ const INJECTED_JS = `
 type Status = 'idle' | 'loading' | 'done' | 'error'
 
 export function useWebViewFetch() {
-  const navigation = useNavigation()
   const [fetchUrl, setFetchUrl] = useState<string | null>(null)
   const [html, setHtml] = useState<string | null>(null)
   const [status, setStatus] = useState<Status>('idle')
@@ -41,11 +40,12 @@ export function useWebViewFetch() {
     htmlReceivedRef.current = false
   }, [])
 
-  // Unmount WebView if user navigates away
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', abort)
-    return unsubscribe
-  }, [navigation, abort])
+  // Abort fetch when screen loses focus
+  useFocusEffect(
+    useCallback(() => {
+      return abort
+    }, [abort])
+  )
 
   // Start timeout when fetchUrl is set
   useEffect(() => {
@@ -108,7 +108,7 @@ export function useWebViewFetch() {
           javaScriptEnabled: true as const,
           domStorageEnabled: true as const,
           thirdPartyCookiesEnabled: true as const,
-          style: { width: 0, height: 0, opacity: 0 }
+          style: { position: 'absolute' as const, width: 0, height: 0, opacity: 0 }
         }
       : null
   }

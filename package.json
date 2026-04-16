@@ -1,6 +1,6 @@
 {
   "name": "lemonderssreader",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "author": {
     "name": "Matthieu BACHELIER"
   },
@@ -16,11 +16,10 @@
     "@codeherence/react-native-header": "1.0.1",
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "5.2.9",
-    "@pchmn/expo-material3-theme": "1.3.2",
+    "@pchmn/expo-material3-theme": "^1.4.0",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-navigation/native": "^7.1.8",
     "@shopify/flash-list": "2.0.2",
-    "@tanstack/react-query": "5.99.0",
+    "@tanstack/react-query": "^5.99.1",
     "expo": "~55.0.15",
     "expo-audio": "^55.0.13",
     "expo-constants": "~55.0.14",
@@ -55,14 +54,13 @@
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.23.0",
     "react-native-svg": "15.15.3",
-    "react-native-video": "^6.19.1",
     "react-native-web": "~0.21.0",
     "react-native-webview": "13.16.0",
     "react-native-worklets": "0.7.2"
   },
   "devDependencies": {
     "@types/react": "~19.2.10",
-    "eslint": "^9.25.0",
+    "eslint": "^10.2.0",
     "eslint-config-expo": "~55.0.0",
     "typescript": "~5.9.2"
   },

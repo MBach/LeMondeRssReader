@@ -1,16 +1,15 @@
 import { FlatListWithHeaders } from '@codeherence/react-native-header'
-import { useNavigation } from '@react-navigation/native'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import parse, { HTMLElement, Node } from 'node-html-parser'
 import { useContext, useEffect, useState } from 'react'
-import { Image, StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native'
+import { Image, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { ActivityIndicator, Banner, Card, Chip, List, Surface, Text, useTheme } from 'react-native-paper'
 import WebView from 'react-native-webview'
+import { useKeepScreenOn } from '../hooks/useKeepScreenOn'
+import { useWebViewAjaxPoll } from '../hooks/useWebViewAjaxPoll'
 
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { IconPremium } from '../../assets'
-import { Api } from '../api'
 import CustomStatusBar from '../components/CustomStatusBar'
 import { FetchError } from '../components/FetchError'
 import { HeaderComponent, LargeHeaderComponent } from '../components/Header'
@@ -20,8 +19,8 @@ import { i18n } from '../locales/i18n'
 import {
   ArticleHeader,
   ArticleHeaderParser,
+  ArticleType,
   LiveContentType,
-  MainStackNavigation,
   parseAndGuessURL,
   SectionContent,
   SeeAlsoButtonContent
@@ -60,15 +59,29 @@ export default function LiveScreen() {
   const settingsContext = useContext(SettingsContext)
   const { colors } = useTheme()
   const window = useWindowDimensions()
-  const navigation = useNavigation<MainStackNavigation>()
-  const queryClient = useQueryClient()
-
+  const router = useRouter()
   const { fetch, reset, html, status, webViewProps } = useWebViewFetch()
 
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
   const [sections, setSections] = useState<SectionContent[]>([])
   const [lastPost, setLastPost] = useState<string | null>(null)
   const [lastArticleModification, setLastArticleModification] = useState<string | null>(null)
+
+  const articleUrl = category && yyyy && mm && dd && title ? `https://www.lemonde.fr/${category}/live/${yyyy}/${mm}/${dd}/${title}` : null
+
+  const { data, webViewProps: pollWebViewProps } = useWebViewAjaxPoll<LiveAjaxResponse>(
+    articleUrl,
+    () => {
+      if (!article?.id) return null
+      const parts: string[] = []
+      if (lastPost) parts.push(`lastPost=${encodeURIComponent(lastPost)}`)
+      if (lastArticleModification) parts.push(`lastArticleModification=${encodeURIComponent(lastArticleModification)}`)
+      const qs = parts.length > 0 ? `?${parts.join('&')}` : ''
+      return `https://www.lemonde.fr/ajax/live/article/${article.id}${qs}`
+    },
+    5000,
+    !!article?.id
+  )
 
   const styles = StyleSheet.create({
     imageHeader: {
@@ -98,27 +111,6 @@ export default function LiveScreen() {
     }
   })
 
-  const { data } = useQuery<LiveAjaxResponse | null>({
-    queryKey: ['newPosts', article?.id, lastPost, lastArticleModification],
-    queryFn: async (): Promise<LiveAjaxResponse | null> => {
-      if (!article?.id) return null
-
-      const params: Record<string, string> = {}
-      if (lastPost) params['lastPost'] = lastPost
-      if (lastArticleModification) params['lastArticleModification'] = lastArticleModification
-
-      const response = await Api.get(`ajax/live/article/${article.id}`, { searchParams: params })
-      if (!response.ok) {
-        console.warn('[LiveScreen] Failed to fetch new posts')
-        return null
-      }
-      return response.json() as Promise<LiveAjaxResponse>
-    },
-    enabled: !!article?.id,
-    refetchInterval: 5000,
-    refetchOnWindowFocus: true
-  })
-
   // Kick off WebView fetch when params change
   useEffect(() => {
     if (!category || !yyyy || !mm || !dd || !title) {
@@ -127,9 +119,6 @@ export default function LiveScreen() {
     }
     reset()
     fetch(`https://www.lemonde.fr/${category}/live/${yyyy}/${mm}/${dd}/${title}`)
-    return () => {
-      queryClient.cancelQueries({ queryKey: ['newPosts'], exact: false })
-    }
   }, [slugArr.join('/')])
 
   // Parse HTML once WebView delivers it
@@ -142,18 +131,12 @@ export default function LiveScreen() {
     }
   }, [status, html])
 
-  useEffect(() => {
-    if (settingsContext.keepScreenOn) {
-      activateKeepAwakeAsync()
-    } else {
-      deactivateKeepAwake()
-    }
-  }, [settingsContext.keepScreenOn])
+  useKeepScreenOn(settingsContext.keepScreenOn)
 
   useEffect(() => {
     if (!data) return
-    const newLastPost = data.lastPost?.date?.replace('.000000', '') || null
-    const newLastArticleModification = data.lastArticleModification?.date?.replace('.000000', '') || null
+    const newLastPost = data.lastPost?.date?.replace(/\.\d+$/, '') || null
+    const newLastArticleModification = data.lastArticleModification?.date?.replace(/\.\d+$/, '') || null
     if (newLastPost) setLastPost(newLastPost)
     if (newLastArticleModification) setLastArticleModification(newLastArticleModification)
   }, [data])
@@ -386,7 +369,23 @@ export default function LiveScreen() {
             style={{ marginStart: 24, marginEnd: 8, marginVertical: 8 }}
             onPress={() => {
               const parsed = parseAndGuessURL(content.url)
-              if (parsed) navigation.push(parsed.type, parsed)
+              if (parsed) {
+                const { type, category: c, yyyy: y, mm: m, dd: d, title: t } = parsed
+                switch (type) {
+                  case ArticleType.ARTICLE:
+                    router.push(`/(tabs)/(home)/${c}/article/${y}/${m}/${d}/${t}`)
+                    break
+                  case ArticleType.LIVE:
+                    router.push(`/(tabs)/(home)/${c}/live/${y}/${m}/${d}/${t}`)
+                    break
+                  case ArticleType.VIDEO:
+                    router.push(`/(tabs)/(home)/${c}/video/${y}/${m}/${d}/${t}`)
+                    break
+                  case ArticleType.PODCAST:
+                    router.push(`/(tabs)/(home)/${c}/podcast/${y}/${m}/${d}/${t}`)
+                    break
+                }
+              }
             }}>
             <Card.Content style={{ flexDirection: 'row', marginEnd: 8 }}>
               {see.isRestricted && (
@@ -444,10 +443,8 @@ export default function LiveScreen() {
   const fetchFailed = status === 'error'
 
   return (
-    <Surface elevation={0} style={{ flex: 1 }}>
-      {/* Hidden WebView — zero size, delivers HTML then unmounts */}
-      {webViewProps && <WebView {...webViewProps} />}
-      <StatusBar translucent />
+    <>
+    <SafeAreaView style={{ flex: 1, marginBottom: -48 }}>
       {fetchFailed ? (
         <FetchError
           onRetry={() => {
@@ -464,7 +461,6 @@ export default function LiveScreen() {
       ) : (
         <>
           <Banner
-            style={{ marginTop: 32 }}
             icon="update"
             visible={Array.isArray(data?.created) && data.created.length > 0}
             actions={[{ label: i18n.t('live.view'), onPress: () => {} }]}>
@@ -477,13 +473,18 @@ export default function LiveScreen() {
             disableLargeHeaderFadeAnim={false}
             data={sections}
             extraData={sections}
-            keyExtractor={(_: any, index: number) => index.toString()}
             renderItem={renderSection}
+            keyExtractor={(_: any, index: number) => index.toString()}
             HeaderComponent={(props: any) => <HeaderComponent {...props} article={article} />}
             LargeHeaderComponent={(props: any) => <LargeHeaderComponent {...props} article={article} />}
           />
         </>
       )}
-    </Surface>
+    </SafeAreaView>
+    <View style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+      {webViewProps && <WebView {...webViewProps} />}
+      {pollWebViewProps && <WebView {...pollWebViewProps} />}
+    </View>
+  </>
   )
 }

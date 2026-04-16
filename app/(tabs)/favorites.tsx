@@ -1,7 +1,7 @@
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect } from 'expo-router'
 import { useRouter } from 'expo-router'
-import { useCallback, useContext, useEffect, useState } from 'react'
-import { FlatList, StatusBar, View } from 'react-native'
+import { useCallback, useContext, useState } from 'react'
+import { FlatList, View } from 'react-native'
 import { ActivityIndicator, IconButton, List, Snackbar, Text } from 'react-native-paper'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -18,10 +18,6 @@ export default function FavoritesScreen() {
   const [loading, setLoading] = useState(true)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [favorites, setFavorites] = useState<ArticleHeader[]>([])
-
-  useEffect(() => {
-    loadFavorites()
-  }, [])
 
   useFocusEffect(
     useCallback(() => {
@@ -68,6 +64,7 @@ export default function FavoritesScreen() {
           size={22}
           onPress={async () => {
             await settingsContext.toggleFavorite(item)
+            setSnackbarVisible(true)
             loadFavorites()
           }}
         />
@@ -86,7 +83,6 @@ export default function FavoritesScreen() {
         </View>
       ) : (
         <FlatList
-          style={{ paddingTop: StatusBar.currentHeight }}
           data={favorites}
           renderItem={renderFavorite}
           keyExtractor={(item: ArticleHeader) => item.url}

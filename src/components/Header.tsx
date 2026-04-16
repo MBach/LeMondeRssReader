@@ -1,6 +1,5 @@
 import { FadingView, Header, LargeHeader, ScalingView } from '@codeherence/react-native-header'
-import { useNavigation } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useRouter } from 'expo-router'
 import { type FC, useContext, useEffect, useState } from 'react'
 import { Image, Share, View, useWindowDimensions } from 'react-native'
 import { IconButton, Portal, Snackbar, Text, useTheme } from 'react-native-paper'
@@ -14,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { i18n } from '../../src/locales/i18n'
-import { ArticleHeader, RootStackParamList } from '../../src/types'
+import { ArticleHeader } from '../../src/types'
 import { SettingsContext } from '../context/SettingsContext'
 
 const useFavoriteStatus = (article: ArticleHeader): [boolean, () => Promise<boolean>] => {
@@ -23,7 +22,9 @@ const useFavoriteStatus = (article: ArticleHeader): [boolean, () => Promise<bool
 
   useEffect(() => {
     if (article) {
-      settingsContext.hasFavorite(article.url).then(setIsFavorite)
+      settingsContext.hasFavorite(article.url).then((v) => {
+        setIsFavorite(v)
+      })
     }
   }, [article])
 
@@ -114,7 +115,6 @@ const BannerImage: FC<BannerImageProps> = ({ article, scrollY }) => {
   )
 }
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>
 interface HeaderComponentProps {
   article: ArticleHeader
   showNavBar?: SharedValue<number>
@@ -129,7 +129,7 @@ export const HeaderComponent = ({ article, showNavBar, scrollY, children }: Head
   const [isFavorite, toggleFavorite] = useFavoriteStatus(article)
   const [snackbarVisible, setSnackbarVisible] = useState(false)
   const [lastAction, setLastAction] = useState(false)
-  const navigation = useNavigation<NavigationProp>()
+  const router = useRouter()
   const settingsContext = useContext(SettingsContext)
 
   const _showNavBar = showNavBar ?? fallbackShowNavBar
@@ -149,7 +149,7 @@ export const HeaderComponent = ({ article, showNavBar, scrollY, children }: Head
           <IconButton
             icon="arrow-left"
             size={20}
-            onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
+            onPress={() => (router.canGoBack() ? router.back() : router.navigate('/(tabs)/(home)'))}
           />
         }
         headerCenter={<Text numberOfLines={2}>{article?.title}</Text>}

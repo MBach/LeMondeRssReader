@@ -24,7 +24,13 @@
     }
   },
   "comments": {
-    "fetchMore": "Commentaires page %{page} chargés"
+    "fetchMore": "Commentaires page %{page} chargés",
+    "button": "Voir les commentaires ({{count}})",
+    "title": "Commentaires",
+    "titleWithCount": "Commentaires ({{count}})",
+    "replyTo": "En réponse à {{name}}",
+    "empty": "Aucun commentaire",
+    "error": "Impossible de charger les commentaires"
   },
   "favorites": {
     "deleted": "Favori supprimé",
@@ -113,6 +119,14 @@
     "view": "Voir"
   },
   "settings": {
+    "account": {
+      "title": "Compte",
+      "loginTitle": "Connexion au Monde",
+      "login": "Se connecter",
+      "loginDesc": "Accédez à votre abonnement pour lire les articles premium",
+      "logout": "Se déconnecter",
+      "logoutDesc": "Vous êtes actuellement connecté"
+    },
     "general": {
       "title": "Général",
       "content1": "Se souvenir de la dernière catégorie",

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { useFocusEffect } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 import { HTMLElement, parse } from 'node-html-parser'
-import { JSX, useCallback, useContext, useEffect, useState } from 'react'
+import { JSX, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ContentLoader, { Rect } from 'react-content-loader/native'
 import { FlatList, Image, RefreshControl, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { Surface, Text, TouchableRipple, useTheme } from 'react-native-paper'
@@ -12,7 +12,6 @@ import { FetchError } from '@/src/components/FetchError'
 import { SettingsContext } from '@/src/context/SettingsContext'
 import { useBottomSheet } from '@/src/context/useBottomSheet'
 import { useWebViewFetch } from '@/src/hooks/useWebViewFetch'
-import { useRouter } from 'expo-router'
 import WebView from 'react-native-webview'
 import { DefaultImageFeed, IconMic, IconPremium, IconVideo } from '../../../assets'
 import { Api } from '../../../src/api'
@@ -128,21 +127,10 @@ export default function HomeScreen() {
     if (data) {
       const items: HTMLElement[] = data.querySelectorAll('item')
       if (items && items.length > 0) {
-        //console.log('useEffect > data changed, calling parseRssItems')
         setItems(parseRssItems(items))
       }
     }
   }, [data])
-
-  /*
-  useEffect(() => {
-    console.log('useEffect > items.length', items.length)
-  }, [items])
-
-  useEffect(() => {
-    console.log('useEffect > feedUri', feedUri)
-  }, [feedUri])
-  */
 
   // Parse premium icons from the WebView-delivered HTML
   useEffect(() => {
@@ -204,32 +192,36 @@ export default function HomeScreen() {
     }
   }
 
-  const styles = StyleSheet.create({
-    itemContainer: {
-      flex: 1,
-      flexDirection: settingsContext.fontScale > 1.5 ? 'column' : 'row',
-      borderBottomWidth: 1,
-      borderBottomColor: colors.elevation.level5
-    },
-    extraIconContainer: {
-      flexDirection: 'row-reverse',
-      margin: 4
-    },
-    imageBG: {
-      resizeMode: 'cover',
-      width: 120,
-      height: 108,
-      alignItems: 'flex-end',
-      paddingTop: 4,
-      paddingRight: 8
-    },
-    iconPremium: {
-      width: 24,
-      height: 24,
-      backgroundColor: colors.primaryContainer,
-      tintColor: colors.onPrimaryContainer
-    }
-  })
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        itemContainer: {
+          flex: 1,
+          flexDirection: settingsContext.fontScale > 1.5 ? 'column' : 'row',
+          borderBottomWidth: 1,
+          borderBottomColor: colors.elevation.level5
+        },
+        extraIconContainer: {
+          flexDirection: 'row-reverse',
+          margin: 4
+        },
+        imageBG: {
+          resizeMode: 'cover',
+          width: 120,
+          height: 108,
+          alignItems: 'flex-end',
+          paddingTop: 4,
+          paddingRight: 8
+        },
+        iconPremium: {
+          width: 24,
+          height: 24,
+          backgroundColor: colors.primaryContainer,
+          tintColor: colors.onPrimaryContainer
+        }
+      }),
+    [colors, settingsContext.fontScale]
+  )
 
   useFocusEffect(
     useCallback(() => {
@@ -240,21 +232,6 @@ export default function HomeScreen() {
       return () => clearTimeout(timer)
     }, [sheetRef?.current])
   )
-
-  /*useFocusEffect(
-    useCallback(() => {
-      if (isFetched) {
-        refetch()
-      }
-    }, [refetch, isFetched])
-  )*/
-
-  useEffect(() => {
-    console.log('useEffect > mounted')
-    return () => {
-      console.log('useEffect > unmounted')
-    }
-  }, [])
 
   const renderItem = ({ item }: { item: ParsedRssItem }) => {
     // Check if 2nd capture group is live/video/other
@@ -270,7 +247,7 @@ export default function HomeScreen() {
         type = ArticleType.PODCAST
       }
     }
-    let extraIcons: React.JSX.Element[] = []
+    let extraIcons: JSX.Element[] = []
     if (premiumMap.get(item.link)) {
       extraIcons.push(
         <View key="premiumIcon" style={styles.extraIconContainer}>

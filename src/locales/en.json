@@ -24,7 +24,13 @@
     }
   },
   "comments": {
-    "fetchMore": "Comments page %{page} loaded"
+    "fetchMore": "Comments page %{page} loaded",
+    "button": "View comments ({{count}})",
+    "title": "Comments",
+    "titleWithCount": "Comments ({{count}})",
+    "replyTo": "In reply to {{name}}",
+    "empty": "No comments",
+    "error": "Could not load comments"
   },
   "favorites": {
     "deleted": "Favorite removed",
@@ -113,6 +119,14 @@
     "view": "View"
   },
   "settings": {
+    "account": {
+      "title": "Account",
+      "loginTitle": "Login to Le Monde",
+      "login": "Login",
+      "loginDesc": "Access your Le Monde subscription to read premium articles",
+      "logout": "Logout",
+      "logoutDesc": "You are currently logged in"
+    },
     "general": {
       "title": "General",
       "content1": "Remember last category",

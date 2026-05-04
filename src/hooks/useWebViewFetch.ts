@@ -1,30 +1,73 @@
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const TIMEOUT_MS = 10_000
+const DEFAULT_TIMEOUT_MS = 20_000
 
 const INJECTED_JS = `
-  (function() {
-    function extract() {
-      window.ReactNativeWebView.postMessage(document.documentElement.outerHTML)
-    }
-    if (document.readyState === 'complete') {
-      extract()
-    } else {
-      window.addEventListener('load', extract)
-    }
-  })();
-  true;
+(function() {
+  var POLL_INTERVAL = 300;
+  var start = Date.now();
+
+  function post(payload) {
+    window.ReactNativeWebView.postMessage(JSON.stringify(payload));
+  }
+
+  function isReady(container) {
+    var svg = container.querySelector('svg');
+    if (!svg) return false;
+    if (svg.querySelectorAll('path').length < 10) return false;
+    var path = svg.querySelector('path');
+    var fill = path ? getComputedStyle(path).fill : '';
+    // 'none' is a valid fill (e.g. AOM borders); we just need it computed
+    return fill && fill !== '';
+  }
+
+  function hideTooltips(container) {
+    container.querySelectorAll('[class*="d_tooltip_"]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+  }
+
+  function postHtmlAndDone() {
+    post({ kind: 'html', data: document.documentElement.outerHTML });
+    post({ kind: 'done' });
+  }
+
+  function start_() {
+    var a = 0;
+    (function pollReactions() {
+      var found = !!document.querySelector('[data-trigger="comments-popin"]');
+      if (found || a++ >= 10) {
+        postHtmlAndDone();
+      } else {
+        setTimeout(pollReactions, 300);
+      }
+    })();
+  }
+
+  if (document.readyState === 'complete') {
+    start_();
+  } else {
+    window.addEventListener('load', start_);
+  }
+})();
+true;
 `
 
 type Status = 'idle' | 'loading' | 'done' | 'error'
 
-export function useWebViewFetch() {
+type Options = {
+  timeoutMs?: number
+}
+
+export function useWebViewFetch(options: Options = {}) {
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
+
   const [fetchUrl, setFetchUrl] = useState<string | null>(null)
   const [html, setHtml] = useState<string | null>(null)
   const [status, setStatus] = useState<Status>('idle')
 
-  const htmlReceivedRef = useRef(false)
+  const doneReceivedRef = useRef(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearTimer = () => {
@@ -37,51 +80,68 @@ export function useWebViewFetch() {
   const abort = useCallback(() => {
     clearTimer()
     setFetchUrl(null)
-    htmlReceivedRef.current = false
+    doneReceivedRef.current = false
   }, [])
 
-  // Abort fetch when screen loses focus
   useFocusEffect(
     useCallback(() => {
       return abort
     }, [abort])
   )
 
-  // Start timeout when fetchUrl is set
   useEffect(() => {
     if (!fetchUrl) return
     timeoutRef.current = setTimeout(() => {
-      console.warn('[WebViewFetch] timed out after', TIMEOUT_MS, 'ms')
       setFetchUrl(null)
       setStatus('error')
-    }, TIMEOUT_MS)
+    }, timeoutMs)
     return clearTimer
-  }, [fetchUrl])
+  }, [fetchUrl, timeoutMs])
 
   const fetch = useCallback((url: string) => {
     console.log('[WebViewFetch] starting fetch:', url)
-    htmlReceivedRef.current = false
+    doneReceivedRef.current = false
     setHtml(null)
     setStatus('loading')
     setFetchUrl(url)
   }, [])
 
   const onMessage = useCallback((event: { nativeEvent: { data: string } }) => {
-    if (htmlReceivedRef.current) {
-      console.log('[WebViewFetch] duplicate onMessage ignored')
+    if (doneReceivedRef.current) {
+      console.log('[WebViewFetch] message after done ignored')
       return
     }
-    console.log('[WebViewFetch] HTML received, length:', event.nativeEvent.data.length)
-    htmlReceivedRef.current = true
-    clearTimer()
-    setFetchUrl(null)
-    setHtml(event.nativeEvent.data)
-    setStatus('done')
+    let payload: any
+    try {
+      payload = JSON.parse(event.nativeEvent.data)
+    } catch {
+      // Legacy/raw HTML fallback (defensive — shouldn't happen with new INJECTED_JS)
+      doneReceivedRef.current = true
+      clearTimer()
+      setFetchUrl(null)
+      setHtml(event.nativeEvent.data)
+      setStatus('done')
+      return
+    }
+
+    switch (payload.kind) {
+      case 'html':
+        console.log('[WebViewFetch] HTML received, length:', payload.data?.length)
+        setHtml(payload.data)
+        break
+      case 'done':
+        console.log('[WebViewFetch] done')
+        doneReceivedRef.current = true
+        clearTimer()
+        setFetchUrl(null)
+        setStatus('done')
+        break
+    }
   }, [])
 
   const onError = useCallback(() => {
     console.warn('[WebViewFetch] WebView error')
-    if (htmlReceivedRef.current) return
+    if (doneReceivedRef.current) return
     clearTimer()
     setFetchUrl(null)
     setStatus('error')
@@ -98,7 +158,6 @@ export function useWebViewFetch() {
     reset,
     html,
     status,
-    // Spread these directly onto your <WebView> when fetchUrl is set
     webViewProps: fetchUrl
       ? {
           source: { uri: fetchUrl },

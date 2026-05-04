@@ -8,6 +8,8 @@ export function useKeepScreenOn(enabled: boolean) {
     } else {
       void deactivateKeepAwake()
     }
-    return () => { void deactivateKeepAwake() }
+    return () => {
+      void deactivateKeepAwake()
+    }
   }, [enabled])
 }

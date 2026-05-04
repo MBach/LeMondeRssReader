@@ -86,6 +86,19 @@ export type ArticleHeader = {
   date?: string
   readingTime?: string
   isRestricted: boolean
+  commentsCount?: number
+}
+
+export interface Comment {
+  id: string
+  parentId: string | null
+  level: number
+  author: string
+  date: string
+  content: string
+  likes: number
+  replyCount: number
+  repliedTo: string | null
 }
 
 type OgPropertyKey = keyof ArticleHeader

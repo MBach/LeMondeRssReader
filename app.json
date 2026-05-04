@@ -2,7 +2,7 @@
   "expo": {
     "name": "LeMondeRssReader",
     "slug": "LeMondeRssReader",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lemonderssreader",
@@ -23,7 +23,6 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "autoVerify": true,
           "data": [
             {
               "scheme": "https",
@@ -39,7 +38,7 @@
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ],
-      "versionCode": 41
+      "versionCode": 42
     },
     "web": {
       "output": "static",
@@ -50,9 +49,15 @@
       "expo-font",
       "expo-image",
       "expo-web-browser",
-      ["expo-splash-screen", { "image": null }],
+      [
+        "expo-splash-screen",
+        {
+          "image": null
+        }
+      ],
       "./plugins/withAdaptiveIconSplashScreen",
-      "./plugins/withAndroidCustomAssets"
+      "./plugins/withAndroidCustomAssets",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,

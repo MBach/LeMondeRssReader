@@ -1,5 +1,5 @@
 import { createContext, type FC, type ReactNode } from 'react'
-import { useSettings, UseSettingsType, initialSettingsContext } from './useSettings'
+import { initialSettingsContext, useSettings, UseSettingsType } from './useSettings'
 
 export const SettingsContext = createContext<UseSettingsType>(initialSettingsContext)
 

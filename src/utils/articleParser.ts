@@ -6,6 +6,7 @@ import {
   ArticleHeaderParser,
   CarouselCard,
   CarouselContent,
+  Comment,
   ContentType,
   ImgContent,
   InlineText,
@@ -203,12 +204,39 @@ export function extractCarousel(nav: HTMLElement, carousel: HTMLElement, windowW
 }
 
 // ---------------------------------------------------------------------------
-// Main entry point: parse full HTML → { article, paragraphes }
+// Comments
+// ---------------------------------------------------------------------------
+
+function parseCommentsFromDoc(doc: ReturnType<typeof parse>): Comment[] {
+  const containers = doc.querySelectorAll('[data-component="comments-container"]')
+  const result: Comment[] = []
+  for (const c of containers) {
+    const article = c.querySelector('article.ds-comment')
+    if (!article) continue
+    const repliedTo = c.querySelector('.ds-comment__reply-name')?.textContent?.trim() || null
+    result.push({
+      id: c.getAttribute('data-comment-id') || '',
+      parentId: ((v) => (!v || v === 'null' ? null : v))(c.getAttribute('data-parent-id')),
+      level: parseInt(c.getAttribute('data-level') || '1', 10),
+      likes: parseInt(c.getAttribute('data-likes') || '0', 10),
+      replyCount: parseInt(article.getAttribute('data-reply-count') || '0', 10),
+      author: c.querySelector('.ds-comment-signature__name')?.textContent?.trim() || '',
+      date: c.querySelector('.ds-comment-signature__date')?.textContent?.trim() || '',
+      content: c.querySelector('.ds-comment__content')?.textContent?.trim() || '',
+      repliedTo: repliedTo || null
+    })
+  }
+  return result
+}
+
+// ---------------------------------------------------------------------------
+// Main entry point: parse full HTML → { article, paragraphes, comments }
 // ---------------------------------------------------------------------------
 
 export type ParseResult = {
   article: ArticleHeader
   paragraphes: ContentType[]
+  comments: Comment[]
 }
 
 export function parseArticleHtml(html: string, windowWidth: number, hasReadAlso: boolean): ParseResult {
@@ -301,6 +329,14 @@ export function parseArticleHtml(html: string, windowWidth: number, hasReadAlso:
   // Last resort: parse main directly
   if (parMap.size === 0) append(main.childNodes)
 
+  // --- Comments count (regex is more reliable than node-html-parser attribute selectors) ---
+  const commentsMatch = html.match(/data-comments-count="(\d+)"/)
+  if (commentsMatch) {
+    const count = parseInt(commentsMatch[1], 10)
+    if (count > 0) a.commentsCount = count
+  }
+  const comments = parseCommentsFromDoc(doc)
+
   // --- Prepend metadata items ---
   const meta: ContentType[] = [{ type: 'description', data: a.description }]
   if (a.authors) meta.push({ type: 'authors', data: a.authors })
@@ -310,6 +346,7 @@ export function parseArticleHtml(html: string, windowWidth: number, hasReadAlso:
 
   return {
     article: a,
-    paragraphes: [...meta, ...Array.from(parMap.values())]
+    paragraphes: [...meta, ...Array.from(parMap.values())],
+    comments
   }
 }

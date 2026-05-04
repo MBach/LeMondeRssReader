@@ -444,47 +444,47 @@ export default function LiveScreen() {
 
   return (
     <>
-    <SafeAreaView style={{ flex: 1, marginBottom: -48 }}>
-      {fetchFailed ? (
-        <FetchError
-          onRetry={() => {
-            reset()
-            fetch(`https://www.lemonde.fr/${category}/live/${yyyy}/${mm}/${dd}/${title}`)
-          }}
-        />
-      ) : isLoading ? (
-        <ActivityIndicator
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 }}
-          color={colors.primary}
-          size={40}
-        />
-      ) : (
-        <>
-          <Banner
-            icon="update"
-            visible={Array.isArray(data?.created) && data.created.length > 0}
-            actions={[{ label: i18n.t('live.view'), onPress: () => {} }]}>
-            {i18n.t('live.newComments')}
-          </Banner>
-          <CustomStatusBar translucent />
-          <FlatListWithHeaders
-            disableAutoFixScroll
-            headerFadeInThreshold={0.8}
-            disableLargeHeaderFadeAnim={false}
-            data={sections}
-            extraData={sections}
-            renderItem={renderSection}
-            keyExtractor={(_: any, index: number) => index.toString()}
-            HeaderComponent={(props: any) => <HeaderComponent {...props} article={article} />}
-            LargeHeaderComponent={(props: any) => <LargeHeaderComponent {...props} article={article} />}
+      <SafeAreaView style={{ flex: 1, marginBottom: -48 }}>
+        {fetchFailed ? (
+          <FetchError
+            onRetry={() => {
+              reset()
+              fetch(`https://www.lemonde.fr/${category}/live/${yyyy}/${mm}/${dd}/${title}`)
+            }}
           />
-        </>
-      )}
-    </SafeAreaView>
-    <View style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
-      {webViewProps && <WebView {...webViewProps} />}
-      {pollWebViewProps && <WebView {...pollWebViewProps} />}
-    </View>
-  </>
+        ) : isLoading ? (
+          <ActivityIndicator
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 }}
+            color={colors.primary}
+            size={40}
+          />
+        ) : (
+          <>
+            <Banner
+              icon="update"
+              visible={Array.isArray(data?.created) && data.created.length > 0}
+              actions={[{ label: i18n.t('live.view'), onPress: () => {} }]}>
+              {i18n.t('live.newComments')}
+            </Banner>
+            <CustomStatusBar translucent />
+            <FlatListWithHeaders
+              disableAutoFixScroll
+              headerFadeInThreshold={0.8}
+              disableLargeHeaderFadeAnim={false}
+              data={sections}
+              extraData={sections}
+              renderItem={renderSection}
+              keyExtractor={(_: any, index: number) => index.toString()}
+              HeaderComponent={(props: any) => <HeaderComponent {...props} article={article} />}
+              LargeHeaderComponent={(props: any) => <LargeHeaderComponent {...props} article={article} />}
+            />
+          </>
+        )}
+      </SafeAreaView>
+      <View style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        {webViewProps && <WebView {...webViewProps} />}
+        {pollWebViewProps && <WebView {...pollWebViewProps} />}
+      </View>
+    </>
   )
 }

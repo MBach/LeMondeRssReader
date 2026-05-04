@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useRouter } from 'expo-router'
 import { useContext, useState } from 'react'
 import { ScrollView, StatusBar, StyleSheet, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   ActivityIndicator,
   Button,
@@ -16,6 +16,7 @@ import {
   TouchableRipple,
   useTheme
 } from 'react-native-paper'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { KEYS } from '../constants'
 import { SettingsContext } from '../context/SettingsContext'
@@ -30,6 +31,7 @@ import { Category, Theme } from '../types'
  */
 export function SettingsScreen() {
   const settingsContext = useContext(SettingsContext)
+  const router = useRouter()
 
   const [data, setData] = useState<Category[]>(settingsContext.feed)
   const [showThemeDialog, setShowThemeDialog] = useState<boolean>(false)
@@ -111,6 +113,29 @@ export function SettingsScreen() {
       <SettingsContext.Consumer>
         {(settingsContext: UseSettingsType) => (
           <ScrollView style={{ paddingTop: StatusBar.currentHeight }} contentContainerStyle={{ paddingBottom: insets.bottom }}>
+            <View style={styles.surfaceContainer}>
+              <Text variant="bodyMedium" style={{ color: colors.primary }}>
+                {i18n.t('settings.account.title')}
+              </Text>
+              <View style={[styles.flexRow, styles.rippleMarginTop, { alignItems: 'center' }]}>
+                <View style={styles.flex}>
+                  <Text variant="bodySmall">
+                    {settingsContext.isLoggedIn ? i18n.t('settings.account.logoutDesc') : i18n.t('settings.account.loginDesc')}
+                  </Text>
+                </View>
+                <Button
+                  mode="contained"
+                  onPress={() =>
+                    router.push({
+                      pathname: '/login',
+                      params: { mode: settingsContext.isLoggedIn ? 'logout' : 'login' }
+                    })
+                  }>
+                  {settingsContext.isLoggedIn ? i18n.t('settings.account.logout') : i18n.t('settings.account.login')}
+                </Button>
+              </View>
+            </View>
+            <Divider />
             <View style={styles.surfaceContainer}>
               <Text variant="bodyMedium" style={{ color: colors.primary }}>
                 {i18n.t('settings.general.title')}

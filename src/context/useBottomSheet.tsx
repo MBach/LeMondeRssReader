@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useRef, type ReactNode, type RefObject, type FC } from 'react'
 import BottomSheet from '@gorhom/bottom-sheet'
+import { createContext, useContext, useRef, type FC, type ReactNode, type RefObject } from 'react'
 
 type BottomSheetRef = RefObject<BottomSheet | null>
 const BottomSheetContext = createContext<BottomSheetRef | null>(null)

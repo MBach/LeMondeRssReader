@@ -1,6 +1,6 @@
 import { FadingView, Header, LargeHeader, ScalingView } from '@codeherence/react-native-header'
 import { useRouter } from 'expo-router'
-import { type FC, useContext, useEffect, useState } from 'react'
+import { type FC, type ReactNode, useContext, useEffect, useState } from 'react'
 import { Image, Share, View, useWindowDimensions } from 'react-native'
 import { IconButton, Portal, Snackbar, Text, useTheme } from 'react-native-paper'
 import Animated, {
@@ -119,7 +119,7 @@ interface HeaderComponentProps {
   article: ArticleHeader
   showNavBar?: SharedValue<number>
   scrollY?: SharedValue<number>
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 export const HeaderComponent = ({ article, showNavBar, scrollY, children }: HeaderComponentProps) => {

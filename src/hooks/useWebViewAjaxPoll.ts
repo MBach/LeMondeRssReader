@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import WebView from 'react-native-webview'
 
-export function useWebViewAjaxPoll<T>(
-  sourceUrl: string | null,
-  getUrl: () => string | null,
-  intervalMs: number,
-  enabled: boolean
-) {
+export function useWebViewAjaxPoll<T>(sourceUrl: string | null, getUrl: () => string | null, intervalMs: number, enabled: boolean) {
   const webViewRef = useRef<WebView>(null)
   const [isReady, setIsReady] = useState(false)
   const [data, setData] = useState<T | null>(null)

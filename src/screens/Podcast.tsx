@@ -8,6 +8,7 @@ import { ActivityIndicator, IconButton, ProgressBar, Text, useTheme } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context'
 import WebView from 'react-native-webview'
 
+import React from 'react'
 import { ArticleItem } from '../components/ArticleItem'
 import { FetchError } from '../components/FetchError'
 import { HeaderComponent, LargeHeaderComponent } from '../components/Header'

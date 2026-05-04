@@ -1,7 +1,7 @@
 import { SettingsContext } from '@/src/context/SettingsContext'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Tabs } from 'expo-router'
-import { useContext } from 'react'
+import React, { useContext } from 'react'
 import { BottomNavigation } from 'react-native-paper'
 import { i18n } from '../../src/locales/i18n'
 

@@ -6,6 +6,7 @@ import { Button, Card, IconButton, Text, useTheme } from 'react-native-paper'
 import Carousel from 'react-native-reanimated-carousel'
 import WebView from 'react-native-webview'
 
+import React from 'react'
 import { IconPremium } from '../../assets'
 import { SettingsContext } from '../context/SettingsContext'
 import { i18n } from '../locales/i18n'

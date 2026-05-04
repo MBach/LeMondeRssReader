@@ -96,6 +96,7 @@ export const KEYS = {
   DYNAMIC_STATUSBAR_COLOR: 'dynamicStatusBarColor',
   FAVORITES: 'favorites',
   FEED: 'feed',
+  IS_LOGGED_IN: 'isLoggedIn',
   KEEP_LAST_SECTION: 'keepLastSection',
   KEEP_SCREEN_ON: 'keepScreenOn',
   LAST_SECTION_ENTRY: 'lastSectionEntry',

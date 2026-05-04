@@ -1,5 +1,4 @@
-import { useFocusEffect } from 'expo-router'
-import { useRouter } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useContext, useState } from 'react'
 import { FlatList, View } from 'react-native'
 import { ActivityIndicator, IconButton, List, Snackbar, Text } from 'react-native-paper'
@@ -9,6 +8,7 @@ import { SettingsContext } from '@/src/context/SettingsContext'
 import { useBottomSheet } from '@/src/context/useBottomSheet'
 import { i18n } from '@/src/locales/i18n'
 import { ArticleHeader, ArticleType, parseAndGuessURL } from '@/src/types'
+import React from 'react'
 
 export default function FavoritesScreen() {
   const settingsContext = useContext(SettingsContext)
@@ -82,11 +82,7 @@ export default function FavoritesScreen() {
           <Text variant="titleMedium">{i18n.t('favorites.empty')}</Text>
         </View>
       ) : (
-        <FlatList
-          data={favorites}
-          renderItem={renderFavorite}
-          keyExtractor={(item: ArticleHeader) => item.url}
-        />
+        <FlatList data={favorites} renderItem={renderFavorite} keyExtractor={(item: ArticleHeader) => item.url} />
       )}
       <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={Snackbar.DURATION_SHORT}>
         {i18n.t('favorites.deleted')}

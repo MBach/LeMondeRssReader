@@ -1,10 +1,12 @@
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useContext, useEffect, useState } from 'react'
 import { ActivityIndicator, Linking, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { Button, Card, Surface, Text, useTheme } from 'react-native-paper'
 import WebView from 'react-native-webview'
 
 import { FlatListWithHeaders } from '@codeherence/react-native-header'
+import ky from 'ky'
+import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ArticleItem } from '../components/ArticleItem'
 import CustomStatusBar from '../components/CustomStatusBar'
@@ -16,10 +18,12 @@ import { useWebViewFetch } from '../hooks/useWebViewFetch'
 import { i18n } from '../locales/i18n'
 import { ArticleHeader, ContentType } from '../types'
 import { parseArticleHtml } from '../utils/articleParser'
+import { commentCache } from '../utils/commentCache'
 
 export default function ArticleScreen() {
   const { category, slug } = useLocalSearchParams<{ category: string; slug: string[] }>()
   const settingsContext = useContext(SettingsContext)
+  const router = useRouter()
   const { colors } = useTheme()
   const window = useWindowDimensions()
 
@@ -27,6 +31,7 @@ export default function ArticleScreen() {
 
   const [article, setArticle] = useState<ArticleHeader | undefined>(undefined)
   const [paragraphes, setParagraphes] = useState<ContentType[]>([])
+  const [commentsCount, setCommentsCount] = useState<number | undefined>(undefined)
 
   const { fetch, reset, html, status, webViewProps } = useWebViewFetch()
 
@@ -46,6 +51,7 @@ export default function ArticleScreen() {
       return
     }
     reset()
+    setCommentsCount(undefined)
     console.log('[ArticleScreen] fetching:', articleUrl)
     fetch(articleUrl)
   }, [articleUrl])
@@ -53,9 +59,18 @@ export default function ArticleScreen() {
   useEffect(() => {
     if (status !== 'done' || !html) return
     try {
-      const { article: a, paragraphes: p } = parseArticleHtml(html, window.width, settingsContext.hasReadAlso)
+      const { article: a, paragraphes: p, comments: c } = parseArticleHtml(html, window.width, settingsContext.hasReadAlso)
       setArticle(a)
       setParagraphes(p)
+      if (c.length > 0 && articleUrl) commentCache.set(articleUrl, c)
+      if (a.id) {
+        ky.get(`https://www.lemonde.fr/ajax/feedbacks/page-stats?pageId=${a.id}`)
+          .json<{ totalComments: number }>()
+          .then((stats) => {
+            if (stats.totalComments > 0) setCommentsCount(stats.totalComments)
+          })
+          .catch(() => {})
+      }
     } catch (e) {
       console.warn('[ArticleScreen] parse error', e)
     }
@@ -63,23 +78,42 @@ export default function ArticleScreen() {
 
   const renderItem = ({ item }: { item: ContentType }) => <ArticleItem item={item} />
 
-  const renderFooter = () => (
-    <>
-      {article?.isRestricted && (
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text variant="bodyMedium">{i18n.t('article.restricted')}</Text>
-          </Card.Content>
-          <Card.Actions>
-            <Button mode="contained" onPress={() => Linking.openURL('https://abo.lemonde.fr/')}>
-              {i18n.t('article.register')}
+  const renderFooter = () => {
+    return (
+      <>
+        {article?.isRestricted && !settingsContext.isLoggedIn && (
+          <Card style={styles.card}>
+            <Card.Content>
+              <Text variant="bodyMedium">{i18n.t('article.restricted')}</Text>
+            </Card.Content>
+            <Card.Actions>
+              <Button onPress={() => router.push({ pathname: '/login', params: { mode: 'login' } })}>
+                {i18n.t('settings.account.login')}
+              </Button>
+              <Button mode="contained" onPress={() => Linking.openURL('https://abo.lemonde.fr/')}>
+                {i18n.t('article.register')}
+              </Button>
+            </Card.Actions>
+          </Card>
+        )}
+        {settingsContext.isLoggedIn && commentsCount && commentsCount > 0 && (
+          <View style={{ marginTop: 8, marginEnd: 8, flex: 1, flexDirection: 'row-reverse' }}>
+            <Button
+              mode="contained"
+              icon="comment-outline"
+              onPress={() =>
+                router.push({
+                  pathname: `/(home)/${category}/comments/${yyyy}/${mm}/${dd}/${title}` as any
+                })
+              }>
+              {i18n.t('comments.button', { count: commentsCount })}
             </Button>
-          </Card.Actions>
-        </Card>
-      )}
-      <View style={styles.footerPadding} />
-    </>
-  )
+          </View>
+        )}
+        <View style={styles.footerPadding} />
+      </>
+    )
+  }
 
   const isLoading = status === 'idle' || status === 'loading' || !article
   const fetchFailed = status === 'error'

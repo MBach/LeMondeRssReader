@@ -2,6 +2,7 @@ import { type FC } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Button, IconButton, Text, useTheme } from 'react-native-paper'
 
+import React from 'react'
 import { i18n } from '../../src/locales/i18n'
 
 const styles = StyleSheet.create({

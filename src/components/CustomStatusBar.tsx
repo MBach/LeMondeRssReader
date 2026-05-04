@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { StatusBar, StatusBarStyle, useColorScheme } from 'react-native'
 import { Theme } from '../../src/types'
 import { SettingsContext } from '../context/SettingsContext'

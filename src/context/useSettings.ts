@@ -20,10 +20,12 @@ export interface UseSettingsType {
   lastFiveCategories: MenuEntry[]
   share: boolean
   theme: Theme
+  isLoggedIn: boolean
   getFavorites: () => Promise<ArticleHeader[]>
   hasFavorite: (link: string) => Promise<boolean>
   removeCategory: (c: MenuEntry) => Promise<void>
   setCurrentCategory: (c: MenuEntry) => Promise<void>
+  setLoggedIn: (b: boolean) => Promise<void>
   setDynamicStatusBarColor: (b: boolean) => Promise<void>
   setFeed: (feed: Category[]) => Promise<void>
   setKeepLastSection: (b: boolean) => Promise<void>
@@ -47,6 +49,7 @@ export const initialSettingsContext = {
   hydrated: false,
   fontScale: 1,
   feed: defaultFeeds,
+  isLoggedIn: false,
   share: true,
   keepLastSection: true,
   keepScreenOn: true,
@@ -64,6 +67,7 @@ export const useSettings = (): UseSettingsType => {
   const [hasDynamicStatusBarColor, _setDynamicStatusBarColor] = useState<boolean>(true)
   const [share, _setShare] = useState<boolean>(true)
   const [currentCategory, _setCurrentCategory] = useState<MenuEntry>(defaultMenuEntry)
+  const [isLoggedIn, _setIsLoggedIn] = useState<boolean>(false)
   const [lastFiveCategories, setLastFiveCategories] = useState<MenuEntry[]>([])
 
   useEffect(() => {
@@ -122,6 +126,9 @@ export const useSettings = (): UseSettingsType => {
     ///
     const r = await AsyncStorage.getItem(KEYS.READ_ALSO)
     _setReadAlso(r === '1' || r === null)
+    ///
+    const li = await AsyncStorage.getItem(KEYS.IS_LOGGED_IN)
+    _setIsLoggedIn(li === '1')
     setHydrated(true)
   }
 
@@ -234,6 +241,11 @@ export const useSettings = (): UseSettingsType => {
     _setShare(b)
   }
 
+  const setLoggedIn = async (b: boolean): Promise<void> => {
+    await AsyncStorage.setItem(KEYS.IS_LOGGED_IN, b ? '1' : '0')
+    _setIsLoggedIn(b)
+  }
+
   const setNavbarStyle = async (isLight: boolean) => {
     if (Platform.OS !== 'android') return
     await NavigationBar.setButtonStyleAsync(isLight ? 'dark' : 'light')
@@ -281,6 +293,7 @@ export const useSettings = (): UseSettingsType => {
     hasReadAlso,
     hasDynamicStatusBarColor,
     hydrated,
+    isLoggedIn,
     keepLastSection,
     keepScreenOn,
     lastFiveCategories,
@@ -294,6 +307,7 @@ export const useSettings = (): UseSettingsType => {
     setFeed,
     setKeepLastSection,
     setKeepScreenOn,
+    setLoggedIn,
     setReadAlso,
     setShare,
     setTheme,

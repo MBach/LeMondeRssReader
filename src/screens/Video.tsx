@@ -6,6 +6,7 @@ import { ActivityIndicator, Text, useTheme } from 'react-native-paper'
 import WebView from 'react-native-webview'
 
 import { ScrollViewWithHeaders } from '@codeherence/react-native-header'
+import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ArticleItem } from '../components/ArticleItem'
 import { FetchError } from '../components/FetchError'

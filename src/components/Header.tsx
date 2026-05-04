@@ -12,6 +12,7 @@ import Animated, {
   useSharedValue
 } from 'react-native-reanimated'
 
+import React from 'react'
 import { i18n } from '../../src/locales/i18n'
 import { ArticleHeader } from '../../src/types'
 import { SettingsContext } from '../context/SettingsContext'
